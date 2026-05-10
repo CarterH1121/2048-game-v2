@@ -1,0 +1,5075 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>2048 Enhanced - Material Design 3 Edition</title>
+    
+    <!-- ==================== Google Fonts ==================== -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@600;800&family=Outfit:wght@400;600;800;900&display=swap" rel="stylesheet">
+    
+    <!-- ==================== PWA 配置 ==================== -->
+    <meta name="theme-color" content="#6366F1">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="description" content="2048 Enhanced - Material Design 3 Edition. 玻璃态设计、品牌色彩系统、PWA原生应用体验。">
+    <link rel="manifest" href="data:application/json,{%22name%22:%222048-V2-Enhanced%22,%22short_name%22:%222048V2%22,%22start_url%22:%22.%22,%22display%22:%22standalone%22,%22background_color%22:%22%230F0F1A%22,%22theme_color%22:%22%236366F1%22}">
+    
+    <style>
+        /* ========== 基础重置 ========== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        html, body {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            font-family: 'Outfit', 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+            transition: background-color 0.5s ease-in-out, color 0.5s ease-in-out;
+        }
+
+        /* ========== 主题变量系统 ========== */
+        :root {
+            /* ========== Material Design 3 品牌色彩系统 ========== */
+/* ==================== Material Design 3 品牌色彩系统 ==================== */
+            --brand-primary: #6366F1;        /* 靛蓝紫 - 主品牌色 */
+            --brand-primary-light: #818CF8;  /* 浅靛蓝 */
+            --brand-primary-dark: #4F46E5;   /* 深靛蓝 */
+            --brand-secondary: #14B8A6;      /* 青绿色 - 辅助品牌色 */
+--brand-accent: #F59E0B;        /* 金橙色 - 强调色 */
+            --brand-error: #EF4444;
+            
+            /* ==================== 玻璃态效果系统 (Glassmorphism) ==================== */
+            --glass-bg: rgba(30, 30, 46, 0.6);           /* 玻璃态背景 */
+            --glass-border: rgba(255, 255, 255, 0.08);   /* 玻璃态边框 */
+            --glass-shine: rgba(255, 255, 255, 0.05);    /* 玻璃态光泽 */
+            --surface-2: #252535;
+            --surface-3: #2D2D40;
+            --md-background: #0F0F1A;
+            --on-surface: #E4E4E7;
+            --on-surface-variant: #9CA3AF;
+            --outline: #3F3F5A;
+            --outline-variant: #27273A;
+            
+            /* ========== 玻璃态效果系统 ========== */
+            --glass-bg: rgba(30, 30, 46, 0.6);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --glass-shine: rgba(255, 255, 255, 0.05);
+            
+            /* ========== Material Design 3 阴影系统 ========== */
+            --shadow-color: rgba(0, 0, 0, 0.4);
+            --shadow-1: 0 2px 4px var(--shadow-color);
+            --shadow-2: 0 4px 8px var(--shadow-color), 0 2px 4px var(--shadow-color);
+            --shadow-3: 0 8px 24px var(--shadow-color), 0 4px 8px var(--shadow-color);
+            --shadow-4: 0 16px 48px var(--shadow-color), 0 8px 24px var(--shadow-color);
+            
+            /* 经典主题（默认） */
+            --bg-primary: #faf8ef;
+            --bg-secondary: #bbada0;
+            --bg-grid: #bbada0;
+            --text-primary: #776e65;
+            --text-secondary: #776e65;
+            --text-on-tile: #776e65;
+            --accent-color: #8f7a66;
+            --success-color: #4CAF50;
+            --warning-color: #FF9800;
+            --error-color: #F44336;
+            
+            /* 方块颜色 */
+            --tile-2: #eee4da;
+            --tile-4: #ede0c8;
+            --tile-8: #f2b179;
+            --tile-16: #f59563;
+            --tile-32: #f67c5f;
+            --tile-64: #f65e3b;
+            --tile-128: #edcf72;
+            --tile-256: #edcc61;
+            --tile-512: #edc850;
+            --tile-1024: #edc53f;
+            --tile-2048: #edc22e;
+            --tile-super: #3c3a32;
+            
+            /* 按钮颜色 */
+            --btn-primary: #8f7a66;
+            --btn-secondary: #bbada0;
+            
+            /* 尺寸 */
+            --radius-sm: 4px;
+            --radius-md: 8px;
+            --radius-lg: 12px;
+        }
+
+        /* ========== 主题定义 ========== */
+        /* 深夜霓虹主题 */
+        body.theme-neon {
+            /* 玻璃态效果系统 */
+            --glass-bg: rgba(0, 10, 26, 0.7);
+            --glass-border: rgba(0, 255, 255, 0.15);
+            --glass-shine: rgba(0, 255, 255, 0.05);
+            
+            /* 品牌色彩系统 */
+            --brand-primary: #00ffff;
+            --brand-primary-light: #33ffff;
+            --brand-primary-dark: #00cccc;
+            --brand-secondary: #ff00ff;
+            --brand-accent: #ffff00;
+            
+            /* 阴影系统 */
+            --shadow-color: rgba(0, 255, 255, 0.3);
+            --shadow-1: 0 2px 4px var(--shadow-color);
+            --shadow-2: 0 4px 8px var(--shadow-color), 0 2px 4px var(--shadow-color);
+            --shadow-3: 0 8px 24px var(--shadow-color), 0 4px 8px var(--shadow-color);
+            --shadow-4: 0 16px 48px var(--shadow-color), 0 8px 24px var(--shadow-color);
+            
+            /* 基础色彩 */
+            --bg-primary: #0a0a1a;
+            --bg-secondary: rgba(0,255,255,0.1);
+            --bg-grid: rgba(0,255,255,0.15);
+            --text-primary: #00ffff;
+            --text-secondary: #ff00ff;
+            --text-on-tile: #0a0a1a;
+            --accent-color: #ff00ff;
+            
+            /* 方块颜色 */
+            --tile-2: #0066ff;
+            --tile-4: #0088ff;
+            --tile-8: #00ccff;
+            --tile-16: #00ffff;
+            --tile-32: #ff00ff;
+            --tile-64: #ff66ff;
+            --tile-128: #ffff00;
+            --tile-256: #ffcc00;
+            --tile-512: #ff9900;
+            --tile-1024: #ffffff;
+            --tile-2048: #ffffff;
+            --tile-super: #ffffff;
+            
+            /* 按钮颜色 */
+            --btn-primary: #ff00ff;
+            --btn-secondary: #00ffff;
+        }
+
+        /* 樱花主题 */
+        body.theme-sakura {
+            /* 玻璃态效果系统 */
+            --glass-bg: rgba(255, 255, 255, 0.6);
+            --glass-border: rgba(240, 98, 146, 0.2);
+            --glass-shine: rgba(255, 255, 255, 0.08);
+            
+            /* 品牌色彩系统 */
+            --brand-primary: #f06292;
+            --brand-primary-light: #f48fb1;
+            --brand-primary-dark: #ec407a;
+            --brand-secondary: #ec407a;
+            --brand-accent: #ffd54f;
+            
+            /* 阴影系统 */
+            --shadow-color: rgba(136, 14, 79, 0.2);
+            --shadow-1: 0 2px 4px var(--shadow-color);
+            --shadow-2: 0 4px 8px var(--shadow-color), 0 2px 4px var(--shadow-color);
+            --shadow-3: 0 8px 24px var(--shadow-color), 0 4px 8px var(--shadow-color);
+            --shadow-4: 0 16px 48px var(--shadow-color), 0 8px 24px var(--shadow-color);
+            
+            /* 基础色彩 */
+            --bg-primary: linear-gradient(180deg, #fce4ec, #f8bbd9);
+            --bg-secondary: rgba(255,255,255,0.8);
+            --bg-grid: rgba(255,182,193,0.4);
+            --text-primary: #880e4f;
+            --text-secondary: #c2185b;
+            --text-on-tile: #ffffff;
+            --accent-color: #e91e63;
+            
+            /* 方块颜色 */
+            --tile-2: #f8bbd9;
+            --tile-4: #f48fb1;
+            --tile-8: #f06292;
+            --tile-16: #ec407a;
+            --tile-32: #e91e63;
+            --tile-64: #d81b60;
+            --tile-128: #ffd54f;
+            --tile-256: #ffca28;
+            --tile-512: #ffc107;
+            --tile-1024: #ffb300;
+            --tile-2048: #ffa000;
+            --tile-super: #ff6f00;
+            
+            /* 按钮颜色 */
+            --btn-primary: #e91e63;
+            --btn-secondary: #f48fb1;
+        }
+
+        /* 科技主题 */
+        body.theme-tech {
+            /* 玻璃态效果系统 */
+            --glass-bg: rgba(15, 15, 30, 0.7);
+            --glass-border: rgba(0, 212, 255, 0.15);
+            --glass-shine: rgba(0, 212, 255, 0.05);
+            
+            /* 品牌色彩系统 */
+            --brand-primary: #00d4ff;
+            --brand-primary-light: #33ddff;
+            --brand-primary-dark: #00b8e6;
+            --brand-secondary: #7c4dff;
+            --brand-accent: #ff9100;
+            
+            /* 阴影系统 */
+            --shadow-color: rgba(0, 212, 255, 0.3);
+            --shadow-1: 0 2px 4px var(--shadow-color);
+            --shadow-2: 0 4px 8px var(--shadow-color), 0 2px 4px var(--shadow-color);
+            --shadow-3: 0 8px 24px var(--shadow-color), 0 4px 8px var(--shadow-color);
+            --shadow-4: 0 16px 48px var(--shadow-color), 0 8px 24px var(--shadow-color);
+            
+            /* 基础色彩 */
+            --bg-primary: linear-gradient(135deg, #1a237e, #0d47a1);
+            --bg-secondary: rgba(33,150,243,0.2);
+            --bg-grid: rgba(33,150,243,0.3);
+            --text-primary: #00e5ff;
+            --text-secondary: #18ffff;
+            --text-on-tile: #ffffff;
+            --accent-color: #00e5ff;
+            
+            /* 方块颜色 */
+            --tile-2: #1565c0;
+            --tile-4: #1976d2;
+            --tile-8: #1e88e5;
+            --tile-16: #2196f3;
+            --tile-32: #42a5f5;
+            --tile-64: #64b5f6;
+            --tile-128: #ffd600;
+            --tile-256: #ffea00;
+            --tile-512: #ffc400;
+            --tile-1024: #ffab00;
+            --tile-2048: #ff6d00;
+            --tile-super: #ffffff;
+            
+            /* 按钮颜色 */
+            --btn-primary: #00e5ff;
+            --btn-secondary: #2196f3;
+        }
+
+        /* 自然主题 */
+        body.theme-nature {
+            /* 玻璃态效果系统 */
+            --glass-bg: rgba(255, 255, 255, 0.5);
+            --glass-border: rgba(76, 175, 80, 0.2);
+            --glass-shine: rgba(255, 255, 255, 0.08);
+            
+            /* 品牌色彩系统 */
+            --brand-primary: #4caf50;
+            --brand-primary-light: #66bb6a;
+            --brand-primary-dark: #388e3c;
+            --brand-secondary: #8bc34a;
+            --brand-accent: #ff9800;
+            
+            /* 阴影系统 */
+            --shadow-color: rgba(76, 175, 80, 0.2);
+            --shadow-1: 0 2px 4px var(--shadow-color);
+            --shadow-2: 0 4px 8px var(--shadow-color), 0 2px 4px var(--shadow-color);
+            --shadow-3: 0 8px 24px var(--shadow-color), 0 4px 8px var(--shadow-color);
+            --shadow-4: 0 16px 48px var(--shadow-color), 0 8px 24px var(--shadow-color);
+            
+            /* 基础色彩 */
+            --bg-primary: linear-gradient(180deg, #e8f5e9, #c8e6c9);
+            --bg-secondary: rgba(76,175,80,0.3);
+            --bg-grid: rgba(76,175,80,0.25);
+            --text-primary: #1b5e20;
+            --text-secondary: #2e7d32;
+            --text-on-tile: #ffffff;
+            --accent-color: #2e7d32;
+            
+            /* 方块颜色 */
+            --tile-2: #a5d6a7;
+            --tile-4: #81c784;
+            --tile-8: #66bb6a;
+            --tile-16: #4caf50;
+            --tile-32: #43a047;
+            --tile-64: #388e3c;
+            --tile-128: #ffd54f;
+            --tile-256: #ffca28;
+            --tile-512: #ffc107;
+            --tile-1024: #ffb300;
+            --tile-2048: #ff8f00;
+            --tile-super: #ff6f00;
+            
+            /* 按钮颜色 */
+            --btn-primary: #4caf50;
+            --btn-secondary: #81c784;
+        }
+
+        /* 极简主题 */
+        /* ==================== 经典主题 - 原版2048风格 + 玻璃态效果 ==================== */
+        body.theme-classic {
+            /* 实际应用主题色 */
+            background-color: #faf8ef;
+            color: #776e65;
+            
+            /* 玻璃态效果系统 - 米色系玻璃态 */
+            --glass-bg: rgba(250, 248, 239, 0.85);       /* 米色半透明 */
+            --glass-border: rgba(119, 110, 101, 0.15);   /* 经典边框色 */
+            --glass-shine: rgba(255, 255, 255, 0.2);     /* 白色光泽 */
+            
+            /* 品牌色彩系统 - 经典2048风格 */
+            --brand-primary: #8f7a66;        /* 经典按钮色 */
+            --brand-primary-light: #bbada0;  /* 经典网格背景色 */
+            --brand-primary-dark: #776e65;   /* 经典文字色 */
+            --brand-secondary: #f2b179;      /* 经典方块色 */
+            --brand-accent: #edc22e;         /* 金色强调色 */
+            
+            /* 阴影系统 - 柔和阴影 */
+            --shadow-color: rgba(119, 110, 101, 0.2);
+            --shadow-1: 0 2px 4px var(--shadow-color);
+            --shadow-2: 0 4px 8px var(--shadow-color), 0 2px 4px var(--shadow-color);
+            --shadow-3: 0 8px 24px var(--shadow-color), 0 4px 8px var(--shadow-color);
+            --shadow-4: 0 16px 48px var(--shadow-color), 0 8px 24px var(--shadow-color);
+            
+            /* 基础色彩 - 原版2048 */
+            --bg-primary: #faf8ef;           /* 米色背景 */
+            --bg-secondary: #bbada0;         /* 网格背景 */
+            --bg-grid: #bbada0;              /* 网格色 */
+            --text-primary: #776e65;         /* 经典文字色 */
+            --text-secondary: #776e65;       /* 次要文字色 */
+            --text-on-tile: #f9f6f2;         /* 方块上文字 */
+            --accent-color: #8f7a66;         /* 强调色 */
+            
+            /* 方块颜色 - 原版2048经典配色 */
+            --tile-2: #eee4da;
+            --tile-4: #ede0c8;
+            --tile-8: #f2b179;
+            --tile-16: #f59563;
+            --tile-32: #f67c5f;
+            --tile-64: #f65e3b;
+            --tile-128: #edcf72;
+            --tile-256: #edcc61;
+            --tile-512: #edc850;
+            --tile-1024: #edc53f;
+            --tile-2048: #edc22e;
+            --tile-super: #3c3a32;
+            
+            /* 经典主题专用Toast样式 */
+            --toast-bg: rgba(119, 110, 101, 0.95);    /* 深褐色半透明，高对比度 */
+            --toast-text: #faf8ef;                   /* 米色文字 */
+            --toast-border: rgba(142, 122, 102, 0.8); /* 边框色 */
+        }
+        
+        body.theme-minimal {
+            /* 实际应用主题色 */
+            background-color: #ffffff;
+            color: #212121;
+            
+            /* 玻璃态效果系统 */
+            --glass-bg: rgba(255, 255, 255, 0.8);
+            --glass-border: rgba(0, 0, 0, 0.08);
+            --glass-shine: rgba(255, 255, 255, 0.1);
+            
+            /* 品牌色彩系统 */
+            --brand-primary: #212121;
+            --brand-primary-light: #424242;
+            --brand-primary-dark: #000000;
+            --brand-secondary: #757575;
+            --brand-accent: #212121;
+            
+            /* 阴影系统 */
+            --shadow-color: rgba(0, 0, 0, 0.1);
+            --shadow-1: 0 2px 4px var(--shadow-color);
+            --shadow-2: 0 4px 8px var(--shadow-color), 0 2px 4px var(--shadow-color);
+            --shadow-3: 0 8px 24px var(--shadow-color), 0 4px 8px var(--shadow-color);
+            --shadow-4: 0 16px 48px var(--shadow-color), 0 8px 24px var(--shadow-color);
+            
+            /* 基础色彩 */
+            --bg-primary: #ffffff;
+            --bg-secondary: #f5f5f5;
+            --bg-grid: #d0d0d0;  /* 线条加深，提升对比度 */
+            --text-primary: #212121;
+            --text-secondary: #424242;
+            --text-on-tile: #ffffff;
+            --accent-color: #212121;
+            
+            /* 方块颜色 */
+            --tile-2: #e0e0e0;
+            --tile-4: #bdbdbd;
+            --tile-8: #9e9e9e;
+            --tile-16: #757575;
+            --tile-32: #616161;
+            --tile-64: #424242;
+            --tile-128: #212121;
+            --tile-256: #212121;
+            --tile-512: #212121;
+            --tile-1024: #212121;
+            --tile-2048: #212121;
+            --tile-super: #000000;
+            
+            /* 按钮颜色 */
+            --btn-primary: #212121;
+            --btn-secondary: #757575;
+        }
+
+        /* ========== 主容器 ========== */
+        .game-wrapper {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            background: var(--bg-primary);
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* ========== 顶部状态区 ========== */
+        .header {
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+            z-index: 100;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .game-title {
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: var(--text-primary);
+            letter-spacing: -2px;
+            font-family: 'Outfit', sans-serif;
+            background: linear-gradient(135deg, var(--brand-primary), var(--brand-secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .md3-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, var(--brand-primary), var(--brand-secondary));
+            color: white;
+            font-size: 0.4em;
+            font-weight: 700;
+            padding: 4px 10px;
+            border-radius: 12px;
+            letter-spacing: 0;
+            box-shadow: var(--shadow-1);
+            -webkit-text-fill-color: white;
+        }
+
+        .level-badge {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            color: var(--text-primary);
+            padding: 8px 12px;
+            border-radius: var(--radius-md);
+            font-size: 0.85rem;
+            font-weight: 600;
+            box-shadow: var(--shadow-1);
+            font-family: 'Outfit', sans-serif;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+            min-width: 90px;
+            min-height: 60px;
+        }
+
+        .level-number {
+            font-size: 0.7rem;
+            color: var(--text-secondary);
+            font-weight: 500;
+            letter-spacing: 0.5px;
+        }
+
+        .level-rank {
+            font-size: 1rem;
+            color: var(--text-primary);
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .level-rank-icon {
+            font-size: 0.9rem;
+        }
+
+        .score-panel {
+            display: flex;
+            justify-content: space-between;
+            align-items: stretch;
+            gap: 10px;
+            padding: 10px 20px;
+            margin-bottom: 10px;
+            flex-wrap: nowrap;
+        }
+
+        .score-panel .score-box {
+            flex: 1;
+            min-width: 90px;
+        }
+
+        .score-panel .level-badge {
+            flex: 1;
+            white-space: nowrap;
+        }
+
+        /* 每日任务进度 */
+        .daily-progress {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 15px;
+            margin: 0 20px 10px 20px;
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-md);
+            font-size: 0.85rem;
+        }
+
+        .daily-task-icon {
+            font-size: 1.2rem;
+            flex-shrink: 0;
+        }
+
+        .daily-task-name {
+            color: var(--text-primary);
+            font-weight: 600;
+            white-space: nowrap;
+            min-width: 80px;
+        }
+
+        .daily-task-bar {
+            flex: 1;
+            height: 8px;
+            background: var(--bg-secondary);
+            border-radius: 4px;
+            overflow: hidden;
+            min-width: 60px;
+        }
+
+        .daily-task-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--brand-primary), var(--accent-color));
+            border-radius: 4px;
+            transition: width 0.3s ease;
+        }
+
+        .daily-task-count {
+            color: var(--text-primary);
+            font-weight: 700;
+            white-space: nowrap;
+            min-width: 40px;
+            text-align: center;
+        }
+
+        .daily-task-reward {
+            color: #FFD700;
+            font-weight: 600;
+            white-space: nowrap;
+            font-size: 0.8rem;
+            padding: 3px 8px;
+            background: rgba(255,215,0,0.15);
+            border-radius: var(--radius-sm);
+            border: 1px solid rgba(255,215,0,0.3);
+        }
+
+        .daily-progress.completed .daily-task-icon {
+            color: var(--success-color);
+        }
+
+        .daily-progress.completed .daily-task-name {
+            color: var(--success-color);
+        }
+
+        .daily-progress.completed .daily-task-fill {
+            background: var(--success-color);
+        }
+
+        .daily-progress.completed .daily-task-reward {
+            color: var(--success-color);
+            background: rgba(76,175,80,0.15);
+            border-color: rgba(76,175,80,0.3);
+        }
+
+        .header-center {
+            display: none;
+        }
+
+        .score-box {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);  /* 玻璃态边框 */
+            padding: 10px 20px;
+            border-radius: var(--radius-md);
+            text-align: center;
+            min-width: 80px;
+            border: 1px solid var(--glass-border);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            box-shadow: var(--shadow-2);
+        }
+
+        .score-label {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 4px;
+        }
+
+        .score-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .header-right {
+            display: flex;
+            gap: 8px;
+            align-items: flex-end;
+        }
+        
+        .header-btn-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 2px;
+        }
+        
+        .header-btn-label {
+            font-size: 10px;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        .icon-btn {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            border: none;
+            background: var(--glass-bg);
+            color: var(--text-primary);
+            font-size: 1.2rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+            border: 1px solid var(--glass-border);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+        }
+
+        .icon-btn:hover {
+            transform: scale(1.1);
+            background: var(--accent-color);
+            color: white;
+        }
+
+        .icon-btn:active {
+            transform: scale(0.95);
+        }
+
+        /* ========== 核心游戏区 ========== */
+        .game-main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            position: relative;
+        }
+
+        .grid-container {
+            position: relative;
+            background: var(--bg-grid);
+            border-radius: 16px;
+            padding: 10px;
+            touch-action: none;
+            border: 1px solid var(--glass-border);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            box-shadow: var(--shadow-3);
+        }
+
+        .grid-background {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+        }
+
+        .grid-cell {
+            width: 80px;
+            height: 80px;
+            background: rgba(238, 228, 218, 0.35);
+            border-radius: var(--radius-md);
+        }
+
+        .tile-container {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            right: 10px;
+            bottom: 10px;
+        }
+
+        .tile {
+            position: absolute;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            border-radius: var(--radius-md);
+            transition: transform 0.15s ease-in-out;
+            z-index: 10;
+        }
+
+        .tile-new {
+            animation: tile-appear 0.2s ease;
+        }
+
+        @keyframes tile-appear {
+            0% { opacity: 0; transform: scale(0); }
+            100% { opacity: 1; transform: scale(1); }
+        }
+
+        .tile-merged {
+            animation: tile-pop 0.2s ease-out;
+        }
+
+        @keyframes tile-pop {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1); }
+        }
+
+        .tile-super {
+            animation: tile-glow 2s ease-in-out infinite;
+            color: #f9f6f2;
+        }
+
+        @keyframes tile-glow {
+            0%, 100% { box-shadow: 0 0 20px rgba(255, 215, 0, 0.5); }
+            50% { box-shadow: 0 0 40px rgba(255, 215, 0, 0.8); }
+        }
+
+        /* ========== 道具快捷栏 ========== */
+        .powerup-bar {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            padding: 15px;
+            background: var(--glass-bg);
+            border-radius: 16px;
+            margin-top: 20px;
+            border: 1px solid var(--glass-border);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            box-shadow: var(--shadow-2);
+        }
+
+        .powerup-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .powerup-btn {
+            width: 50px;
+            height: 50px;
+            border-radius: var(--radius-md);
+            border: none;
+            background: var(--glass-bg);
+            color: var(--text-primary);
+            font-size: 1.5rem;
+            cursor: pointer;
+            position: relative;
+            transition: all 0.2s ease;
+            border: 1px solid var(--glass-border);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+        }
+
+        .powerup-btn:hover:not(:disabled) {
+            transform: scale(1.1);
+            background: var(--accent-color);
+            color: white;
+        }
+
+        .powerup-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .powerup-btn-newgame {
+            background: linear-gradient(135deg, var(--brand-primary), var(--brand-secondary));
+            color: white;
+        }
+
+        .powerup-btn-newgame:hover {
+            transform: scale(1.1);
+            box-shadow: 0 4px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .powerup-item-newgame {
+            margin-left: 15px;
+            border-left: 1px solid var(--glass-border);
+            padding-left: 15px;
+        }
+
+        .powerup-count {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background: var(--accent-color);
+            color: white;
+            font-size: 0.75rem;
+            font-weight: 700;
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .powerup-label {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+        }
+
+        /* ========== 底部导航 ========== */
+        .bottom-nav {
+            display: flex;
+            justify-content: space-around;
+            padding: 10px 0;
+            background: var(--glass-bg);
+            border-top: 1px solid var(--glass-border);
+            padding-bottom: calc(10px + env(safe-area-inset-bottom));
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            padding: 8px 16px;
+            border: none;
+            background: transparent;
+            color: var(--text-secondary);
+            font-size: 0.75rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border-radius: var(--radius-md);
+        }
+
+        .nav-item:hover, .nav-item.active {
+            color: var(--accent-color);
+        }
+
+        .nav-item.active {
+            background: rgba(0,0,0,0.05);
+        }
+
+        .nav-icon {
+            font-size: 1.5rem;
+        }
+
+        /* ========== 模态弹窗 ========== */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.6);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            backdrop-filter: blur(5px);
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal {
+            width: 380px;
+            max-width: 90%;
+            background: var(--glass-bg);
+            padding: 30px;
+            border-radius: 16px;
+            max-height: 90vh;
+            overflow: hidden;
+            animation: modal-in 0.3s ease-out;
+            box-shadow: var(--shadow-4);
+            border: 1px solid var(--glass-border);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+        }
+
+        /* 分享弹窗保持原宽度 */
+        .modal:has(.share-card-preview) {
+            width: auto;
+        }
+
+        @keyframes modal-in {
+            0% { opacity: 0; transform: scale(0.9) translateY(20px); }
+            100% { opacity: 1; transform: scale(1) translateY(0); }
+        }
+
+        .modal-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .modal-body {
+            color: var(--text-primary);
+            max-height: calc(90vh - 80px);
+            overflow-y: auto;
+            padding-right: 8px; /* 为滚动条留出间距 */
+        }
+
+        /* 美化的滚动条样式 */
+        .modal-body::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .modal-body::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .modal-body::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 3px;
+            transition: background 0.2s ease;
+        }
+
+        .modal-body::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.35);
+        }
+
+/* Firefox滚动条样式 */
+        .modal-body {
+            scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
+        }
+
+        /* 排行榜列表样式 - 与成就弹窗滚动条一致 */
+        .leaderboard-list {
+            max-height: 400px;
+            overflow-y: auto;
+            padding-right: 8px; /* 为滚动条留出间距 */
+        }
+
+        /* 美化的滚动条样式（与成就弹窗一致） */
+        .leaderboard-list::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .leaderboard-list::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .leaderboard-list::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 3px;
+            transition: background 0.2s ease;
+        }
+
+        .leaderboard-list::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.35);
+        }
+
+        /* 震撼合成特效样式 */
+        .merge-blur {
+            filter: blur(3px) brightness(0.8);
+            transition: all 0.3s ease;
+        }
+        
+        .merge-effect {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 10000;
+            pointer-events: none;
+        }
+        
+        .merge-animation {
+            text-align: center;
+            animation: mergePulse 3s ease-out forwards;
+        }
+        
+        .merge-text {
+            font-size: 3rem;
+            font-weight: bold;
+            color: #ffd700;
+            text-shadow: 0 0 20px rgba(255, 215, 0, 0.8);
+            margin-bottom: 20px;
+            animation: textGlow 3s ease-out forwards;
+        }
+        
+        .merge-particles {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 300px;
+            height: 300px;
+            transform: translate(-50%, -50%);
+            background: radial-gradient(circle, rgba(255, 215, 0, 0.3) 0%, transparent 70%);
+            border-radius: 50%;
+            animation: particleExpand 3s ease-out forwards;
+        }
+        
+        .merge-glow {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 500px;
+            height: 500px;
+            transform: translate(-50%, -50%);
+            background: radial-gradient(circle, rgba(255, 215, 0, 0.1) 0%, transparent 70%);
+            border-radius: 50%;
+            animation: glowExpand 3s ease-out forwards;
+        }
+        
+        @keyframes mergePulse {
+            0% { transform: scale(0.5); opacity: 0; }
+            20% { transform: scale(1.2); opacity: 1; }
+            80% { transform: scale(1); opacity: 1; }
+            100% { transform: scale(0.8); opacity: 0; }
+        }
+        
+        @keyframes textGlow {
+            0% { text-shadow: 0 0 10px rgba(255, 215, 0, 0.5); }
+            50% { text-shadow: 0 0 30px rgba(255, 215, 0, 1), 0 0 40px rgba(255, 165, 0, 0.8); }
+            100% { text-shadow: 0 0 10px rgba(255, 215, 0, 0.3); }
+        }
+        
+        @keyframes particleExpand {
+            0% { transform: translate(-50%, -50%) scale(0); opacity: 1; }
+            50% { transform: translate(-50%, -50%) scale(1.5); opacity: 0.7; }
+            100% { transform: translate(-50%, -50%) scale(2); opacity: 0; }
+        }
+        
+        @keyframes glowExpand {
+            0% { transform: translate(-50%, -50%) scale(0); opacity: 0.5; }
+            50% { transform: translate(-50%, -50%) scale(1); opacity: 0.3; }
+            100% { transform: translate(-50%, -50%) scale(1.5); opacity: 0; }
+        }
+
+        /* 美化的滚动条样式（与成就弹窗一致） */
+        .leaderboard-list::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .leaderboard-list::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .leaderboard-list::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 3px;
+            transition: background 0.2s ease;
+        }
+
+        .leaderboard-list::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.35);
+        }
+
+        /* Firefox滚动条样式 */
+        .leaderboard-list {
+            scrollbar-width: thin;
+            scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border-radius: var(--radius-md);
+            border: none;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-family: 'Outfit', sans-serif;
+        }
+
+        .btn-primary {
+            background: var(--btn-primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .btn-secondary {
+            background: var(--btn-secondary);
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            transform: translateY(-2px);
+        }
+
+        /* ========== 设置面板 ========== */
+        .settings-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 0;
+            border-bottom: 1px solid rgba(0,0,0,0.1);
+        }
+
+        .settings-label {
+            font-size: 1rem;
+            color: var(--text-primary);
+        }
+
+        .toggle-switch {
+            width: 50px;
+            height: 26px;
+            background: var(--btn-secondary);
+            border-radius: 13px;
+            position: relative;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+
+        .toggle-switch.active {
+            background: var(--success-color);
+        }
+
+        .toggle-switch::after {
+            content: '';
+            position: absolute;
+            width: 22px;
+            height: 22px;
+            background: white;
+            border-radius: 50%;
+            top: 2px;
+            left: 2px;
+            transition: transform 0.3s ease;
+        }
+
+        .toggle-switch.active::after {
+            transform: translateX(24px);
+        }
+
+        /* ========== 主题选择器 ========== */
+        .theme-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .theme-option {
+            padding: 15px 10px;
+            border: 2px solid transparent;
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.2s ease;
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+        }
+
+        .theme-option:hover, .theme-option.active {
+            border-color: var(--accent-color);
+        }
+
+        .theme-option.active {
+            box-shadow: 0 0 0 2px var(--accent-color);
+        }
+
+        .theme-option-name {
+            font-size: 0.85rem;
+            color: var(--text-primary);
+            margin-top: 5px;
+        }
+
+        /* ========== 排行榜 ========== */
+        .leaderboard-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .tab-btn {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            background: var(--glass-bg);
+            color: var(--text-primary);
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border: 1px solid var(--glass-border);
+            font-family: 'Outfit', sans-serif;
+        }
+
+        .tab-btn.active {
+            background: var(--accent-color);
+            color: white;
+        }
+
+        .leaderboard-list {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .leaderboard-item {
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            border-bottom: 1px solid var(--glass-border);
+            background: var(--glass-bg);
+            border-radius: var(--radius-md);
+            margin-bottom: 8px;
+        }
+
+        .leaderboard-rank {
+            width: 30px;
+            text-align: center;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .leaderboard-name {
+            flex: 1;
+            padding: 0 10px;
+            color: var(--text-primary);
+        }
+
+        .leaderboard-score {
+            font-weight: 700;
+            color: var(--accent-color);
+        }
+
+        /* ========== 成就面板 ========== */
+        .achievement-section {
+            margin-bottom: 20px;
+        }
+
+        .section-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .achievement-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .achievement-item {
+            display: flex;
+            align-items: center;
+            padding: 12px;
+            background: var(--glass-bg);
+            border-radius: var(--radius-md);
+            gap: 12px;
+            border: 1px solid var(--glass-border);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+        }
+
+        .achievement-item.locked {
+            opacity: 0.6;
+        }
+
+        .achievement-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--accent-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+        }
+
+        .achievement-item.locked .achievement-icon {
+            background: var(--btn-secondary);
+        }
+
+        .achievement-info {
+            flex: 1;
+        }
+
+        .achievement-name {
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .achievement-desc {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+
+        .achievement-status {
+            font-size: 0.85rem;
+            color: var(--success-color);
+        }
+
+        /* ========== 段位展示 ========== */
+        .rank-display {
+            text-align: center;
+            padding: 20px;
+            background: var(--glass-bg);
+            border-radius: 16px;
+            margin-bottom: 20px;
+            border: 1px solid var(--glass-border);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            box-shadow: var(--shadow-2);
+        }
+
+        .rank-icon {
+            font-size: 3rem;
+            margin-bottom: 10px;
+        }
+
+        .rank-name {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .rank-progress {
+            margin-top: 10px;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: var(--bg-grid);
+            border-radius: 4px;
+            margin-top: 10px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: var(--accent-color);
+            border-radius: 4px;
+            transition: width 0.3s ease;
+        }
+
+        /* ========== 每日任务 ========== */
+        .task-item {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            background: var(--glass-bg);
+            border-radius: var(--radius-md);
+            margin-bottom: 10px;
+            gap: 15px;
+            border: 1px solid var(--glass-border);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+        }
+
+        .task-icon {
+            width: 40px;
+            height: 40px;
+            background: var(--accent-color);
+            border-radius: var(--radius-md);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+        }
+
+        .task-info {
+            flex: 1;
+        }
+
+        .task-name {
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .task-progress {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+
+        .task-reward {
+            font-size: 0.85rem;
+            color: var(--success-color);
+            font-weight: 600;
+        }
+
+        /* ========== 新手教程 ========== */
+        .tutorial-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.8);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1100;
+        }
+
+        .tutorial-overlay.active {
+            display: flex;
+        }
+
+        .tutorial-box {
+            background: var(--glass-bg);
+            padding: 40px;
+            border-radius: 16px;
+            text-align: center;
+            max-width: 320px;
+            border: 1px solid var(--glass-border);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            box-shadow: var(--shadow-3);
+        }
+
+        .tutorial-step {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            margin-bottom: 10px;
+        }
+
+        .tutorial-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 15px;
+        }
+
+        .tutorial-desc {
+            color: var(--text-secondary);
+            margin-bottom: 20px;
+        }
+
+        .tutorial-arrow {
+            font-size: 3rem;
+            color: var(--accent-color);
+            animation: arrow-bounce 1s ease-in-out infinite;
+        }
+
+        @keyframes arrow-bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        /* ========== 分享面板 ========== */
+        .share-card-preview {
+            background: var(--glass-bg);
+            padding: 30px;
+            border-radius: 16px;
+            text-align: center;
+            margin-bottom: 20px;
+            border: 1px solid var(--glass-border);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+        }
+
+        .share-score {
+            font-size: 3rem;
+            font-weight: 700;
+            color: var(--accent-color);
+        }
+
+        .share-info {
+            color: var(--text-secondary);
+            margin-top: 10px;
+        }
+
+        .share-message {
+            padding: 15px;
+            background: var(--bg-secondary);
+            border-radius: var(--radius-md);
+            margin-bottom: 15px;
+            cursor: pointer;
+        }
+
+        .share-buttons {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        /* ========== Toast提示（已整合到第1629行增强版） ========== */
+        /* 经典主题下使用专用样式 */
+        body.theme-classic .toast {
+            background: var(--toast-bg);
+            color: var(--toast-text);
+            border: 2px solid var(--toast-border);
+            box-shadow: 0 4px 12px rgba(119, 110, 101, 0.3);
+            font-weight: bold;
+            font-size: 16px;
+            padding: 15px 30px;
+            border-radius: 12px;
+        }
+
+        /* ========== 成就解锁动画 - 震撼大型弹窗 ========== */
+        .achievement-unlock {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0);
+            min-width: 520px;
+            max-width: 90vw;
+            padding: 60px 50px 50px;
+            border-radius: 24px;
+            z-index: 1300;
+            text-align: center;
+            opacity: 0;
+            visibility: hidden;
+            background: linear-gradient(145deg, 
+                rgba(255, 248, 220, 0.95) 0%,
+                rgba(255, 235, 180, 0.98) 30%,
+                rgba(255, 215, 100, 0.95) 100%
+            );
+            box-shadow: 
+                0 0 0 1px rgba(255, 215, 0, 0.5),
+                0 0 30px rgba(255, 215, 0, 0.4),
+                0 0 60px rgba(255, 200, 0, 0.3),
+                0 0 100px rgba(255, 180, 0, 0.2),
+                0 30px 80px rgba(0, 0, 0, 0.5),
+                inset 0 2px 0 rgba(255, 255, 255, 0.6),
+                inset 0 -2px 10px rgba(200, 150, 0, 0.2);
+            border: 3px solid transparent;
+            background-clip: padding-box;
+            overflow: visible;
+        }
+
+        /* 玻璃态主题适配 */
+        body.theme-neon .achievement-unlock,
+        body.theme-material .achievement-unlock {
+            background: linear-gradient(145deg,
+                rgba(20, 25, 40, 0.95) 0%,
+                rgba(30, 35, 55, 0.98) 50%,
+                rgba(40, 45, 70, 0.95) 100%
+            );
+            box-shadow:
+                0 0 0 1px rgba(255, 215, 0, 0.4),
+                0 0 40px rgba(255, 215, 0, 0.3),
+                0 0 80px rgba(255, 200, 0, 0.2),
+                0 30px 80px rgba(0, 0, 0, 0.6),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            border: 2px solid rgba(255, 215, 0, 0.5);
+        }
+
+        /* 光晕背景层 */
+        .achievement-unlock::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 200%;
+            height: 200%;
+            transform: translate(-50%, -50%);
+            background: radial-gradient(circle,
+                rgba(255, 215, 0, 0.15) 0%,
+                rgba(255, 200, 0, 0.1) 30%,
+                rgba(255, 180, 0, 0.05) 50%,
+                transparent 70%
+            );
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            z-index: -1;
+        }
+
+        .achievement-unlock.active {
+            opacity: 1;
+            visibility: visible;
+            animation: achievement-entrance 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+        }
+
+        .achievement-unlock.active::before {
+            animation: glow-pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes achievement-entrance {
+            0% {
+                opacity: 0;
+                transform: translate(-50%, -50%) scale(0.3) rotate(-5deg);
+            }
+            40% {
+                opacity: 1;
+                transform: translate(-50%, -50%) scale(1.08) rotate(1deg);
+            }
+            70% {
+                transform: translate(-50%, -50%) scale(0.95) rotate(-0.5deg);
+            }
+            100% {
+                opacity: 1;
+                transform: translate(-50%, -50%) scale(1) rotate(0);
+            }
+        }
+
+        @keyframes glow-pulse {
+            0%, 100% {
+                opacity: 0.6;
+                transform: translate(-50%, -50%) scale(1);
+            }
+            50% {
+                opacity: 1;
+                transform: translate(-50%, -50%) scale(1.1);
+            }
+        }
+
+        /* ========== 粒子爆发特效 ========== */
+        /* 中心光爆 */
+        .achievement-unlock .particle-burst {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 10px;
+            height: 10px;
+            pointer-events: none;
+        }
+
+        .achievement-unlock .particle-burst::before,
+        .achievement-unlock .particle-burst::after {
+            content: '';
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            background: radial-gradient(circle, #FFD700 0%, #FFA500 50%, transparent 70%);
+            border-radius: 50%;
+            opacity: 0;
+        }
+
+        .achievement-unlock.active .particle-burst::before {
+            animation: particle-explode-1 1s ease-out 0.2s forwards;
+        }
+
+        .achievement-unlock.active .particle-burst::after {
+            animation: particle-explode-2 1s ease-out 0.25s forwards;
+        }
+
+        @keyframes particle-explode-1 {
+            0% {
+                opacity: 1;
+                transform: translate(-50%, -50%) scale(0);
+                box-shadow: 
+                    60px -30px 0 0 #FFD700,
+                    -60px -30px 0 0 #FFA500,
+                    0px 70px 0 0 #FFEC8B,
+                    80px 40px 0 0 #FFD700,
+                    -80px 40px 0 0 #FFA500;
+            }
+            50% {
+                opacity: 1;
+            }
+            100% {
+                opacity: 0;
+                transform: translate(-50%, -50%) scale(1);
+                box-shadow: 
+                    120px -60px 0 -4px transparent,
+                    -120px -60px 0 -4px transparent,
+                    0px 140px 0 -4px transparent,
+                    160px 80px 0 -4px transparent,
+                    -160px 80px 0 -4px transparent;
+            }
+        }
+
+        @keyframes particle-explode-2 {
+            0% {
+                opacity: 1;
+                transform: translate(-50%, -50%) scale(0) rotate(45deg);
+                box-shadow: 
+                    50px 40px 0 0 #FFEC8B,
+                    -50px 40px 0 0 #FFD700,
+                    90px -20px 0 0 #FFA500,
+                    -90px -20px 0 0 #FFD700,
+                    0px -80px 0 0 #FFEC8B;
+            }
+            50% {
+                opacity: 1;
+            }
+            100% {
+                opacity: 0;
+                transform: translate(-50%, -50%) scale(1) rotate(45deg);
+                box-shadow: 
+                    100px 80px 0 -4px transparent,
+                    -100px 80px 0 -4px transparent,
+                    180px -40px 0 -4px transparent,
+                    -180px -40px 0 -4px transparent,
+                    0px -160px 0 -4px transparent;
+            }
+        }
+
+        /* 四角光芒 */
+        .achievement-unlock .corner-glow {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            pointer-events: none;
+            overflow: hidden;
+            border-radius: 24px;
+        }
+
+        .achievement-unlock .corner-glow::before,
+        .achievement-unlock .corner-glow::after,
+        .achievement-unlock .corner-glow .glow-tl,
+        .achievement-unlock .corner-glow .glow-br {
+            content: '';
+            position: absolute;
+            width: 80px;
+            height: 80px;
+            background: radial-gradient(circle, rgba(255, 215, 0, 0.6) 0%, transparent 70%);
+            opacity: 0;
+        }
+
+        .achievement-unlock .corner-glow::before {
+            top: -20px;
+            right: -20px;
+        }
+
+        .achievement-unlock .corner-glow::after {
+            bottom: -20px;
+            left: -20px;
+        }
+
+        .achievement-unlock .corner-glow .glow-tl {
+            top: -20px;
+            left: -20px;
+        }
+
+        .achievement-unlock .corner-glow .glow-br {
+            bottom: -20px;
+            right: -20px;
+        }
+
+        .achievement-unlock.active .corner-glow::before {
+            animation: corner-flash 1.5s ease-out 0.3s forwards;
+        }
+
+        .achievement-unlock.active .corner-glow::after {
+            animation: corner-flash 1.5s ease-out 0.35s forwards;
+        }
+
+        .achievement-unlock.active .corner-glow .glow-tl {
+            animation: corner-flash 1.5s ease-out 0.4s forwards;
+        }
+
+        .achievement-unlock.active .corner-glow .glow-br {
+            animation: corner-flash 1.5s ease-out 0.45s forwards;
+        }
+
+        @keyframes corner-flash {
+            0% {
+                opacity: 0;
+                transform: scale(0.5);
+            }
+            20% {
+                opacity: 1;
+                transform: scale(1.5);
+            }
+            100% {
+                opacity: 0.3;
+                transform: scale(1);
+            }
+        }
+
+        /* 环形光波 */
+        .achievement-unlock .ring-wave {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 100px;
+            height: 100px;
+            border: 3px solid rgba(255, 215, 0, 0.6);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            pointer-events: none;
+            opacity: 0;
+        }
+
+        .achievement-unlock.active .ring-wave {
+            animation: ring-expand 1.2s ease-out 0.1s forwards;
+        }
+
+        @keyframes ring-expand {
+            0% {
+                width: 50px;
+                height: 50px;
+                opacity: 1;
+                border-width: 4px;
+            }
+            100% {
+                width: 600px;
+                height: 600px;
+                opacity: 0;
+                border-width: 1px;
+            }
+        }
+
+        /* ========== 图标样式 - 大型震撼 ========== */
+        .unlock-icon {
+            font-size: 5.5rem;
+            line-height: 1;
+            margin-bottom: 20px;
+            display: inline-block;
+            position: relative;
+            z-index: 10;
+            transform: scale(0) rotate(-180deg);
+            filter: drop-shadow(0 4px 8px rgba(0,0,0,0.3));
+        }
+
+        .achievement-unlock.active .unlock-icon {
+            animation: icon-grand-entrance 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) 0.2s forwards;
+        }
+
+        @keyframes icon-grand-entrance {
+            0% {
+                transform: scale(0) rotate(-180deg);
+                opacity: 0;
+            }
+            50% {
+                transform: scale(1.3) rotate(10deg);
+            }
+            70% {
+                transform: scale(0.9) rotate(-5deg);
+            }
+            100% {
+                transform: scale(1) rotate(0);
+                opacity: 1;
+            }
+        }
+
+        /* 图标光环 */
+        .unlock-icon::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 120px;
+            height: 120px;
+            transform: translate(-50%, -50%);
+            background: radial-gradient(circle, rgba(255, 215, 0, 0.3) 0%, transparent 60%);
+            border-radius: 50%;
+            opacity: 0;
+            z-index: -1;
+        }
+
+        .achievement-unlock.active .unlock-icon::before {
+            animation: icon-glow-in 1s ease-out 0.6s forwards;
+        }
+
+        @keyframes icon-glow-in {
+            0% {
+                opacity: 0;
+                transform: translate(-50%, -50%) scale(0);
+            }
+            100% {
+                opacity: 1;
+                transform: translate(-50%, -50%) scale(1);
+            }
+        }
+
+        /* 标题样式 */
+        .achievement-unlock .gameover-title {
+            font-size: 2.5rem;
+            font-weight: 900;
+            background: linear-gradient(135deg, #B8860B 0%, #FFD700 30%, #FFEC8B 50%, #FFD700 70%, #DAA520 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 15px;
+            text-shadow: none;
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+            animation: title-shimmer 3s ease-in-out infinite;
+        }
+
+        .achievement-unlock.active .gameover-title {
+            animation: title-entrance 0.6s ease-out 0.4s backwards, title-shimmer 3s ease-in-out 1s infinite;
+        }
+
+        @keyframes title-entrance {
+            0% {
+                opacity: 0;
+                transform: translateY(20px) scale(0.8);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        @keyframes title-shimmer {
+            0%, 100% {
+                filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2)) brightness(1);
+            }
+            50% {
+                filter: drop-shadow(0 2px 8px rgba(255, 215, 0, 0.5)) brightness(1.1);
+            }
+        }
+
+        /* 描述文字 */
+        .achievement-unlock .tutorial-desc {
+            font-size: 1.2rem;
+            color: #5D4E37;
+            margin-bottom: 30px;
+            opacity: 0;
+            transform: translateY(10px);
+        }
+
+        body.theme-neon .achievement-unlock .tutorial-desc,
+        body.theme-material .achievement-unlock .tutorial-desc {
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .achievement-unlock.active .tutorial-desc {
+            animation: desc-fade-in 0.5s ease-out 0.6s forwards;
+        }
+
+        @keyframes desc-fade-in {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* 按钮样式 */
+        .achievement-unlock .btn-primary,
+        .achievement-unlock .btn {
+            background: linear-gradient(135deg, #FFD700 0%, #FFA500 50%, #FF8C00 100%);
+            color: #4A3000;
+            font-size: 1.1rem;
+            font-weight: 700;
+            padding: 16px 48px;
+            border: none;
+            border-radius: 30px;
+            cursor: pointer;
+            box-shadow: 
+                0 4px 15px rgba(255, 165, 0, 0.4),
+                inset 0 2px 0 rgba(255, 255, 255, 0.3),
+                inset 0 -2px 0 rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            opacity: 0;
+            transform: scale(0.8);
+        }
+
+        .achievement-unlock.active .btn-primary,
+        .achievement-unlock.active .btn {
+            animation: btn-pop-in 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) 0.7s forwards;
+        }
+
+        @keyframes btn-pop-in {
+            0% {
+                opacity: 0;
+                transform: scale(0.8);
+            }
+            100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .achievement-unlock .btn-primary:hover,
+        .achievement-unlock .btn:hover {
+            transform: scale(1.05);
+            box-shadow: 
+                0 6px 25px rgba(255, 165, 0, 0.5),
+                inset 0 2px 0 rgba(255, 255, 255, 0.4),
+                inset 0 -2px 0 rgba(0, 0, 0, 0.1);
+        }
+
+        .achievement-unlock .btn-primary:active,
+        .achievement-unlock .btn:active {
+            transform: scale(0.98);
+        }
+
+        /* 按钮光泽动画 */
+        .achievement-unlock .btn-primary::before,
+        .achievement-unlock .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .achievement-unlock .btn-primary:hover::before,
+        .achievement-unlock .btn:hover::before {
+            left: 100%;
+        }
+
+        /* 星星粒子装饰 - 纯CSS */
+        .achievement-unlock .star-particles {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            pointer-events: none;
+            overflow: visible;
+        }
+
+        .achievement-unlock .star-particles::before,
+        .achievement-unlock .star-particles::after {
+            content: '✦ ✧ ★ ☆ ✦ ✧';
+            position: absolute;
+            font-size: 16px;
+            color: rgba(255, 215, 0, 0.8);
+            white-space: nowrap;
+            opacity: 0;
+            text-shadow: 0 0 10px rgba(255, 215, 0, 0.8);
+        }
+
+        .achievement-unlock .star-particles::before {
+            top: 20%;
+            left: -20px;
+        }
+
+        .achievement-unlock .star-particles::after {
+            bottom: 25%;
+            right: -30px;
+        }
+
+        .achievement-unlock.active .star-particles::before {
+            animation: star-float-left 2s ease-out 0.5s forwards;
+        }
+
+        .achievement-unlock.active .star-particles::after {
+            animation: star-float-right 2s ease-out 0.6s forwards;
+        }
+
+        @keyframes star-float-left {
+            0% {
+                opacity: 0;
+                transform: translateX(-30px) translateY(-20px) rotate(-15deg);
+            }
+            30% {
+                opacity: 1;
+            }
+            100% {
+                opacity: 0.6;
+                transform: translateX(0) translateY(10px) rotate(0);
+            }
+        }
+
+        @keyframes star-float-right {
+            0% {
+                opacity: 0;
+                transform: translateX(30px) translateY(20px) rotate(15deg);
+            }
+            30% {
+                opacity: 1;
+            }
+            100% {
+                opacity: 0.6;
+                transform: translateX(0) translateY(-10px) rotate(0);
+            }
+        }
+
+        /* ========== 游戏结束动画 ========== */
+        .gameover-content {
+            text-align: center;
+            padding: 10px;
+        }
+
+        .gameover-icon {
+            font-size: 4rem;
+            margin-bottom: 15px;
+        }
+
+        .gameover-title {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 15px;
+            text-shadow: 0 2px 8px rgba(0,0,0,0.3);
+        }
+
+        .gameover-stats {
+            margin: 20px 0;
+            background: var(--glass-bg);
+            border-radius: var(--radius-md);
+            padding: 15px;
+            border: 1px solid var(--glass-border);
+        }
+
+        .stat-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 15px;
+            border-bottom: 1px solid var(--glass-border);
+            color: var(--text-primary);
+        }
+
+        .stat-item:last-child {
+            border-bottom: none;
+        }
+
+        .stat-item span:last-child {
+            font-weight: 700;
+            color: var(--accent-color);
+            font-size: 1.2rem;
+        }
+
+        /* ========== 分数增加动画 ========== */
+        .score-add {
+            position: absolute;
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--accent-color);
+            pointer-events: none;
+            animation: score-float 0.8s ease-out forwards;
+        }
+
+        @keyframes score-float {
+            0% { opacity: 1; transform: translateY(0); }
+            100% { opacity: 0; transform: translateY(-30px); }
+        }
+
+        /* ========== 彩纸特效 ========== */
+        .confetti-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            pointer-events: none;
+            z-index: 2000;
+            overflow: hidden;
+        }
+
+        .confetti {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            opacity: 0;
+        }
+
+        /* ========== 难度选择 ========== */
+        .difficulty-options {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .difficulty-btn {
+            flex: 1;
+            padding: 12px;
+            border: 2px solid var(--bg-grid);
+            background: transparent;
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            color: var(--text-primary);
+            transition: all 0.2s ease;
+        }
+
+        .difficulty-btn.active {
+            border-color: var(--accent-color);
+            background: var(--accent-color);
+            color: white;
+        }
+
+        /* ========== 锁定状态 ========== */
+        .locked-feature {
+            position: relative;
+            opacity: 0.5;
+        }
+
+        .locked-feature::after {
+            content: '🔒';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 1.5rem;
+        }
+
+        .unlock-hint {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            margin-top: 5px;
+        }
+
+        /* ========== 响应式设计 ========== */
+        @media (max-width: 480px) {
+            .header {
+                padding: 10px 15px;
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .game-title {
+                font-size: 2rem;
+            }
+
+            .header-center {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .score-box {
+                padding: 8px 15px;
+                min-width: 70px;
+            }
+
+            .level-badge {
+                min-width: 70px;
+                min-height: 55px;
+                padding: 6px 10px;
+            }
+
+            .level-badge .level-number {
+                font-size: 0.65rem;
+            }
+
+            .level-badge .level-rank {
+                font-size: 0.85rem;
+            }
+
+            .score-value {
+                font-size: 1.2rem;
+            }
+
+            .grid-cell {
+                width: 65px;
+                height: 65px;
+            }
+
+            .tile {
+                width: 65px !important;
+                height: 65px !important;
+            }
+
+            .powerup-bar {
+                gap: 15px;
+            }
+
+            .powerup-btn {
+                width: 45px;
+                height: 45px;
+            }
+        }
+
+        @media (min-width: 768px) {
+            .grid-cell {
+                width: 100px;
+                height: 100px;
+            }
+
+            .grid-container {
+                padding: 15px;
+            }
+
+            .grid-background {
+                gap: 15px;
+            }
+
+            .game-wrapper {
+                max-width: 520px;
+                margin: 0 auto;
+            }
+        }
+
+        /* ========== 横屏适配 ========== */
+        @media (orientation: landscape) and (max-height: 500px) {
+            .header {
+                flex-direction: row;
+                padding: 8px 15px;
+            }
+
+            .game-main {
+                padding: 10px;
+            }
+
+            .score-panel {
+                padding: 8px 10px;
+                gap: 8px;
+                margin-bottom: 8px;
+            }
+
+            .score-panel .score-box {
+                padding: 6px 10px;
+                min-width: 65px;
+            }
+
+            .score-box .score-label {
+                font-size: 0.65rem;
+            }
+
+            .score-box .score-value {
+                font-size: 1.2rem;
+            }
+
+            .level-badge {
+                font-size: 0.7rem;
+                padding: 6px 8px;
+                min-width: 65px;
+                min-height: 50px;
+                gap: 2px;
+            }
+
+            .level-badge .level-number {
+                font-size: 0.6rem;
+            }
+
+            .level-badge .level-rank {
+                font-size: 0.75rem;
+            }
+
+            .daily-progress {
+                padding: 6px 10px;
+                margin: 0 10px 8px 10px;
+                gap: 8px;
+                font-size: 0.75rem;
+            }
+
+            .daily-task-icon {
+                font-size: 1rem;
+            }
+
+            .daily-task-name {
+                font-size: 0.75rem;
+                min-width: 70px;
+            }
+
+            .daily-task-bar {
+                height: 6px;
+                min-width: 50px;
+            }
+
+            .daily-task-count {
+                font-size: 0.75rem;
+                min-width: 35px;
+            }
+
+            .daily-task-reward {
+                font-size: 0.7rem;
+                padding: 2px 6px;
+            }
+
+            .grid-cell {
+                width: 50px;
+                height: 50px;
+            }
+
+            .powerup-bar {
+                padding: 8px;
+                margin-top: 10px;
+            }
+
+            .powerup-btn {
+                width: 45px;
+                height: 45px;
+                font-size: 1.3rem;
+            }
+
+            .powerup-item-newgame {
+                margin-left: 10px;
+                padding-left: 10px;
+            }
+
+            .bottom-nav {
+                padding: 5px 0;
+            }
+        }
+        
+        /* ========== Material Design 3 增强样式 ========== */
+        /* 玻璃态卡片通用类 */
+        .glass-card {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-radius: 16px;
+            box-shadow: var(--shadow-2);
+        }
+        
+        /* 品牌渐变按钮 */
+        .btn-brand {
+            background: linear-gradient(135deg, var(--brand-primary), var(--brand-secondary));
+            color: white;
+            border: none;
+            box-shadow: var(--shadow-2);
+        }
+        
+        .btn-brand:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-3);
+        }
+        
+        /* 成就图标增强 */
+        .achievement-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--brand-primary), var(--brand-secondary));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            box-shadow: var(--shadow-1);
+        }
+        
+        /* 任务图标增强 */
+        .task-icon {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, var(--brand-primary), var(--brand-secondary));
+            border-radius: var(--radius-md);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            box-shadow: var(--shadow-1);
+        }
+        
+        /* Material Design 3 风格波纹效果 */
+        .ripple {
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .ripple::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            background: rgba(99, 102, 241, 0.3);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            transition: width 0.3s ease, height 0.3s ease;
+        }
+        
+        .ripple:active::after {
+            width: 200%;
+            height: 200%;
+        }
+        
+        /* 分享信息增强 */
+        .share-message {
+            padding: 15px;
+            background: var(--glass-bg);
+            border-radius: var(--radius-md);
+            margin-bottom: 15px;
+            cursor: pointer;
+            border: 1px solid var(--glass-border);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+        }
+        
+        /* 模态标题增强 */
+        .modal-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 20px;
+            text-align: center;
+            font-family: 'Outfit', sans-serif;
+            background: linear-gradient(135deg, var(--brand-primary), var(--brand-secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        /* 游戏结束标题增强 */
+        .gameover-title {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 10px;
+            font-family: 'Outfit', sans-serif;
+        }
+        
+        /* 解锁动画增强 */
+
+        /* 进度条增强 */
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--brand-primary), var(--brand-secondary));
+            border-radius: 4px;
+            transition: width 0.3s ease;
+        }
+        
+        /* 设置项增强 */
+        .settings-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 0;
+            border-bottom: 1px solid var(--glass-border);
+        }
+        
+        /* Toast提示增强 */
+        .toast {
+            position: fixed;
+            bottom: 100px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--glass-bg);
+            color: white;
+            padding: 12px 24px;
+            border-radius: var(--radius-md);
+            z-index: 1200;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            pointer-events: none;
+            border: 1px solid var(--glass-border);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            box-shadow: var(--shadow-2);
+        }
+        
+        /* Toast active状态 - 必须在最后确保覆盖 */
+        #toast.toast.active {
+            opacity: 1 !important;
+            visibility: visible !important;
+        }
+    </style>
+</head>
+<body>
+    <div class="game-wrapper">
+        <!-- 顶部状态区 -->
+        <header class="header">
+            <div class="header-left">
+                <h1 class="game-title">2048 <span class="md3-badge">MD3</span></h1>
+            </div>
+            <div class="header-right">
+                <div class="header-btn-item">
+                    <button class="icon-btn" id="settingsBtn" title="设置">⚙️</button>
+                    <span class="header-btn-label">设置</span>
+                </div>
+                <div class="header-btn-item">
+                    <button class="icon-btn" id="themeBtn" title="主题">🎨</button>
+                    <span class="header-btn-label">主题</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- 核心游戏区 -->
+        <main class="game-main">
+            <!-- 分数面板 -->
+            <div class="score-panel">
+                <div class="score-box">
+                    <div class="score-label">分数</div>
+                    <div class="score-value" id="currentScore">0</div>
+                </div>
+                <div class="level-badge" id="levelBadge">
+                    <div class="level-number">Lv.1</div>
+                    <div class="level-rank"><span class="level-rank-icon">🥉</span>新手</div>
+                </div>
+                <div class="score-box">
+                    <div class="score-label">最高分</div>
+                    <div class="score-value" id="bestScore">0</div>
+                </div>
+            </div>
+            
+            <!-- 每日任务进度 -->
+            <div class="daily-progress" id="dailyProgress">
+                <span class="daily-task-icon" id="dailyTaskIcon">🎯</span>
+                <span class="daily-task-name" id="dailyTaskName">每日任务</span>
+                <div class="daily-task-bar">
+                    <div class="daily-task-fill" id="dailyTaskFill" style="width: 0%"></div>
+                </div>
+                <span class="daily-task-count" id="dailyTaskCount">0/3</span>
+                <span class="daily-task-reward" id="dailyTaskReward">💰随机道具</span>
+            </div>
+            
+            <div class="grid-container" id="gameGrid">
+                <div class="grid-background" id="gridBackground">
+                    <!-- 16个格子背景 -->
+                </div>
+                <div class="tile-container" id="tileContainer">
+                    <!-- 动态生成的方块 -->
+                </div>
+            </div>
+
+            <!-- 道具快捷栏 -->
+            <div class="powerup-bar" id="powerupBar">
+                <div class="powerup-item">
+                    <button class="powerup-btn" id="undoBtn" disabled>
+                        ↩
+                        <span class="powerup-count" id="undoCount">0</span>
+                    </button>
+                    <span class="powerup-label">撤销</span>
+                </div>
+                <div class="powerup-item">
+                    <button class="powerup-btn" id="hintBtn">
+                        💡
+                        <span class="powerup-count" id="hintCount">3</span>
+                    </button>
+                    <span class="powerup-label">提示</span>
+                </div>
+                <div class="powerup-item">
+                    <button class="powerup-btn" id="shuffleBtn">
+                        🔀
+                        <span class="powerup-count" id="shuffleCount">2</span>
+                    </button>
+                    <span class="powerup-label">洗牌</span>
+                </div>
+                <div class="powerup-item powerup-item-newgame">
+                    <button class="powerup-btn powerup-btn-newgame" id="newGameBtn" title="新游戏">
+                        🔄
+                    </button>
+                    <span class="powerup-label">新游戏</span>
+                </div>
+            </div>
+        </main>
+
+        <!-- 底部导航 -->
+        <nav class="bottom-nav">
+            <button class="nav-item" data-panel="leaderboard">
+                <span class="nav-icon">📊</span>
+                <span>排行</span>
+            </button>
+            <button class="nav-item" data-panel="achievements">
+                <span class="nav-icon">🏆</span>
+                <span>成就</span>
+            </button>
+            <button class="nav-item" data-panel="tasks">
+                <span class="nav-icon">📋</span>
+                <span>任务</span>
+            </button>
+            <button class="nav-item" data-panel="share">
+                <span class="nav-icon">📤</span>
+                <span>分享</span>
+            </button>
+            <button class="nav-item" data-panel="profile">
+                <span class="nav-icon">👤</span>
+                <span>我的</span>
+            </button>
+        </nav>
+    </div>
+
+    <!-- 模态弹窗容器 -->
+    <div class="modal-overlay" id="modalOverlay">
+        <div class="modal" id="modalContent">
+            <!-- 动态内容 -->
+        </div>
+    </div>
+
+    <!-- 游戏结束弹窗 -->
+    <div class="modal-overlay" id="gameOverOverlay">
+        <div class="modal">
+            <div class="gameover-content">
+                <div class="gameover-icon">🎮</div>
+                <div class="gameover-title" id="gameOverTitle">游戏结束!</div>
+                <div class="gameover-stats">
+                    <div class="stat-item">
+                        <span>本局分数</span>
+                        <span id="finalScore">0</span>
+                    </div>
+                    <div class="stat-item">
+                        <span>最高方块</span>
+                        <span id="maxTile">0</span>
+                    </div>
+                    <div class="stat-item">
+                        <span>移动次数</span>
+                        <span id="moveCount">0</span>
+                    </div>
+                </div>
+                <div class="modal-actions">
+                    <button class="btn btn-primary" id="restartBtn">再来一局</button>
+                    <button class="btn btn-secondary" id="shareResultBtn">分享成绩</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 新手教程 -->
+    <div class="tutorial-overlay" id="tutorialOverlay">
+        <div class="tutorial-box">
+            <div class="tutorial-step" id="tutorialStep">步骤 1/3</div>
+            <div class="tutorial-title" id="tutorialTitle">欢迎来到 2048!</div>
+            <div class="tutorial-desc" id="tutorialDesc">
+                上下左右滑动来移动方块，相同数字的方块会合并!
+            </div>
+            <div class="tutorial-arrow" id="tutorialArrow">👆</div>
+            <div class="modal-actions">
+                <button class="btn btn-primary" id="tutorialNext">下一步</button>
+                <button class="btn btn-secondary" id="tutorialSkip">跳过</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 成就解锁动画 -->
+    <div class="modal-overlay" id="achievementOverlay">
+        <div class="achievement-unlock" id="achievementContent">
+            <!-- 粒子特效层 -->
+            <div class="particle-burst"></div>
+            <div class="corner-glow">
+                <div class="glow-tl"></div>
+                <div class="glow-br"></div>
+            </div>
+            <div class="ring-wave"></div>
+            <div class="star-particles"></div>
+            <!-- 内容区 -->
+            <div class="unlock-icon" id="achievementIcon">🏆</div>
+            <div class="gameover-title" id="achievementName">成就解锁!</div>
+            <div class="tutorial-desc" id="achievementDesc">恭喜你完成了这个成就!</div>
+            <div class="modal-actions">
+                <button class="btn btn-primary" id="achievementClose">太棒了!</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast提示 -->
+    <div class="toast" id="toast"></div>
+
+    <!-- 彩纸容器 -->
+    <div class="confetti-container" id="confettiContainer"></div>
+
+    <script>
+        // ==================== 游戏核心模块 ====================
+        const GameCore = {
+            grid: [],
+            score: 0,
+            bestScore: 0,
+            gameOver: false,
+            won: false,
+            gridSize: 4,
+            moveCount: 0,
+            maxTile: 0,
+            previousState: null,
+            history: [],
+            tileIdCounter: 0,
+            gameStartTime: null,
+
+            // 初始化游戏
+            init() {
+                this.loadBestScore();
+                this.grid = Array(this.gridSize).fill(null).map(() => 
+                    Array(this.gridSize).fill(null)
+                );
+                this.score = 0;
+                this.gameOver = false;
+                this.won = false;
+                this.moveCount = 0;
+                this.maxTile = 0;
+                this.history = [];
+                this.tileIdCounter = 0;
+                this.gameStartTime = Date.now();
+                // 里程碑标记
+                this.milestone512 = false;
+                this.milestone1024 = false;
+                this.milestone2048 = false;
+                this.addRandomTile();
+                this.addRandomTile();
+                // 立即显示最高分
+                document.getElementById('bestScore').textContent = this.bestScore;
+                // 重置单局任务进度
+                TaskSystem.resetRoundTasks();
+                this.updateDisplay();
+            },
+
+            // 加载最高分
+            loadBestScore() {
+                const saved = localStorage.getItem('2048-best-score');
+                this.bestScore = saved ? parseInt(saved) : 0;
+            },
+
+            // 保存最高分
+            saveBestScore() {
+                if (this.score > this.bestScore) {
+                    this.bestScore = this.score;
+                    localStorage.setItem('2048-best-score', this.bestScore.toString());
+                    return true;
+                }
+                return false;
+            },
+
+            // 添加随机方块
+            addRandomTile() {
+                const emptyCells = [];
+                for (let r = 0; r < this.gridSize; r++) {
+                    for (let c = 0; c < this.gridSize; c++) {
+                        if (!this.grid[r][c]) {
+                            emptyCells.push({ row: r, col: c });
+                        }
+                    }
+                }
+                if (emptyCells.length === 0) return null;
+
+                const cell = emptyCells[Math.floor(Math.random() * emptyCells.length)];
+                const value = this.getTileValue();
+                const tile = {
+                    id: ++this.tileIdCounter,
+                    value: value,
+                    row: cell.row,
+                    col: cell.col,
+                    isNew: true,
+                    mergedFrom: null
+                };
+                this.grid[cell.row][cell.col] = tile;
+                this.maxTile = Math.max(this.maxTile, value);
+                return tile;
+            },
+
+            // 获取方块值（根据难度）
+            getTileValue() {
+                const difficulty = GameSettings.difficulty;
+                let prob;
+                switch(difficulty) {
+                    case 'easy': prob = 0.1; break;
+                    case 'normal': prob = 0.1; break;
+                    case 'hard': prob = 0.25; break;
+                    default: prob = 0.1;
+                }
+                return Math.random() < prob ? 4 : 2;
+            },
+
+            // 移动方块
+            move(direction) {
+                if (this.gameOver) return false;
+
+                this.saveState();
+                
+                let moved = false;
+                const vector = this.getVector(direction);
+                const traversals = this.buildTraversals(vector);
+                
+                // 重置合并标记
+                for (let r = 0; r < this.gridSize; r++) {
+                    for (let c = 0; c < this.gridSize; c++) {
+                        if (this.grid[r][c]) {
+                            this.grid[r][c].mergedFrom = null;
+                            this.grid[r][c].isNew = false;
+                        }
+                    }
+                }
+
+                traversals.rows.forEach(row => {
+                    traversals.cols.forEach(col => {
+                        const tile = this.grid[row][col];
+                        if (tile) {
+                            const positions = this.findFarthestPosition(row, col, vector);
+                            const next = positions.next;
+                            
+if (next && this.grid[next.row]?.[next.col]?.value === tile.value) {
+                                const merged = {
+                                    id: ++this.tileIdCounter,
+                                    value: tile.value * 2,
+                                    row: next.row,
+                                    col: next.col,
+                                    mergedFrom: [tile, this.grid[next.row][next.col]],
+                                    isNew: false
+                                };
+                                this.grid[next.row][next.col] = merged;
+                                this.grid[row][col] = null;
+                                this.score += merged.value;
+                                this.maxTile = Math.max(this.maxTile, merged.value);
+                                moved = true;
+                                
+                                // 🎯 关键修复：合成特效调用（包括128方块）
+                                if (merged.value >= 64) {  // 降低阈值，包括64、128、256等
+                                    // 延迟调用特效，确保DOM已更新
+                                    setTimeout(() => {
+                                        // 使用更简单的方法计算位置
+                                        const container = document.getElementById('tileContainer');
+                                        if (container) {
+                                            const rect = container.getBoundingClientRect();
+                                            const x = rect.left + 150; // 固定位置测试
+                                            const y = rect.top + 150;
+                                            console.log('调用合成特效:', merged.value, x, y);
+                                            this.showMergeEffect(merged.value, x, y);
+                                        } else {
+                                            console.error('找不到tileContainer');
+                                        }
+                                    }, 100);
+                                }
+                                
+                                // 里程碑弹出提示
+                                if (merged.value === 512 && !this.milestone512) {
+                                    this.milestone512 = true;
+                                    showToast('🎉 达成里程碑: 512!');
+                                }
+                                if (merged.value === 1024 && !this.milestone1024) {
+                                    this.milestone1024 = true;
+                                    showToast('🎊 达成里程碑: 1024!');
+                                }
+                                if (merged.value === 2048 && !this.milestone2048) {
+                                    this.milestone2048 = true;
+                                    showToast('🏆 恭喜达成2048! 你赢了!');
+                                }
+
+                                // 检查是否赢得游戏
+                                if (merged.value === 2048 && !this.won) {
+                                    this.won = true;
+                                }
+                            } else if (positions.farthest.row !== row || positions.farthest.col !== col) {
+                                this.grid[positions.farthest.row][positions.farthest.col] = tile;
+                                this.grid[row][col] = null;
+                                tile.row = positions.farthest.row;
+                                tile.col = positions.farthest.col;
+                                moved = true;
+                            }
+                        }
+                    });
+                });
+
+                if (moved) {
+                    this.moveCount++;
+                    this.addRandomTile();
+                    this.updateDisplay();
+                    
+                    // 播放音效
+                    if (GameSettings.soundEnabled) {
+                        AudioManager.playMove();
+                    }
+
+                    // 检查游戏结束
+                    if (!this.movesAvailable()) {
+                        this.gameOver = true;
+                        setTimeout(() => this.handleGameOver(), 300);
+                    }
+
+                    // 检查成就
+                    AchievementSystem.check(this);
+                } else {
+                    this.restoreState();
+                }
+
+                return moved;
+            },
+
+            // 获取移动向量
+            getVector(direction) {
+                const vectors = {
+                    up: { row: -1, col: 0 },
+                    down: { row: 1, col: 0 },
+                    left: { row: 0, col: -1 },
+                    right: { row: 0, col: 1 }
+                };
+                return vectors[direction];
+            },
+
+            // 构建遍历顺序
+            buildTraversals(vector) {
+                const traversals = { rows: [], cols: [] };
+                for (let i = 0; i < this.gridSize; i++) {
+                    traversals.rows.push(i);
+                    traversals.cols.push(i);
+                }
+                if (vector.row === 1) traversals.rows.reverse();
+                if (vector.col === 1) traversals.cols.reverse();
+                return traversals;
+            },
+
+            // 找到最远位置
+            findFarthestPosition(row, col, vector) {
+                let prev;
+                do {
+                    prev = { row, col };
+                    row += vector.row;
+                    col += vector.col;
+                } while (row >= 0 && row < this.gridSize && 
+                         col >= 0 && col < this.gridSize && 
+                         !this.grid[row][col]);
+                
+                return {
+                    farthest: prev,
+                    next: row >= 0 && row < this.gridSize && col >= 0 && col < this.gridSize 
+                        ? { row, col } : null
+                };
+            },
+
+            // 检查是否有可用移动
+            movesAvailable() {
+                for (let r = 0; r < this.gridSize; r++) {
+                    for (let c = 0; c < this.gridSize; c++) {
+                        if (!this.grid[r][c]) return true;
+                        if (this.canMerge(r, c)) return true;
+                    }
+                }
+                return false;
+            },
+
+            // 检查是否可以合并
+            canMerge(row, col) {
+                const tile = this.grid[row][col];
+                if (!tile) return false;
+                const directions = [
+                    { row: 0, col: 1 },
+                    { row: 1, col: 0 }
+                ];
+                for (const dir of directions) {
+                    const nr = row + dir.row;
+                    const nc = col + dir.col;
+                    if (nr < this.gridSize && nc < this.gridSize) {
+                        const neighbor = this.grid[nr][nc];
+                        if (neighbor && neighbor.value === tile.value) {
+                            return true;
+                        }
+                    }
+                }
+                return false;
+            },
+
+            // 保存状态
+            saveState() {
+                this.history.push({
+                    grid: JSON.parse(JSON.stringify(this.grid)),
+                    score: this.score,
+                    moveCount: this.moveCount,
+                    maxTile: this.maxTile
+                });
+                if (this.history.length > 10) {
+                    this.history.shift();
+                }
+            },
+
+            // 恢复状态
+            restoreState() {
+                if (this.history.length > 0) {
+                    this.history.pop();
+                }
+            },
+
+            // 撤销操作
+            undo() {
+                if (this.history.length === 0) return false;
+                const state = this.history.pop();
+                this.grid = state.grid;
+                this.score = state.score;
+                this.moveCount = state.moveCount;
+                this.maxTile = state.maxTile;
+                this.gameOver = false;
+                this.updateDisplay();
+                return true;
+            },
+
+            // 获取提示（最佳移动方向）
+            getHint() {
+                const directions = ['up', 'down', 'left', 'right'];
+                let bestMove = null;
+                let bestScore = -1;
+                
+                for (const dir of directions) {
+                    const testGrid = JSON.parse(JSON.stringify(this.grid));
+                    let testScore = 0;
+                    // 简单启发式：计算可能的合并数
+                    const vector = this.getVector(dir);
+                    for (let r = 0; r < this.gridSize; r++) {
+                        for (let c = 0; c < this.gridSize; c++) {
+                            if (testGrid[r][c]) {
+                                const nr = r + vector.row;
+                                const nc = c + vector.col;
+                                if (nr >= 0 && nr < this.gridSize && 
+                                    nc >= 0 && nc < this.gridSize &&
+                                    testGrid[nr][nc] && 
+                                    testGrid[nr][nc].value === testGrid[r][c].value) {
+                                    testScore += testGrid[r][c].value * 2;
+                                }
+                            }
+                        }
+                    }
+                    if (testScore > bestScore) {
+                        bestScore = testScore;
+                        bestMove = dir;
+                    }
+                }
+                return bestMove || 'left';
+            },
+
+            // 洗牌功能
+            shuffle() {
+                console.log('🔀 开始洗牌...');
+                const tiles = [];
+                for (let r = 0; r < this.gridSize; r++) {
+                    for (let c = 0; c < this.gridSize; c++) {
+                        if (this.grid[r][c]) {
+                            tiles.push(this.grid[r][c].value);
+                            this.grid[r][c] = null;
+                        }
+                    }
+                }
+                
+                // 随机排列
+                for (let i = tiles.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [tiles[i], tiles[j]] = [tiles[j], tiles[i]];
+                }
+                
+                // 重新放置
+                let positions = [];
+                for (let r = 0; r < this.gridSize; r++) {
+                    for (let c = 0; c < this.gridSize; c++) {
+                        positions.push({ row: r, col: c });
+                    }
+                }
+                positions.sort(() => Math.random() - 0.5);
+                
+                tiles.forEach((value, index) => {
+                    this.grid[positions[index].row][positions[index].col] = {
+                        id: ++this.tileIdCounter,
+                        value: value,
+                        row: positions[index].row,
+                        col: positions[index].col,
+                        isNew: true,
+                        mergedFrom: null
+                    };
+                });
+                
+                this.updateDisplay();
+                if (GameSettings.soundEnabled) {
+                    AudioManager.playMove();
+                }
+                showToast('🔀 洗牌成功!');
+                
+                // 强制重新渲染
+                setTimeout(() => {
+                    Renderer.render();
+                }, 50);
+            },
+
+            // 更新显示
+            updateDisplay() {
+                Renderer.render();
+                document.getElementById('currentScore').textContent = this.score;
+                if (this.saveBestScore()) {
+                    document.getElementById('bestScore').textContent = this.bestScore;
+                }
+                // 实时更新任务进度（针对分数和方块任务）
+                TaskSystem.updateTask('score', this.score);
+                TaskSystem.updateTask('tile256', this.maxTile);
+            },
+
+// 在合并方块时调用特效
+            // 找到合并逻辑位置并添加特效调用
+            // 在移动处理逻辑中添加合成特效
+            
+// 游戏结束处理 - 简化版本
+            handleGameOver() {
+                if (GameSettings.soundEnabled) {
+                    AudioManager.playGameOver();
+                }
+                
+                // 更新排行榜
+                Leaderboard.addScore(this.score);
+                
+                // 更新累计分数
+                LevelSystem.addScore(this.score);
+                
+                // 更新任务进度
+                TaskSystem.updateTask('games', 1);
+                
+                // 简化：直接用alert显示游戏结束
+                alert(`游戏结束!\n得分: ${this.score}\n最高方块: ${this.maxTile}\n移动次数: ${this.moveCount}`);
+                
+                // 同时尝试显示弹窗
+                setTimeout(() => {
+                    const overlay = document.getElementById('gameOverOverlay');
+                    if (overlay) {
+                        document.getElementById('finalScore').textContent = this.score;
+                        document.getElementById('maxTile').textContent = this.maxTile;
+                        document.getElementById('moveCount').textContent = this.moveCount;
+                        document.getElementById('gameOverTitle').textContent = '游戏结束!';
+                        overlay.classList.add('active');
+                    }
+                }, 100);
+            },
+                document.getElementById('moveCount').textContent = this.moveCount;
+                document.getElementById('gameOverTitle').textContent = this.won ? '恭喜通关!' : '游戏结束!';
+                document.getElementById('gameOverOverlay').classList.add('active');
+                
+                if (this.won) {
+                    Effects.celebrate();
+                }
+            }
+        };
+
+        // ==================== 渲染模块 ====================
+        const Renderer = {
+            gridContainer: null,
+            tileContainer: null,
+            cellSize: 80,
+            gap: 10,
+
+            init() {
+                this.gridContainer = document.getElementById('gridBackground');
+                this.tileContainer = document.getElementById('tileContainer');
+                this.createCellBackgrounds();
+                this.calculateSizes();
+            },
+
+            calculateSizes() {
+                const cell = document.querySelector('.grid-cell');
+                if (cell) {
+                    this.cellSize = cell.offsetWidth;
+                    const style = getComputedStyle(document.getElementById('gridBackground'));
+                    this.gap = parseInt(style.gap) || 10;
+                }
+            },
+
+            createCellBackgrounds() {
+                this.gridContainer.innerHTML = '';
+                for (let i = 0; i < 16; i++) {
+                    const cell = document.createElement('div');
+                    cell.className = 'grid-cell';
+                    this.gridContainer.appendChild(cell);
+                }
+            },
+
+            render() {
+                this.tileContainer.innerHTML = '';
+                this.calculateSizes();
+                
+                for (let r = 0; r < GameCore.gridSize; r++) {
+                    for (let c = 0; c < GameCore.gridSize; c++) {
+                        const tile = GameCore.grid[r][c];
+                        if (tile) {
+                            this.renderTile(tile);
+                        }
+                    }
+                }
+            },
+
+            renderTile(tile) {
+                const el = document.createElement('div');
+                el.className = 'tile';
+                el.id = 'tile-' + tile.id;
+                el.textContent = tile.value;
+                
+                // 计算位置
+                el.style.left = (tile.col * (this.cellSize + this.gap)) + 'px';
+                el.style.top = (tile.row * (this.cellSize + this.gap)) + 'px';
+                el.style.width = this.cellSize + 'px';
+                el.style.height = this.cellSize + 'px';
+                el.style.fontSize = this.getFontSize(tile.value) + 'px';
+                
+                // 设置颜色
+                const color = this.getTileColor(tile.value);
+                el.style.backgroundColor = color.bg;
+                el.style.color = color.text;
+                
+                // 新方块动画
+                if (tile.isNew) {
+                    el.classList.add('tile-new');
+                }
+                
+                // 合并动画
+                if (tile.mergedFrom) {
+                    el.classList.add('tile-merged');
+                }
+                
+                // 超级方块
+                if (tile.value >= 2048) {
+                    el.classList.add('tile-super');
+                }
+                
+                this.tileContainer.appendChild(el);
+            },
+
+            getFontSize(value) {
+                if (value >= 16384) return this.cellSize * 0.25;
+                if (value >= 1024) return this.cellSize * 0.35;
+                if (value >= 128) return this.cellSize * 0.4;
+                return this.cellSize * 0.5;
+            },
+
+            getTileColor(value) {
+                const theme = GameSettings.theme;
+                const colors = {
+                    classic: {
+                        2: { bg: '#eee4da', text: '#776e65' },
+                        4: { bg: '#ede0c8', text: '#776e65' },
+                        8: { bg: '#f2b179', text: '#f9f6f2' },
+                        16: { bg: '#f59563', text: '#f9f6f2' },
+                        32: { bg: '#f67c5f', text: '#f9f6f2' },
+                        64: { bg: '#f65e3b', text: '#f9f6f2' },
+                        128: { bg: '#edcf72', text: '#f9f6f2' },
+                        256: { bg: '#edcc61', text: '#f9f6f2' },
+                        512: { bg: '#edc850', text: '#f9f6f2' },
+                        1024: { bg: '#edc53f', text: '#f9f6f2' },
+                        2048: { bg: '#edc22e', text: '#f9f6f2' },
+                        4096: { bg: '#3c3a32', text: '#f9f6f2' },
+                        8192: { bg: '#3c3a32', text: '#f9f6f2' }
+                    },
+                    neon: {
+                        2: { bg: '#0066ff', text: '#ffffff' },
+                        4: { bg: '#0088ff', text: '#ffffff' },
+                        8: { bg: '#00ccff', text: '#0a0a1a' },
+                        16: { bg: '#00ffff', text: '#0a0a1a' },
+                        32: { bg: '#00ff88', text: '#0a0a1a' },
+                        64: { bg: '#ff00ff', text: '#ffffff' },
+                        128: { bg: '#ff66ff', text: '#0a0a1a' },
+                        256: { bg: '#ffff00', text: '#0a0a1a' },
+                        512: { bg: '#ffcc00', text: '#0a0a1a' },
+                        1024: { bg: '#ff9900', text: '#0a0a1a' },
+                        2048: { bg: '#ffffff', text: '#0a0a1a' },
+                        4096: { bg: '#ffffff', text: '#ff00ff' },
+                        8192: { bg: '#ffffff', text: '#00ffff' }
+                    },
+                    sakura: {
+                        2: { bg: '#f8bbd9', text: '#ffffff' },
+                        4: { bg: '#f48fb1', text: '#ffffff' },
+                        8: { bg: '#f06292', text: '#ffffff' },
+                        16: { bg: '#ec407a', text: '#ffffff' },
+                        32: { bg: '#e91e63', text: '#ffffff' },
+                        64: { bg: '#d81b60', text: '#ffffff' },
+                        128: { bg: '#ffd54f', text: '#ffffff' },
+                        256: { bg: '#ffca28', text: '#ffffff' },
+                        512: { bg: '#ffc107', text: '#ffffff' },
+                        1024: { bg: '#ffb300', text: '#ffffff' },
+                        2048: { bg: '#ffa000', text: '#ffffff' },
+                        4096: { bg: '#ff6f00', text: '#ffffff' },
+                        8192: { bg: '#e65100', text: '#ffffff' }
+                    },
+                    tech: {
+                        2: { bg: '#1565c0', text: '#ffffff' },
+                        4: { bg: '#1976d2', text: '#ffffff' },
+                        8: { bg: '#1e88e5', text: '#ffffff' },
+                        16: { bg: '#2196f3', text: '#ffffff' },
+                        32: { bg: '#42a5f5', text: '#ffffff' },
+                        64: { bg: '#64b5f6', text: '#0d47a1' },
+                        128: { bg: '#ffd600', text: '#0d47a1' },
+                        256: { bg: '#ffea00', text: '#0d47a1' },
+                        512: { bg: '#ffc400', text: '#0d47a1' },
+                        1024: { bg: '#ffab00', text: '#0d47a1' },
+                        2048: { bg: '#ff6d00', text: '#ffffff' },
+                        4096: { bg: '#ffffff', text: '#1a237e' },
+                        8192: { bg: '#00e5ff', text: '#0d47a1' }
+                    },
+                    nature: {
+                        2: { bg: '#a5d6a7', text: '#1b5e20' },
+                        4: { bg: '#81c784', text: '#ffffff' },
+                        8: { bg: '#66bb6a', text: '#ffffff' },
+                        16: { bg: '#4caf50', text: '#ffffff' },
+                        32: { bg: '#43a047', text: '#ffffff' },
+                        64: { bg: '#388e3c', text: '#ffffff' },
+                        128: { bg: '#ffd54f', text: '#ffffff' },
+                        256: { bg: '#ffca28', text: '#ffffff' },
+                        512: { bg: '#ffc107', text: '#ffffff' },
+                        1024: { bg: '#ffb300', text: '#ffffff' },
+                        2048: { bg: '#ff8f00', text: '#ffffff' },
+                        4096: { bg: '#ff6f00', text: '#ffffff' },
+                        8192: { bg: '#e65100', text: '#ffffff' }
+                    },
+                    minimal: {
+                        2: { bg: '#e0e0e0', text: '#212121' },
+                        4: { bg: '#bdbdbd', text: '#212121' },
+                        8: { bg: '#9e9e9e', text: '#ffffff' },
+                        16: { bg: '#757575', text: '#ffffff' },
+                        32: { bg: '#616161', text: '#ffffff' },
+                        64: { bg: '#424242', text: '#ffffff' },
+                        128: { bg: '#212121', text: '#ffffff' },
+                        256: { bg: '#212121', text: '#ffffff' },
+                        512: { bg: '#212121', text: '#ffffff' },
+                        1024: { bg: '#212121', text: '#ffffff' },
+                        2048: { bg: '#000000', text: '#ffffff' },
+                        4096: { bg: '#000000', text: '#ffffff' },
+                        8192: { bg: '#000000', text: '#ffffff' }
+                    }
+                };
+
+                const themeColors = colors[theme] || colors.classic;
+                if (themeColors[value]) {
+                    return themeColors[value];
+                }
+                // 超出范围
+                return { bg: '#3c3a32', text: '#f9f6f2' };
+            }
+        };
+
+        // ==================== 音效模块 ====================
+        const AudioManager = {
+            audioContext: null,
+            soundEnabled: true,
+            musicEnabled: false,
+
+            init() {
+                try {
+                    this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                } catch(e) {
+                    console.log('Web Audio API not supported');
+                }
+            },
+
+            playTone(frequency, duration, type = 'sine') {
+                if (!this.audioContext || !this.soundEnabled) return;
+                
+                const oscillator = this.audioContext.createOscillator();
+                const gainNode = this.audioContext.createGain();
+                
+                oscillator.connect(gainNode);
+                gainNode.connect(this.audioContext.destination);
+                
+                oscillator.frequency.value = frequency;
+                oscillator.type = type;
+                
+                gainNode.gain.setValueAtTime(0.3, this.audioContext.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, this.audioContext.currentTime + duration);
+                
+                oscillator.start(this.audioContext.currentTime);
+                oscillator.stop(this.audioContext.currentTime + duration);
+            },
+
+            playMove() {
+                this.playTone(440, 0.1, 'sine');
+            },
+
+            playMerge() {
+                this.playTone(523.25, 0.15, 'sine');
+                setTimeout(() => this.playTone(659.25, 0.15, 'sine'), 50);
+            },
+
+            playGameOver() {
+                setTimeout(() => this.playTone(392, 0.3, 'sine'), 0);
+                setTimeout(() => this.playTone(349.23, 0.3, 'sine'), 150);
+                setTimeout(() => this.playTone(329.63, 0.5, 'sine'), 300);
+            },
+
+            playAchievement() {
+                const notes = [523.25, 587.33, 659.25, 783.99];
+                notes.forEach((note, i) => {
+                    setTimeout(() => this.playTone(note, 0.2, 'sine'), i * 100);
+                });
+            }
+        };
+
+        // ==================== 设置模块 ====================
+        const GameSettings = {
+            soundEnabled: true,
+            vibrationEnabled: true,
+            autoSave: true,
+            difficulty: 'normal',
+            theme: 'classic',
+            
+            storageKey: '2048-settings',
+
+            init() {
+                this.load();
+            },
+
+            load() {
+                const saved = localStorage.getItem(this.storageKey);
+                if (saved) {
+                    const data = JSON.parse(saved);
+                    this.soundEnabled = data.soundEnabled !== false;
+                    this.vibrationEnabled = data.vibrationEnabled !== false;
+                    this.autoSave = data.autoSave !== false;
+                    this.difficulty = data.difficulty || 'normal';
+                    this.theme = data.theme || 'classic';
+                }
+                this.applyTheme();
+            },
+
+            save() {
+                localStorage.setItem(this.storageKey, JSON.stringify({
+                    soundEnabled: this.soundEnabled,
+                    vibrationEnabled: this.vibrationEnabled,
+                    autoSave: this.autoSave,
+                    difficulty: this.difficulty,
+                    theme: this.theme
+                }));
+            },
+
+            applyTheme() {
+                document.body.className = '';
+                document.body.classList.add('theme-' + this.theme);
+            },
+
+            toggleSound() {
+                this.soundEnabled = !this.soundEnabled;
+                this.save();
+                return this.soundEnabled;
+            },
+
+            toggleVibration() {
+                this.vibrationEnabled = !this.vibrationEnabled;
+                this.save();
+                return this.vibrationEnabled;
+            },
+
+            toggleAutoSave() {
+                this.autoSave = !this.autoSave;
+                this.save();
+                return this.autoSave;
+            },
+
+            setDifficulty(level) {
+                this.difficulty = level;
+                this.save();
+            },
+
+            setTheme(theme) {
+                this.theme = theme;
+                this.applyTheme();
+                this.save();
+            }
+        };
+
+        // ==================== 等级系统 ====================
+        const LevelSystem = {
+            totalScore: 0,
+            level: 1,
+            gamesPlayed: 0,
+
+            ranks: [
+                { name: '新手', icon: '🥉', minScore: 0 },
+                { name: '入门', icon: '🥈', minScore: 10000 },
+                { name: '进阶', icon: '🥇', minScore: 50000 },
+                { name: '高手', icon: '⭐', minScore: 200000 },
+                { name: '专家', icon: '💎', minScore: 500000 },
+                { name: '大师', icon: '👑', minScore: 1000000 },
+                { name: '传奇', icon: '🏆', minScore: 5000000 }
+            ],
+
+            storageKey: '2048-level',
+
+            init() {
+                this.load();
+                this.updateDisplay();
+            },
+
+            load() {
+                const saved = localStorage.getItem(this.storageKey);
+                if (saved) {
+                    const data = JSON.parse(saved);
+                    this.totalScore = data.totalScore || 0;
+                    this.gamesPlayed = data.gamesPlayed || 0;
+                    this.calculateLevel();
+                }
+            },
+
+            save() {
+                localStorage.setItem(this.storageKey, JSON.stringify({
+                    totalScore: this.totalScore,
+                    gamesPlayed: this.gamesPlayed
+                }));
+            },
+
+            addScore(score) {
+                const oldLevel = this.level;
+                this.totalScore += score;
+                this.gamesPlayed++;
+                this.calculateLevel();
+                this.save();
+                
+                if (this.level > oldLevel) {
+                    this.onLevelUp(oldLevel, this.level);
+                }
+                
+                this.updateDisplay();
+            },
+
+            calculateLevel() {
+                for (let i = this.ranks.length - 1; i >= 0; i--) {
+                    if (this.totalScore >= this.ranks[i].minScore) {
+                        this.level = i + 1;
+                        return;
+                    }
+                }
+                this.level = 1;
+            },
+
+            onLevelUp(oldLevel, newLevel) {
+                // 播放音效
+                if (GameSettings.soundEnabled) {
+                    AudioManager.playAchievement();
+                }
+
+                // 触发震动
+                if (GameSettings.vibrationEnabled && navigator.vibrate) {
+                    navigator.vibrate(100);
+                }
+
+                // 检查功能解锁
+                const unlocks = this.getUnlocks(newLevel);
+                if (unlocks.length > 0) {
+                    this.showUnlockMessage(unlocks);
+                }
+            },
+
+            getUnlocks(level) {
+                const unlocks = [];
+                if (level >= 3) unlocks.push('道具系统');
+                if (level >= 4) unlocks.push('主题切换');
+                if (level >= 5) unlocks.push('排行榜');
+                if (level >= 6) unlocks.push('好友挑战');
+                if (level >= 7) unlocks.push('全部功能');
+                return unlocks;
+            },
+
+            showUnlockMessage(unlocks) {
+                showToast('🎉 解锁新功能: ' + unlocks.join(', '));
+            },
+
+            updateDisplay() {
+                const rank = this.ranks[this.level - 1];
+                const badge = document.getElementById('levelBadge');
+                badge.innerHTML = `
+                    <div class="level-number">Lv.${this.level}</div>
+                    <div class="level-rank"><span class="level-rank-icon">${rank.icon}</span>${rank.name}</div>
+                `;
+            },
+
+            getCurrentRank() {
+                return this.ranks[this.level - 1];
+            },
+
+            getNextRank() {
+                if (this.level >= this.ranks.length) return null;
+                return this.ranks[this.level];
+            },
+
+            getProgress() {
+                const current = this.getCurrentRank();
+                const next = this.getNextRank();
+                if (!next) return 100;
+                const progress = ((this.totalScore - current.minScore) / (next.minScore - current.minScore)) * 100;
+                return Math.min(100, Math.max(0, progress));
+            }
+        };
+
+        // ==================== 成就系统 ====================
+        const AchievementSystem = {
+            achievements: [],
+            
+            definitions: {
+                // 基础成就 (10个)
+                first_merge: { name: '初试身手', desc: '完成第一次合并', icon: '🎯', type: 'basic' },
+                first_128: { name: '小试牛刀', desc: '合成128方块', icon: '🔶', type: 'basic' },
+                first_256: { name: '渐入佳境', desc: '合成256方块', icon: '🔸', type: 'basic' },
+                first_512: { name: '巅峰挑战', desc: '合成512方块', icon: '💎', type: 'basic' },
+                first_1024: { name: '千人斩', desc: '合成1024方块', icon: '🌟', type: 'basic' },
+                first_2048: { name: '2048大师', desc: '合成2048方块', icon: '👑', type: 'basic' },
+                first_4096: { name: '超越极限', desc: '合成4096方块', icon: '🔥', type: 'basic' },
+                first_8192: { name: '传说之最', desc: '合成8192方块', icon: '⚡', type: 'basic' },
+                days_7: { name: '周常玩家', desc: '连续登录7天', icon: '📅', type: 'basic' },
+                games_100: { name: '百局老兵', desc: '累计完成100局', icon: '🎮', type: 'basic' },
+                
+                // 挑战成就 (5个)
+                score_50000: { name: '分数猎人', desc: '单局得分超过50000', icon: '🏅', type: 'challenge' },
+                score_100000: { name: '分数王者', desc: '单局得分超过100000', icon: '🏆', type: 'challenge' },
+                speed_5min: { name: '神速玩家', desc: '5分钟内达成1024', icon: '⚡', type: 'challenge' },
+                comeback: { name: '逆转乾坤', desc: '使用道具后获胜', icon: '🔄', type: 'challenge' },
+                streak_10: { name: '十连胜', desc: '连续10局创新高', icon: '🔥', type: 'challenge' },
+                
+                // 特殊成就 (3个)
+                powerup_master: { name: '道具大师', desc: '累计使用道具100次', icon: '🧙', type: 'special' },
+                theme_collector: { name: '主题收藏家', desc: '解锁所有主题', icon: '🎨', type: 'special' },
+                social_master: { name: '社交达人', desc: '分享10次', icon: '📢', type: 'special' },
+                
+                // 隐藏成就 (2个)
+                lucky: { name: '幸运儿', desc: '单局连续生成3个4', icon: '🍀', type: 'hidden' },
+                perfect: { name: '完美主义', desc: '合并效率超过95%', icon: '✨', type: 'hidden' }
+            },
+
+            storageKey: '2048-achievements',
+            consecutiveFour: 0,
+
+            init() {
+                this.load();
+            },
+
+            load() {
+                const saved = localStorage.getItem(this.storageKey);
+                if (saved) {
+                    this.achievements = JSON.parse(saved);
+                } else {
+                    // 初始化所有成就
+                    this.achievements = {};
+                    for (const key in this.definitions) {
+                        this.achievements[key] = {
+                            unlocked: false,
+                            unlockedAt: null,
+                            progress: 0
+                        };
+                    }
+                }
+            },
+
+            save() {
+                localStorage.setItem(this.storageKey, JSON.stringify(this.achievements));
+            },
+
+            check(game) {
+                // 检查方块成就
+                this.checkTileAchievement('first_128', game.maxTile >= 128);
+                this.checkTileAchievement('first_256', game.maxTile >= 256);
+                this.checkTileAchievement('first_512', game.maxTile >= 512);
+                this.checkTileAchievement('first_1024', game.maxTile >= 1024);
+                this.checkTileAchievement('first_2048', game.maxTile >= 2048);
+                this.checkTileAchievement('first_4096', game.maxTile >= 4096);
+                this.checkTileAchievement('first_8192', game.maxTile >= 8192);
+
+                // 检查分数成就
+                this.checkScoreAchievement('score_50000', game.score);
+                this.checkScoreAchievement('score_100000', game.score);
+            },
+
+            checkTileAchievement(id, condition) {
+                if (!condition) return;
+                if (!this.achievements[id].unlocked) {
+                    this.unlock(id);
+                }
+            },
+
+            checkScoreAchievement(id, score) {
+                const thresholds = {
+                    score_50000: 50000,
+                    score_100000: 100000
+                };
+                if (score >= thresholds[id] && !this.achievements[id].unlocked) {
+                    this.unlock(id);
+                }
+            },
+
+            unlock(id) {
+                if (this.achievements[id].unlocked) return;
+                
+                this.achievements[id].unlocked = true;
+                this.achievements[id].unlockedAt = Date.now();
+                this.save();
+
+                this.showUnlock(id);
+            },
+
+            showUnlock(id) {
+                const def = this.definitions[id];
+                document.getElementById('achievementIcon').textContent = def.icon;
+                document.getElementById('achievementName').textContent = def.name;
+                document.getElementById('achievementDesc').textContent = def.desc;
+                document.getElementById('achievementOverlay').classList.add('active');
+                
+                if (GameSettings.soundEnabled) {
+                    AudioManager.playAchievement();
+                }
+            },
+
+            getAll() {
+                const list = [];
+                for (const key in this.definitions) {
+                    list.push({
+                        id: key,
+                        ...this.definitions[key],
+                        ...this.achievements[key]
+                    });
+                }
+                return list;
+            },
+
+            getUnlockedCount() {
+                return Object.values(this.achievements).filter(a => a.unlocked).length;
+            }
+        };
+
+        // ==================== 排行榜模块 ====================
+        const Leaderboard = {
+            scores: {
+                daily: [],
+                weekly: [],
+                alltime: []
+            },
+
+            storageKey: '2048-leaderboard',
+            lastDailyReset: null,
+            lastWeeklyReset: 0,
+
+            init() {
+                this.load();
+                if (!this.lastDailyReset) {
+                    this.lastDailyReset = new Date().toDateString();
+                }
+                this.checkWeeklyReset();
+            },
+
+            load() {
+                const saved = localStorage.getItem(this.storageKey);
+                if (saved) {
+                    const data = JSON.parse(saved);
+                    this.scores = data.scores || this.scores;
+                    this.lastWeeklyReset = data.lastWeeklyReset || 0;
+                }
+            },
+
+            save() {
+                localStorage.setItem(this.storageKey, JSON.stringify({
+                    scores: this.scores,
+                    lastWeeklyReset: this.lastWeeklyReset
+                }));
+            },
+
+            addScore(score) {
+                const now = Date.now();
+                const name = '你'; // 可以改成自定义名字
+                
+                this.scores.daily.push({ score, name, time: now });
+                this.scores.weekly.push({ score, name, time: now });
+                this.scores.alltime.push({ score, name, time: now });
+                
+                // 排序并截取
+                this.scores.daily = this.sortAndLimit(this.scores.daily, 10);
+                this.scores.weekly = this.sortAndLimit(this.scores.weekly, 20);
+                this.scores.alltime = this.sortAndLimit(this.scores.alltime, 50);
+                
+                this.save();
+            },
+
+            sortAndLimit(arr, limit) {
+                return arr.sort((a, b) => b.score - a.score).slice(0, limit);
+            },
+
+            checkWeeklyReset() {
+                const now = new Date();
+                const today = now.getDay();
+                
+                // 每日重置排行榜
+                if (this.lastDailyReset !== now.toDateString()) {
+                    this.scores.daily = [];
+                    this.lastDailyReset = now.toDateString();
+                    this.save();
+                }
+                
+                // 周日重置每周排行榜
+                if (today === 0 && Date.now() - this.lastWeeklyReset > 604800000) {
+                    this.scores.weekly = [];
+                    this.lastWeeklyReset = Date.now();
+                    this.save();
+                }
+            },
+
+            getDaily() {
+                return this.scores.daily;
+            },
+
+            getWeekly() {
+                return this.scores.weekly;
+            },
+
+            getAllTime() {
+                return this.scores.alltime;
+            },
+            
+            // 清零所有玩家数据（实际上是当前玩家的本地数据）
+            clearAllPlayerData() {
+                // 清空排行榜数据
+                this.scores = { daily: [], weekly: [], alltime: [] };
+                this.lastDailyReset = new Date().toDateString();
+                this.lastWeeklyReset = Date.now();
+                this.save();
+                
+                // 清空任务数据
+                TaskSystem.clearAllTaskData();
+                
+                // 清空游戏状态
+                localStorage.removeItem('bestScore');
+                localStorage.removeItem('gameState');
+                
+                showToast('🧹 所有玩家数据已清零');
+                
+                // 刷新显示
+                TaskSystem.updateDailyProgressUI();
+                this.renderLeaderboard();
+            }
+        };
+
+        // ==================== 每日任务系统 ====================
+        const TaskSystem = {
+            tasks: [],
+            completedTasks: [],
+            lastReset: null,
+
+            storageKey: '2048-tasks',
+
+            defaultTasks: [
+                { id: 'games', name: '完成3局游戏', target: 3, progress: 0, reward: '1个道具', type: 'count' },
+                { id: 'score', name: '单局得分超过5000', target: 5000, progress: 0, reward: '2个道具', type: 'score' },
+                { id: 'tile256', name: '合成256方块', target: 256, progress: 0, reward: '1个提示', type: 'tile' },
+                { id: 'powerup', name: '使用2次道具', target: 2, progress: 0, reward: '1个撤销', type: 'count' }
+            ],
+            
+            // 清零所有任务数据
+            clearAllTaskData() {
+                this.tasks = JSON.parse(JSON.stringify(this.defaultTasks));
+                this.completedTasks = [];
+                this.lastReset = new Date().toDateString();
+                
+                localStorage.removeItem(this.storageKey);
+                localStorage.removeItem('completedDailyTasks');
+                
+                this.updateDailyProgressUI();
+            },
+
+            init() {
+                this.load();
+                this.checkReset();
+                this.updateDailyProgressUI();
+            },
+
+            updateDailyProgressUI() {
+                // 找到第一个未完成任务
+                const incompleteTasks = this.tasks.filter(t => !this.completedTasks.includes(t.id));
+                
+                const progressEl = document.getElementById('dailyProgress');
+                const iconEl = document.getElementById('dailyTaskIcon');
+                const nameEl = document.getElementById('dailyTaskName');
+                const fillEl = document.getElementById('dailyTaskFill');
+                const countEl = document.getElementById('dailyTaskCount');
+                const rewardEl = document.getElementById('dailyTaskReward');
+                
+                if (!progressEl) return;
+                
+                // 检查是否所有任务都完成了
+                if (incompleteTasks.length === 0) {
+                    progressEl.classList.add('completed');
+                    iconEl.textContent = '🎉';
+                    nameEl.textContent = '今日任务全部完成';
+                    fillEl.style.width = '100%';
+                    countEl.textContent = `${this.completedTasks.length}/${this.tasks.length}`;
+                    rewardEl.textContent = '✅已领取';
+                    return;
+                }
+                
+                // 显示第一个未完成任务
+                const currentTask = incompleteTasks[0];
+                const progress = Math.min(currentTask.progress, currentTask.target);
+                const percent = Math.min(100, (progress / currentTask.target) * 100);
+                
+                progressEl.classList.remove('completed');
+                iconEl.textContent = '🎯';
+                nameEl.textContent = currentTask.name;
+                fillEl.style.width = `${percent}%`;
+                countEl.textContent = `${progress}/${currentTask.target}`;
+                rewardEl.textContent = `💰${currentTask.reward || '随机道具'}`;
+            },
+
+            load() {
+                const saved = localStorage.getItem(this.storageKey);
+                if (saved) {
+                    const data = JSON.parse(saved);
+                    this.tasks = data.tasks || this.defaultTasks;
+                    this.completedTasks = data.completedTasks || [];
+                    this.lastReset = data.lastReset;
+                } else {
+                    this.tasks = JSON.parse(JSON.stringify(this.defaultTasks));
+                }
+            },
+
+            save() {
+                localStorage.setItem(this.storageKey, JSON.stringify({
+                    tasks: this.tasks,
+                    completedTasks: this.completedTasks,
+                    lastReset: this.lastReset
+                }));
+            },
+
+            checkReset() {
+                const today = new Date().toDateString();
+                if (this.lastReset !== today) {
+                    this.resetTasks();
+                    this.lastReset = today;
+                    this.save();
+                }
+            },
+
+            resetTasks() {
+                this.tasks = JSON.parse(JSON.stringify(this.defaultTasks));
+                this.completedTasks = [];
+            },
+
+            resetRoundTasks() {
+                // 重置单局任务进度（分数、方块）
+                this.tasks.forEach(task => {
+                    if (task.type === 'score' || task.type === 'tile') {
+                        task.progress = 0;
+                    }
+                });
+                // 从已完成列表中移除单局任务
+                this.completedTasks = this.completedTasks.filter(id => {
+                    const task = this.tasks.find(t => t.id === id);
+                    return task && task.type !== 'score' && task.type !== 'tile';
+                });
+                this.save();
+                this.updateDailyProgressUI();
+            },
+
+            updateTask(id, value) {
+                const task = this.tasks.find(t => t.id === id);
+                if (!task || this.completedTasks.includes(id)) return;
+                
+                // 根据任务类型更新进度
+                if (task.type === 'score' || task.type === 'tile') {
+                    // 分数/方块任务：直接设置当前值
+                    task.progress = value;
+                } else {
+                    // 计数任务：累加
+                    task.progress += value;
+                }
+                
+                if (task.progress >= task.target) {
+                    this.completeTask(id);
+                }
+                
+                this.save();
+                this.updateDailyProgressUI();
+            },
+
+            // 合成特效系统
+        showMergeEffect(value, x, y) {
+            // 创建大型合成特效
+            const effect = document.createElement('div');
+            effect.className = 'merge-effect';
+            effect.innerHTML = `
+                <div class="merge-animation">
+                    <div class="merge-text">🎉 合成 ${value}!</div>
+                    <div class="merge-particles"></div>
+                    <div class="merge-glow"></div>
+                </div>
+            `;
+            
+            // 定位到合成位置
+            effect.style.position = 'fixed';
+            effect.style.left = x + 'px';
+            effect.style.top = y + 'px';
+            effect.style.transform = 'translate(-50%, -50%)';
+            effect.style.zIndex = '10000';
+            effect.style.pointerEvents = 'none';
+            
+            document.body.appendChild(effect);
+            
+            // 播放合成音效
+            if (GameSettings.soundEnabled) {
+                AudioManager.playMerge();
+            }
+            
+            // 触发页面震撼效果
+            document.body.classList.add('merge-blur');
+            
+            // 3秒后移除特效
+            setTimeout(() => {
+                document.body.classList.remove('merge-blur');
+                if (effect.parentNode) {
+                    effect.parentNode.removeChild(effect);
+                }
+            }, 3000);
+        },
+        
+        // 调试功能 - 测试游戏结束弹窗
+        testGameOverModal() {
+            this.score = 1234;
+            this.maxTile = 256;
+            this.moveCount = 50;
+            this.won = false;
+            this.gameOver = true;
+            this.showGameOverModal();
+        },
+        
+        // 调试功能 - 测试合成特效
+        testMergeEffect() {
+            const rect = document.getElementById('tileContainer').getBoundingClientRect();
+            const x = rect.left + 100;
+            const y = rect.top + 100;
+            this.showMergeEffect(128, x, y);
+        },
+        
+        // 修复任务更新逻辑
+        forceUpdateTaskDisplay() {
+            // 强制刷新任务显示
+            const incompleteTasks = this.tasks.filter(t => !this.completedTasks.includes(t.id));
+            
+            if (incompleteTasks.length === 0) {
+                // 所有任务完成
+                this.showAllTasksCompleted();
+            } else {
+                // 显示第一个未完成任务
+                this.showCurrentTask(incompleteTasks[0]);
+            }
+        },
+        
+        showAllTasksCompleted() {
+            const progressEl = document.getElementById('dailyProgress');
+            const iconEl = document.getElementById('dailyTaskIcon');
+            const nameEl = document.getElementById('dailyTaskName');
+            const fillEl = document.getElementById('dailyTaskFill');
+            const countEl = document.getElementById('dailyTaskCount');
+            const rewardEl = document.getElementById('dailyTaskReward');
+            
+            if (!progressEl) return;
+            
+            progressEl.classList.add('completed');
+            iconEl.textContent = '🎉';
+            nameEl.textContent = '今日任务全部完成';
+            fillEl.style.width = '100%';
+            countEl.textContent = `${this.completedTasks.length}/${this.tasks.length}`;
+            rewardEl.textContent = '✅已领取';
+        },
+        
+        showCurrentTask(task) {
+            const progressEl = document.getElementById('dailyProgress');
+            const iconEl = document.getElementById('dailyTaskIcon');
+            const nameEl = document.getElementById('dailyTaskName');
+            const fillEl = document.getElementById('dailyTaskFill');
+            const countEl = document.getElementById('dailyTaskCount');
+            const rewardEl = document.getElementById('dailyTaskReward');
+            
+            if (!progressEl || !task) return;
+            
+            progressEl.classList.remove('completed');
+            iconEl.textContent = task.icon || '🎯';
+            nameEl.textContent = task.name;
+            
+            let progressPercent = 0;
+            if (task.type === 'count') {
+                progressPercent = Math.min(100, (task.progress / task.target) * 100);
+            } else {
+                progressPercent = Math.min(100, (task.progress / task.target) * 100);
+            }
+            
+            fillEl.style.width = progressPercent + '%';
+            
+            if (task.type === 'count') {
+                countEl.textContent = `${task.progress}/${task.target} 💰${task.reward}`;
+            } else {
+                countEl.textContent = `${task.progress}/${task.target} 💰${task.reward}`;
+            }
+            
+            rewardEl.textContent = `💰${task.reward}`;
+        },
+
+            getTasks() {
+                return this.tasks.map(t => ({
+                    ...t,
+                    completed: this.completedTasks.includes(t.id)
+                }));
+            }
+        };
+
+        // ==================== 道具系统 ====================
+        const PowerupSystem = {
+            undo: 0,
+            hint: 3,
+            shuffle: 2,
+            usedPowerup: false,
+            hintShown: false,
+
+            storageKey: '2048-powerups',
+
+            init() {
+                this.load();
+                this.updateDisplay();
+            },
+
+            load() {
+                const saved = localStorage.getItem(this.storageKey);
+                if (saved) {
+                    const data = JSON.parse(saved);
+                    this.undo = data.undo || 0;
+                    this.hint = data.hint || 3;
+                    this.shuffle = data.shuffle || 2;
+                    this.usedPowerupAt = data.usedPowerupAt || 0;
+                    this.hintUsedAt = data.hintUsedAt || 0;
+                }
+            },
+
+            save() {
+                localStorage.setItem(this.storageKey, JSON.stringify({
+                    undo: this.undo,
+                    hint: this.hint,
+                    shuffle: this.shuffle,
+                    usedPowerupAt: this.usedPowerupAt,
+                    hintUsedAt: this.hintUsedAt
+                }));
+            },
+
+            updateDisplay() {
+                document.getElementById('undoCount').textContent = this.undo;
+                document.getElementById('hintCount').textContent = this.hint;
+                document.getElementById('shuffleCount').textContent = this.shuffle;
+                
+                document.getElementById('undoBtn').disabled = this.undo <= 0;
+            },
+
+            useUndo() {
+                if (this.undo <= 0) return false;
+                if (GameCore.history.length === 0) {
+                    showToast('没有可撤销的操作');
+                    return false;
+                }
+                
+                this.undo--;
+                this.usedPowerup = true;
+                GameCore.undo();
+                TaskSystem.updateTask('powerup', 1);
+                
+                if (GameSettings.vibrationEnabled && navigator.vibrate) {
+                    navigator.vibrate(30);
+                }
+                
+                this.updateDisplay();
+                this.save();
+                return true;
+            },
+
+            useHint() {
+                if (this.hint <= 0) {
+                    showToast('提示次数不足');
+                    return false;
+                }
+                if (this.hintShown) return false;
+                
+                this.hint--;
+                this.hintShown = true;
+                TaskSystem.updateTask('powerup', 1);
+                
+                const hint = GameCore.getHint();
+                const arrows = {
+                    up: '⬆️',
+                    down: '⬇️',
+                    left: '⬅️',
+                    right: '➡️'
+                };
+                showToast('建议方向: ' + arrows[hint] + ' ' + hint);
+                
+                this.updateDisplay();
+                this.save();
+                
+                // 3秒后重置提示显示
+                setTimeout(() => { this.hintShown = false; }, 3000);
+                return true;
+            },
+
+            useShuffle() {
+                if (this.shuffle <= 0) {
+                    showToast('洗牌次数不足');
+                    return false;
+                }
+                
+                this.shuffle--;
+                this.usedPowerup = true;
+                GameCore.shuffle();
+                TaskSystem.updateTask('powerup', 1);
+                
+                // 洗牌后检查是否有可移动方向，如果有则允许继续游戏
+                if (GameCore.gameOver && GameCore.movesAvailable()) {
+                    GameCore.gameOver = false;
+                    // 隐藏游戏结束弹窗
+                    document.getElementById('gameOverOverlay').classList.remove('active');
+                    showToast('🔄 洗牌成功！游戏继续！');
+                } else {
+                    showToast('🔀 洗牌成功！');
+                }
+                
+                if (GameSettings.vibrationEnabled && navigator.vibrate) {
+                    navigator.vibrate([20, 50, 20]);
+                }
+                
+                this.updateDisplay();
+                this.save();
+                return true;
+            },
+
+            addItem(type, count = 1) {
+                if (type === 'undo') this.undo += count;
+                else if (type === 'hint') this.hint += count;
+                else if (type === 'shuffle') this.shuffle += count;
+                this.updateDisplay();
+                this.save();
+            },
+
+            addRandomItem() {
+                const items = ['undo', 'hint', 'shuffle'];
+                const item = items[Math.floor(Math.random() * items.length)];
+                this.addItem(item);
+                showToast('获得 1个' + (item === 'undo' ? '撤销' : item === 'hint' ? '提示' : '洗牌') + '道具!');
+            },
+
+            checkComeback(game) {
+                if (this.usedPowerup && game.won) {
+                    AchievementSystem.unlock('comeback');
+                }
+            }
+        };
+
+        // ==================== 教程系统 ====================
+        const TutorialSystem = {
+            currentStep: 0,
+            steps: [
+                {
+                    title: '欢迎来到 2048!',
+                    desc: '一个数字合并的魔法世界',
+                    arrow: '👆',
+                    step: '步骤 1/3'
+                },
+                {
+                    title: '滑动控制',
+                    desc: '上下左右滑动来移动方块',
+                    arrow: '↔️',
+                    step: '步骤 2/3'
+                },
+                {
+                    title: '合并得分!',
+                    desc: '相同数字的方块碰撞会合并成更大的数字，目标是2048!',
+                    arrow: '✨',
+                    step: '步骤 3/3'
+                }
+            ],
+
+            storageKey: '2048-tutorial-done',
+
+            init() {
+                if (!localStorage.getItem(this.storageKey)) {
+                    this.show();
+                }
+            },
+
+            show() {
+                this.currentStep = 0;
+                this.updateDisplay();
+                document.getElementById('tutorialOverlay').classList.add('active');
+            },
+
+            updateDisplay() {
+                const step = this.steps[this.currentStep];
+                document.getElementById('tutorialStep').textContent = step.step;
+                document.getElementById('tutorialTitle').textContent = step.title;
+                document.getElementById('tutorialDesc').textContent = step.desc;
+                document.getElementById('tutorialArrow').textContent = step.arrow;
+                
+                const nextBtn = document.getElementById('tutorialNext');
+                nextBtn.textContent = this.currentStep === this.steps.length - 1 ? '开始游戏' : '下一步';
+            },
+
+            next() {
+                this.currentStep++;
+                if (this.currentStep >= this.steps.length) {
+                    this.complete();
+                } else {
+                    this.updateDisplay();
+                }
+            },
+
+            skip() {
+                this.complete();
+            },
+
+            complete() {
+                document.getElementById('tutorialOverlay').classList.remove('active');
+                localStorage.setItem(this.storageKey, 'true');
+            }
+        };
+
+        // ==================== 特效系统 ====================
+        const Effects = {
+            celebrate() {
+                const container = document.getElementById('confettiContainer');
+                container.innerHTML = '';
+                
+                const colors = ['#ff0000', '#00ff00', '#0000ff', '#ffff00', '#ff00ff', '#00ffff'];
+                const shapes = ['square', 'circle'];
+                
+                for (let i = 0; i < 50; i++) {
+                    const confetti = document.createElement('div');
+                    confetti.className = 'confetti';
+                    confetti.style.left = Math.random() * 100 + '%';
+                    confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                    confetti.style.borderRadius = shapes[Math.floor(Math.random() * shapes.length)] === 'circle' ? '50%' : '0';
+                    confetti.style.width = (Math.random() * 10 + 5) + 'px';
+                    confetti.style.height = confetti.style.width;
+                    
+                    const animation = confetti.animate([
+                        { transform: 'translateY(-10vh) rotate(0deg)', opacity: 1 },
+                        { transform: `translateY(100vh) rotate(${Math.random() * 720}deg)`, opacity: 0 }
+                    ], {
+                        duration: (Math.random() * 2000 + 2000),
+                        easing: 'cubic-bezier(0.25, 0.46, 0.45, 0.94)',
+                        delay: Math.random() * 500
+                    });
+                    
+                    container.appendChild(confetti);
+                }
+                
+                setTimeout(() => {
+                    container.innerHTML = '';
+                }, 4000);
+            }
+        };
+
+        // ==================== 社交分享模块 ====================
+        const SocialShare = {
+            shareMessages: [
+                '我在2048里达到了{score}分！你能超越我吗？',
+                '第{games}局，终于达成{maxTile}！来试试？',
+                '{rank}段位达成！这个分数你行吗？',
+                '手速与策略的较量，我的最高分是{score}！',
+                '停不下来！2048真的有毒...',
+                '又一个午休没了，但分数上去了！',
+                '老板问我为什么盯着手机笑...',
+                '不服来战！我的2048最高分是{score}！',
+                '好友挑战：超越我的{score}分，我就服你！',
+                '2048高手榜有你的名字吗？'
+            ],
+
+            generateMessage(score, maxTile, games, rank) {
+                const idx = Math.floor(Math.random() * this.shareMessages.length);
+                return this.shareMessages[idx]
+                    .replace('{score}', score)
+                    .replace('{maxTile}', maxTile)
+                    .replace('{games}', games)
+                    .replace('{rank}', rank);
+            },
+
+            generateChallengeLink(score) {
+                const data = {
+                    score: score,
+                    timestamp: Date.now()
+                };
+                const encoded = btoa(JSON.stringify(data));
+                return window.location.origin + window.location.pathname + '?challenge=' + encoded;
+            },
+
+            checkChallengeLink() {
+                const params = new URLSearchParams(window.location.search);
+                const challenge = params.get('challenge');
+                if (challenge) {
+                    try {
+                        const data = JSON.parse(atob(challenge));
+                        if (data.score && data.timestamp) {
+                            this.showChallengeDialog(data.score);
+                        }
+                    } catch (e) {
+                        console.log('Invalid challenge link');
+                    }
+                }
+            },
+
+            showChallengeDialog(score) {
+                const content = `
+                    <div class="gameover-content">
+                        <div class="gameover-icon">🎯</div>
+                        <div class="gameover-title">好友挑战!</div>
+                        <div class="tutorial-desc">Ta的分数: ${score}<br>你能超越Ta吗?</div>
+                        <div class="modal-actions">
+                            <button class="btn btn-primary" onclick="UI.closeModal(); GameCore.init();">接受挑战</button>
+                            <button class="btn btn-secondary" onclick="UI.closeModal();">稍后</button>
+                        </div>
+                    </div>
+                `;
+                UI.showModal(content);
+            },
+
+            share(platform) {
+                const score = GameCore.score;
+                const rank = LevelSystem.getCurrentRank();
+                const message = this.generateMessage(score, GameCore.maxTile, LevelSystem.gamesPlayed, rank.name);
+                
+                let url = '';
+                switch(platform) {
+                    case 'wechat':
+                        showToast('请截图分享到微信');
+                        break;
+                    case 'weibo':
+                        url = `https://service.weibo.com/share/share.php?title=${encodeURIComponent(message)}`;
+                        break;
+                    case 'qq':
+                        url = `https://connect.qq.com/widget/shareqq/index.html?url=${encodeURIComponent(window.location.href)}&title=${encodeURIComponent(message)}`;
+                        break;
+                    case 'copy':
+                        navigator.clipboard.writeText(message);
+                        showToast('已复制分享内容');
+                        return;
+                }
+                
+                if (url) {
+                    window.open(url, '_blank');
+                }
+            }
+        };
+
+        // ==================== UI管理模块 ====================
+        const UI = {
+            currentPanel: null,
+
+            init() {
+                this.bindEvents();
+                this.updateSettingsUI();
+            },
+
+            bindEvents() {
+                // 新游戏按钮
+                document.getElementById('newGameBtn').addEventListener('click', () => {
+                    GameCore.init();
+                    this.closeGameOver();
+                });
+
+                // 设置按钮
+                document.getElementById('settingsBtn').addEventListener('click', () => {
+                    this.showSettingsPanel();
+                });
+
+                // 主题按钮
+                document.getElementById('themeBtn').addEventListener('click', () => {
+                    this.showThemePanel();
+                });
+
+                // 道具按钮
+                document.getElementById('undoBtn').addEventListener('click', () => {
+                    PowerupSystem.useUndo();
+                });
+
+                document.getElementById('hintBtn').addEventListener('click', () => {
+                    PowerupSystem.useHint();
+                });
+
+                document.getElementById('shuffleBtn').addEventListener('click', () => {
+                    PowerupSystem.useShuffle();
+                });
+
+                // 底部导航
+                document.querySelectorAll('.nav-item').forEach(item => {
+                    item.addEventListener('click', (e) => {
+                        const panel = e.currentTarget.dataset.panel;
+                        this.showPanel(panel);
+                    });
+                });
+
+                // 弹窗关闭
+                document.getElementById('modalOverlay').addEventListener('click', (e) => {
+                    if (e.target.id === 'modalOverlay') {
+                        this.closeModal();
+                    }
+                });
+
+                document.getElementById('gameOverOverlay').addEventListener('click', (e) => {
+                    if (e.target.id === 'gameOverOverlay') {
+                        this.closeGameOver();
+                    }
+                });
+
+                document.getElementById('achievementClose').addEventListener('click', () => {
+                    document.getElementById('achievementOverlay').classList.remove('active');
+                });
+
+                document.getElementById('achievementOverlay').addEventListener('click', (e) => {
+                    if (e.target.id === 'achievementOverlay') {
+                        document.getElementById('achievementOverlay').classList.remove('active');
+                    }
+                });
+
+                // 游戏结束按钮
+                document.getElementById('restartBtn').addEventListener('click', () => {
+                    this.closeGameOver();
+                    GameCore.init();
+                });
+
+                document.getElementById('shareResultBtn').addEventListener('click', () => {
+                    this.closeGameOver();
+                    this.showPanel('share');
+                });
+
+                // 教程按钮
+                document.getElementById('tutorialNext').addEventListener('click', () => {
+                    TutorialSystem.next();
+                });
+
+                document.getElementById('tutorialSkip').addEventListener('click', () => {
+                    TutorialSystem.skip();
+                });
+            },
+
+            showSettingsPanel() {
+                const content = `
+                    <div class="modal-title">⚙️ 设置</div>
+                    <div class="modal-body">
+                        <div class="settings-item">
+                            <span class="settings-label">🔊 音效</span>
+                            <div class="toggle-switch ${GameSettings.soundEnabled ? 'active' : ''}" id="soundToggle"></div>
+                        </div>
+                        <div class="settings-item">
+                            <span class="settings-label">📳 震动</span>
+                            <div class="toggle-switch ${GameSettings.vibrationEnabled ? 'active' : ''}" id="vibrationToggle"></div>
+                        </div>
+                        <div class="settings-item">
+                            <span class="settings-label">💾 自动保存</span>
+                            <div class="toggle-switch ${GameSettings.autoSave ? 'active' : ''}" id="autoSaveToggle"></div>
+                        </div>
+                        <div class="settings-item">
+                            <span class="settings-label">📊 难度</span>
+                        </div>
+                        <div class="difficulty-options">
+                            <button class="difficulty-btn ${GameSettings.difficulty === 'easy' ? 'active' : ''}" data-diff="easy">新手</button>
+                            <button class="difficulty-btn ${GameSettings.difficulty === 'normal' ? 'active' : ''}" data-diff="normal">标准</button>
+                            <button class="difficulty-btn ${GameSettings.difficulty === 'hard' ? 'active' : ''}" data-diff="hard">挑战</button>
+                        </div>
+                        <div class="settings-item" style="margin-top:15px;">
+                            <span class="settings-label">🗑️ 清除数据</span>
+                            <button class="btn btn-secondary" id="clearDataBtn" style="padding: 8px 16px;">清除</button>
+                        </div>
+                    </div>
+                `;
+                this.showModal(content);
+                
+                // 绑定开关事件
+                document.getElementById('soundToggle').addEventListener('click', (e) => {
+                    const enabled = GameSettings.toggleSound();
+                    e.currentTarget.classList.toggle('active', enabled);
+                });
+
+                document.getElementById('vibrationToggle').addEventListener('click', (e) => {
+                    const enabled = GameSettings.toggleVibration();
+                    e.currentTarget.classList.toggle('active', enabled);
+                });
+
+                document.getElementById('autoSaveToggle').addEventListener('click', (e) => {
+                    const enabled = GameSettings.toggleAutoSave();
+                    e.currentTarget.classList.toggle('active', enabled);
+                });
+
+                document.querySelectorAll('.difficulty-btn').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        document.querySelectorAll('.difficulty-btn').forEach(b => b.classList.remove('active'));
+                        e.target.classList.add('active');
+                        GameSettings.setDifficulty(e.target.dataset.diff);
+                    });
+                });
+
+                document.getElementById('clearDataBtn').addEventListener('click', () => {
+                    if (confirm('确定要清除所有数据吗？')) {
+                        localStorage.clear();
+                        location.reload();
+                    }
+                });
+            },
+
+            showThemePanel() {
+                const themes = [
+                    { id: 'classic', name: '经典', icon: '🎨' },
+                    { id: 'neon', name: '霓虹', icon: '🌃' },
+                    { id: 'sakura', name: '樱花', icon: '🌸' },
+                    { id: 'tech', name: '科技', icon: '💻' },
+                    { id: 'nature', name: '自然', icon: '🌿' },
+                    { id: 'minimal', name: '极简', icon: '⬜' }
+                ];
+
+                const content = `
+                    <div class="modal-title">🎨 主题选择</div>
+                    <div class="modal-body">
+                        <div class="theme-grid">
+                            ${themes.map(t => `
+                                <div class="theme-option ${GameSettings.theme === t.id ? 'active' : ''}" data-theme="${t.id}">
+                                    <div style="font-size: 2rem;">${t.icon}</div>
+                                    <div class="theme-option-name">${t.name}</div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+                this.showModal(content);
+
+                document.querySelectorAll('.theme-option').forEach(opt => {
+                    opt.addEventListener('click', (e) => {
+                        const theme = e.currentTarget.dataset.theme;
+                        GameSettings.setTheme(theme);
+                        document.querySelectorAll('.theme-option').forEach(o => o.classList.remove('active'));
+                        e.currentTarget.classList.add('active');
+                        Renderer.render();
+                    });
+                });
+            },
+
+            showPanel(panel) {
+                switch(panel) {
+                    case 'leaderboard':
+                        this.showLeaderboardPanel();
+                        break;
+                    case 'achievements':
+                        this.showAchievementsPanel();
+                        break;
+                    case 'tasks':
+                        this.showTasksPanel();
+                        break;
+                    case 'share':
+                        this.showSharePanel();
+                        break;
+                    case 'profile':
+                        this.showProfilePanel();
+                        break;
+                }
+            },
+
+            showLeaderboardPanel() {
+                const content = `
+                    <div class="modal-title">📊 排行榜</div>
+                    <div class="modal-body">
+                        <div class="leaderboard-tabs">
+                            <button class="tab-btn active" data-tab="daily">每日</button>
+                            <button class="tab-btn" data-tab="weekly">每周</button>
+                            <button class="tab-btn" data-tab="alltime">历史</button>
+                        </div>
+                        <div class="leaderboard-list" id="leaderboardList">
+                            ${this.renderLeaderboardItems('daily')}
+                        </div>
+                    </div>
+                `;
+                this.showModal(content);
+
+                document.querySelectorAll('.tab-btn').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+                        e.target.classList.add('active');
+                        const tab = e.target.dataset.tab;
+                        document.getElementById('leaderboardList').innerHTML = this.renderLeaderboardItems(tab);
+                    });
+                });
+            },
+
+            renderLeaderboardItems(type) {
+                let data = [];
+                switch(type) {
+                    case 'daily': data = Leaderboard.getDaily(); break;
+                    case 'weekly': data = Leaderboard.getWeekly(); break;
+                    case 'alltime': data = Leaderboard.getAllTime(); break;
+                }
+                
+                if (data.length === 0) {
+                    return '<div style="text-align:center;padding:20px;color:var(--text-secondary);">暂无数据</div>';
+                }
+
+                return data.map((item, index) => `
+                    <div class="leaderboard-item">
+                        <div class="leaderboard-rank">
+                            ${index < 3 ? ['🥇','🥈','🥉'][index] : (index + 1)}
+                        </div>
+                        <div class="leaderboard-name">${item.name}</div>
+                        <div class="leaderboard-score">${item.score.toLocaleString()}</div>
+                    </div>
+                `).join('');
+            },
+
+            showAchievementsPanel() {
+                const rank = LevelSystem.getCurrentRank();
+                const nextRank = LevelSystem.getNextRank();
+                const progress = LevelSystem.getProgress();
+
+                const content = `
+                    <div class="modal-title">🏆 成就殿堂</div>
+                    <div class="modal-body">
+                        <div class="rank-display">
+                            <div class="rank-icon">${rank.icon}</div>
+                            <div class="rank-name">${rank.name}</div>
+                            <div class="rank-progress">
+                                累计分数: ${LevelSystem.totalScore.toLocaleString()}
+                                ${nextRank ? ` | 距离${nextRank.name}还需: ${(nextRank.minScore - LevelSystem.totalScore).toLocaleString()}` : ' | 已达最高段位'}
+                            </div>
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: ${progress}%"></div>
+                            </div>
+                        </div>
+                        ${this.renderAchievements()}
+                    </div>
+                `;
+                this.showModal(content);
+            },
+
+            renderAchievements() {
+                const achievements = AchievementSystem.getAll();
+                const categories = {
+                    basic: '基础成就',
+                    challenge: '挑战成就',
+                    special: '特殊成就',
+                    hidden: '隐藏成就'
+                };
+
+                let html = '';
+                for (const cat in categories) {
+                    const items = achievements.filter(a => a.type === cat);
+                    if (items.length === 0) continue;
+                    
+                    html += `
+                        <div class="achievement-section">
+                            <div class="section-title">${categories[cat]}</div>
+                            <div class="achievement-list">
+                                ${items.map(a => `
+                                    <div class="achievement-item ${a.unlocked ? '' : 'locked'}">
+                                        <div class="achievement-icon">${a.icon}</div>
+                                        <div class="achievement-info">
+                                            <div class="achievement-name">${a.name}</div>
+                                            <div class="achievement-desc">${a.desc}</div>
+                                        </div>
+                                        <div class="achievement-status">${a.unlocked ? '✓' : '🔒'}</div>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                    `;
+                }
+                return html;
+            },
+
+            showTasksPanel() {
+                const tasks = TaskSystem.getTasks();
+                const content = `
+                    <div class="modal-title">📋 每日任务</div>
+                    <div class="modal-body">
+                        ${tasks.map(task => `
+                            <div class="task-item">
+                                <div class="task-icon">${task.completed ? '✅' : '🎯'}</div>
+                                <div class="task-info">
+                                    <div class="task-name">${task.name}</div>
+                                    <div class="task-progress">
+                                        ${task.progress}/${task.target}
+                                        <div class="progress-bar" style="margin-top:5px;">
+                                            <div class="progress-fill" style="width: ${Math.min(100, task.progress/task.target*100)}%"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="task-reward">${task.reward}</div>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+                this.showModal(content);
+            },
+
+            showSharePanel() {
+                const message = SocialShare.generateMessage(
+                    GameCore.bestScore,
+                    GameCore.maxTile,
+                    LevelSystem.gamesPlayed,
+                    LevelSystem.getCurrentRank().name
+                );
+
+                const content = `
+                    <div class="modal-title">📤 分享成绩</div>
+                    <div class="modal-body">
+                        <div class="share-card-preview">
+                            <div style="font-size: 1rem; color: var(--text-secondary);">我的最高分</div>
+                            <div class="share-score">${GameCore.bestScore.toLocaleString()}</div>
+                            <div class="share-info">
+                                最高方块: ${GameCore.maxTile} | 段位: ${LevelSystem.getCurrentRank().name}
+                            </div>
+                        </div>
+                        <div class="share-message">${message}</div>
+                        <div class="share-buttons">
+                            <button class="btn btn-primary" onclick="SocialShare.share('wechat')">微信</button>
+                            <button class="btn btn-secondary" onclick="SocialShare.share('weibo')">微博</button>
+                            <button class="btn btn-secondary" onclick="SocialShare.share('qq')">QQ</button>
+                            <button class="btn btn-secondary" onclick="SocialShare.share('copy')">复制</button>
+                        </div>
+                    </div>
+                `;
+                this.showModal(content);
+            },
+
+            showProfilePanel() {
+                const content = `
+                    <div class="modal-title">👤 我的信息</div>
+                    <div class="modal-body">
+                        <div class="rank-display">
+                            <div class="rank-icon">${LevelSystem.getCurrentRank().icon}</div>
+                            <div class="rank-name">${LevelSystem.getCurrentRank().name}</div>
+                        </div>
+                        <div class="settings-item">
+                            <span class="settings-label">游戏局数</span>
+                            <span style="color: var(--accent-color); font-weight: 700;">${LevelSystem.gamesPlayed}</span>
+                        </div>
+                        <div class="settings-item">
+                            <span class="settings-label">累计分数</span>
+                            <span style="color: var(--accent-color); font-weight: 700;">${LevelSystem.totalScore.toLocaleString()}</span>
+                        </div>
+                        <div class="settings-item">
+                            <span class="settings-label">最高分</span>
+                            <span style="color: var(--accent-color); font-weight: 700;">${GameCore.bestScore.toLocaleString()}</span>
+                        </div>
+                        <div class="settings-item">
+                            <span class="settings-label">成就解锁</span>
+                            <span style="color: var(--accent-color); font-weight: 700;">${AchievementSystem.getUnlockedCount()}/${Object.keys(AchievementSystem.definitions).length}</span>
+                        </div>
+                    </div>
+                `;
+                this.showModal(content);
+            },
+
+            showModal(content) {
+                document.getElementById('modalContent').innerHTML = content;
+                document.getElementById('modalOverlay').classList.add('active');
+            },
+
+            closeModal() {
+                document.getElementById('modalOverlay').classList.remove('active');
+            },
+
+            closeGameOver() {
+                document.getElementById('gameOverOverlay').classList.remove('active');
+            },
+
+            updateSettingsUI() {
+                // 更新UI状态
+            }
+        };
+
+        // ==================== 输入控制 ====================
+        const InputController = {
+            touchStartX: 0,
+            touchStartY: 0,
+            touchEndX: 0,
+            touchEndY: 0,
+
+            init() {
+                this.bindKeyboard();
+                this.bindTouch();
+            },
+
+            bindKeyboard() {
+                document.addEventListener('keydown', (e) => {
+                    const keyMap = {
+                        ArrowUp: 'up',
+                        ArrowDown: 'down',
+                        ArrowLeft: 'left',
+                        ArrowRight: 'right',
+                        w: 'up',
+                        s: 'down',
+                        a: 'left',
+                        d: 'right'
+                    };
+
+                    if (keyMap[e.key]) {
+                        e.preventDefault();
+                        GameCore.move(keyMap[e.key]);
+                    }
+                });
+            },
+
+            bindTouch() {
+                const gameGrid = document.getElementById('gameGrid');
+
+                gameGrid.addEventListener('touchstart', (e) => {
+                    this.touchStartX = e.touches[0].clientX;
+                    this.touchStartY = e.touches[0].clientY;
+                }, { passive: true });
+
+                gameGrid.addEventListener('touchmove', (e) => {
+                    e.preventDefault();
+                }, { passive: false });
+
+                gameGrid.addEventListener('touchend', (e) => {
+                    this.touchEndX = e.changedTouches[0].clientX;
+                    this.touchEndY = e.changedTouches[0].clientY;
+                    this.handleSwipe();
+                }, { passive: true });
+
+                // 鼠标拖拽支持
+                let mouseDown = false;
+                gameGrid.addEventListener('mousedown', (e) => {
+                    mouseDown = true;
+                    this.touchStartX = e.clientX;
+                    this.touchStartY = e.clientY;
+                });
+
+                document.addEventListener('mouseup', (e) => {
+                    if (mouseDown) {
+                        mouseDown = false;
+                        this.touchEndX = e.clientX;
+                        this.touchEndY = e.clientY;
+                        this.handleSwipe();
+                    }
+                });
+            },
+
+            handleSwipe() {
+                const deltaX = this.touchEndX - this.touchStartX;
+                const deltaY = this.touchEndY - this.touchStartY;
+                const minSwipe = 30;
+
+                if (Math.abs(deltaX) < minSwipe && Math.abs(deltaY) < minSwipe) {
+                    return;
+                }
+
+                if (Math.abs(deltaX) > Math.abs(deltaY)) {
+                    GameCore.move(deltaX > 0 ? 'right' : 'left');
+                } else {
+                    GameCore.move(deltaY > 0 ? 'down' : 'up');
+                }
+            }
+        };
+
+        // ==================== Toast提示 ====================
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.classList.add('active');
+            setTimeout(() => {
+                toast.classList.remove('active');
+            }, 2000);
+        }
+
+        // ==================== 初始化 ====================
+        function init() {
+            // 初始化各模块
+            AudioManager.init();
+            GameSettings.init();
+            LevelSystem.init();
+            AchievementSystem.init();
+            Leaderboard.init();
+            TaskSystem.init();
+            PowerupSystem.init();
+            Renderer.init();
+            UI.init();
+            InputController.init();
+            
+            // 等待渲染完成后初始化游戏
+            requestAnimationFrame(() => {
+                GameCore.init();
+                TutorialSystem.init();
+                SocialShare.checkChallengeLink();
+            });
+        }
+
+        // 启动
+        init();
+    </script>
+<!-- 管理员功能 -->
+    <div id="adminPanel" style="position: fixed; bottom: 10px; right: 10px; display: none;">
+        <button onclick="Leaderboard.clearAllPlayerData()" style="background: #ff4444; color: white; border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer;">
+            🧹 清零所有数据
+        </button>
+    </div>
+</html>
