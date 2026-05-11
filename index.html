@@ -4333,7 +4333,7 @@
             },
             
             // 提交游戏记录
-            async submitGame(score, moves, maxTile, gameMode, playTime) {
+            async submitGame(score, moves, maxTile, gameMode, playTime, gameSessionId) {
                 if (!this.isLoggedIn) return;
                 try {
                     await fetch(`${this.baseUrl}/game/record`, {
@@ -4344,8 +4344,9 @@
                             score: score,
                             moves: moves,
                             maxTile: maxTile,
-                            mode: gameMode,  // 注意：后端接收mode字段
-                            duration: playTime
+                            mode: gameMode,
+                            duration: playTime,
+                            gameSessionId: gameSessionId  // 传递会话ID，后端用于去重
                         })
                     });
                     console.log('游戏记录已提交');
@@ -4425,6 +4426,7 @@
             history: [],
             tileIdCounter: 0,
             gameStartTime: null,
+            gameSessionId: null,  // 游戏会话ID，使用道具继续后保持不变
 
             // 初始化游戏
             init() {
@@ -4448,6 +4450,8 @@
                 this.history = [];
                 this.tileIdCounter = 0;
                 this.gameStartTime = Date.now();
+                // 生成唯一游戏会话ID
+                this.gameSessionId = `game-${API.userId}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
                 this.milestone512 = false;
                 this.milestone1024 = false;
                 this.milestone2048 = false;
@@ -4469,6 +4473,7 @@
                     won: this.won,
                     tileIdCounter: this.tileIdCounter,
                     gameStartTime: this.gameStartTime,
+                    gameSessionId: this.gameSessionId,  // 保存会话ID
                     mode: GameModeManager.currentMode,
                     timestamp: Date.now()
                 };
@@ -4496,6 +4501,7 @@
                     this.won = state.won;
                     this.tileIdCounter = state.tileIdCounter;
                     this.gameStartTime = state.gameStartTime;
+                    this.gameSessionId = state.gameSessionId;  // 恢复会话ID
                     
                     document.getElementById('bestScore').textContent = this.bestScore;
                     this.updateDisplay();
@@ -5074,7 +5080,7 @@ if (next && this.grid[next.row] && this.grid[next.row][next.col] && this.grid[ne
                 const playTime = this.gameStartTime ? Math.floor((Date.now() - this.gameStartTime) / 1000) : 0;
                 
                 // 🔗 提交游戏记录到API
-                API.submitGame(this.score, this.moveCount, this.maxTile, GameModeManager.currentMode, playTime);
+                API.submitGame(this.score, this.moveCount, this.maxTile, GameModeManager.currentMode, playTime, this.gameSessionId);
                 
                 // 更新排行榜
                 Leaderboard.addScore(this.score, GameModeManager.currentMode, this.maxTile);
