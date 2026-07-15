@@ -4801,6 +4801,7 @@
                         })
                     });
                     console.log('游戏记录已提交');
+                    if (typeof TaskSystem !== 'undefined') TaskSystem.refreshServerTasks();
                 } catch (e) {
                     console.log('提交记录失败:', e.message);
                 }
@@ -4841,6 +4842,11 @@
                 } catch (e) {
                     return { items: {} };
                 }
+            },
+
+            async getUserTasks() {
+                if (!this.isLoggedIn) return { tasks: [], persistence: 'local' };
+                return this.request(`/tasks/user/${this.userId}`);
             },
             
             // 使用道具
@@ -6785,6 +6791,9 @@ if (next && this.grid[next.row] && this.grid[next.row][next.col] && this.grid[ne
             tasks: [],
             completedTasks: [],
             lastReset: null,
+            serverTasks: [],
+            serverAvailable: false,
+            serverError: '',
 
             storageKey: '2048-tasks',
 
@@ -6811,11 +6820,44 @@ if (next && this.grid[next.row] && this.grid[next.row][next.col] && this.grid[ne
                 this.load();
                 this.checkReset();
                 this.updateDailyProgressUI();
+                if (API.isLoggedIn) this.refreshServerTasks();
+            },
+
+            async refreshServerTasks() {
+                if (!API.isLoggedIn) {
+                    this.serverAvailable = false;
+                    return false;
+                }
+                try {
+                    const data = await API.getUserTasks();
+                    this.serverTasks = (data.tasks || []).map(task => ({
+                        id: `server-${task.code}`,
+                        name: String(task.name || '未命名任务'),
+                        description: String(task.description || ''),
+                        target: Math.max(1, Number(task.target_value) || 1),
+                        progress: Math.max(0, Number(task.progress) || 0),
+                        completed: Number(task.completed) === 1,
+                        reward: '仅记录进度',
+                        type: task.target_type,
+                        source: 'server'
+                    }));
+                    this.serverAvailable = data.persistence === 'database';
+                    this.serverError = '';
+                    this.updateDailyProgressUI();
+                    return this.serverAvailable;
+                } catch (error) {
+                    this.serverAvailable = false;
+                    this.serverError = error.message || '服务端任务不可用';
+                    return false;
+                }
             },
 
             updateDailyProgressUI() {
                 // 找到第一个未完成任务
-                const incompleteTasks = this.tasks.filter(t => !this.completedTasks.includes(t.id));
+                const activeTasks = this.serverAvailable
+                    ? this.serverTasks
+                    : this.tasks.map(task => ({ ...task, completed: this.completedTasks.includes(task.id) }));
+                const incompleteTasks = activeTasks.filter(task => !task.completed);
                 
                 const progressEl = document.getElementById('dailyProgress');
                 const iconEl = document.getElementById('dailyTaskIcon');
@@ -6832,7 +6874,7 @@ if (next && this.grid[next.row] && this.grid[next.row][next.col] && this.grid[ne
                     iconEl.innerHTML = Icon.render('check');
                     nameEl.textContent = '今日任务全部完成';
                     fillEl.style.width = '100%';
-                    countEl.textContent = `${this.completedTasks.length}/${this.tasks.length}`;
+                    countEl.textContent = `${activeTasks.filter(task => task.completed).length}/${activeTasks.length}`;
                     rewardEl.textContent = '今日已记录';
                     return;
                 }
@@ -7063,6 +7105,7 @@ if (next && this.grid[next.row] && this.grid[next.row][next.col] && this.grid[ne
         },
 
             getTasks() {
+                if (this.serverAvailable) return this.serverTasks;
                 return this.tasks.map(t => ({
                     ...t,
                     completed: this.completedTasks.includes(t.id)
@@ -8759,17 +8802,23 @@ showLeaderboardPanel() {
                 return html;
             },
 
-            showTasksPanel() {
+            async showTasksPanel() {
+                if (API.isLoggedIn) await TaskSystem.refreshServerTasks();
                 const tasks = TaskSystem.getTasks();
+                const taskNote = TaskSystem.serverAvailable
+                    ? '任务配置和今日进度来自本地 V2 测试数据库。对局结束后服务端会更新进度；任务奖励领取尚未实现。'
+                    : API.isGuest
+                        ? '游客目标只保存在本机并于次日重置；登录后可使用服务端持久化任务。'
+                        : `服务端任务暂不可用，当前显示本机目标。${TaskSystem.serverError ? `原因：${escapeHTML(TaskSystem.serverError)}` : ''}`;
                 const content = `
                     <div class="modal-title">${Icon.render('tasks')} 今日目标</div>
                     <div class="modal-body">
-                        <div class="panel-note" style="margin-bottom:12px;">每日目标仅在本机记录并于次日重置。服务端尚无任务进度与领奖契约，因此本轮不伪造道具奖励；成长和高阶目标请在“成就”中查看。</div>
+                        <div class="panel-note" style="margin-bottom:12px;">${taskNote}</div>
                         ${tasks.map(task => `
                             <div class="task-item">
                                 <div class="task-icon">${task.completed ? Icon.render('check') : Icon.render('target')}</div>
                                 <div class="task-info">
-                                    <div class="task-name">${task.name}</div>
+                                    <div class="task-name">${escapeHTML(task.name)}</div>
                                     <div class="task-progress">
                                         ${task.progress}/${task.target}
                                         <div class="progress-bar" style="margin-top:5px;">
@@ -8777,7 +8826,7 @@ showLeaderboardPanel() {
                                         </div>
                                     </div>
                                 </div>
-                                <div class="task-reward">${task.completed ? '已记录' : task.reward}</div>
+                                <div class="task-reward">${task.completed ? '已记录' : escapeHTML(task.reward)}</div>
                             </div>
                         `).join('')}
                     </div>

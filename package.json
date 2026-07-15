@@ -7,8 +7,9 @@
     "test": "tests"
   },
   "scripts": {
+    "local:v2": "node tools/local-v2-server.js",
     "test": "npm run test:static && npm run test:browser",
-    "test:static": "node tests/static-check.js",
+    "test:static": "node --check tools/local-v2-server.js && node tests/static-check.js",
     "test:browser": "node tests/acceptance.js"
   },
   "keywords": [],

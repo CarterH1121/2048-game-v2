@@ -21,6 +21,16 @@ npm test
 - `npm run test:browser`：真实 Chrome 中验证登录/游客、四方向移动合并、胜负、道具、主要面板、刷新恢复、离线缓存、横竖屏和指定移动端尺寸。
 - 浏览器截图写入 `output/playwright/acceptance/`，该目录不纳入 Git。
 
+## 本地 V2.0 全链路
+
+先按 `2048-admin/docs/LOCAL_V2.md` 启动隔离 MySQL 和候选后端，再运行：
+
+```powershell
+npm run local:v2
+```
+
+打开 `http://127.0.0.1:8082/`。该本地服务器只把同源 `/api` 请求代理到 `127.0.0.1:3001`，不会请求生产环境。
+
 ## 关键文件
 
 - `index.html`：玩家端真实主版本。

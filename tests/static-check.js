@@ -51,7 +51,9 @@ assert.match(html, /if \(!await API\.useItem\('undo'\)\) return false/, 'account
 assert.match(html, /if \(!await API\.useItem\('bomb'\)\) return false/, 'account item use must be confirmed before applying destructive board effects');
 assert.match(html, /supportedThemes: \['classic', 'neon', 'sakura', 'tech', 'nature', 'minimal'\]/, 'all supported themes must share one validated boundary');
 assert.match(html, /getComputedStyle\(document\.body\)\.getPropertyValue\(token\)/, 'tile rendering must consume theme tokens instead of a second hard-coded palette');
-assert.ok(html.includes('服务端尚无任务进度与领奖契约'), 'task UI must disclose its local-only capability boundary');
+assert.ok(html.includes('/tasks/user/${this.userId}'), 'logged-in task UI must consume the persisted server contract');
+assert.ok(html.includes('任务奖励领取尚未实现'), 'task UI must disclose the remaining reward boundary');
+assert.ok(html.includes('游客目标只保存在本机'), 'guest task UI must disclose its local-only boundary');
 assert.ok(html.includes("(t/10000) + '万'"), 'challenge target labels must convert scores to ten-thousands correctly');
 assert.ok(html.includes('targetScore: 10000'), 'challenge mode must have a valid default target before the first selection');
 assert.ok(html.includes("window.addEventListener('resize', this.resizeHandler"), 'renderer must recalculate tile geometry after viewport changes');
