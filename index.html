@@ -8461,19 +8461,14 @@ showLeaderboardPanel() {
                             </div>
                         </div>
                         
-                        <!-- 游戏模式切换 -->
-                        <div class="mode-tabs" style="display:flex;gap:6px;margin-bottom:12px;">
-                            <button class="mode-btn active" data-mode="classic" style="flex:1;padding:6px 8px;background:rgba(99,102,241,0.2);border:1px solid rgba(99,102,241,0.3);border-radius:6px;color:#818cf8;cursor:pointer;font-size:12px;">🎯 经典</button>
-                            <button class="mode-btn" data-mode="challenge" style="flex:1;padding:6px 8px;background:var(--glass-bg);border:1px solid var(--glass-border);border-radius:6px;color:var(--text-secondary);cursor:pointer;font-size:12px;">🏆 挑战</button>
-                            <button class="mode-btn" data-mode="timed" style="flex:1;padding:6px 8px;background:var(--glass-bg);border:1px solid var(--glass-border);border-radius:6px;color:var(--text-secondary);cursor:pointer;font-size:12px;">⏱️ 限时</button>
-                            <button class="mode-btn" data-mode="extreme" style="flex:1;padding:6px 8px;background:var(--glass-bg);border:1px solid var(--glass-border);border-radius:6px;color:var(--text-secondary);cursor:pointer;font-size:12px;">💀 极限</button>
+                        <div class="leaderboard-scope-note" style="padding:10px 12px;margin-bottom:12px;border:1px solid rgba(99,102,241,0.3);border-radius:8px;background:rgba(99,102,241,0.1);color:var(--text-secondary);font-size:12px;line-height:1.5;">
+                            当前后端仅提供不分模式、不分日期的全球总榜；每日排行和模式排行暂不展示。
                         </div>
                         
                         <!-- 标签切换 -->
                         <div class="tab-buttons" style="display:flex;gap:8px;margin-bottom:12px;">
-                            <button class="tab-btn active" data-tab="global" style="flex:1;padding:8px;background:var(--brand-primary);border:1px solid var(--brand-primary);border-radius:8px;color:white;cursor:pointer;">🌍 全球榜</button>
-                            <button class="tab-btn" data-tab="daily" style="flex:1;padding:8px;background:var(--glass-bg);border:1px solid var(--glass-border);border-radius:8px;color:var(--text-primary);cursor:pointer;">📅 今日</button>
-                            <button class="tab-btn" data-tab="local" style="flex:1;padding:8px;background:var(--glass-bg);border:1px solid var(--glass-border);border-radius:8px;color:var(--text-primary);cursor:pointer;">👤 我的</button>
+                            <button class="tab-btn active" data-tab="global" style="flex:1;padding:8px;background:var(--brand-primary);border:1px solid var(--brand-primary);border-radius:8px;color:white;cursor:pointer;">🌍 全球总榜</button>
+                            <button class="tab-btn" data-tab="local" style="flex:1;padding:8px;background:var(--glass-bg);border:1px solid var(--glass-border);border-radius:8px;color:var(--text-primary);cursor:pointer;">👤 本机记录</button>
                         </div>
                         
                         <!-- 排行榜列表 -->
@@ -8485,27 +8480,7 @@ showLeaderboardPanel() {
                 this.showModal(content);
 
                 // 初始加载
-                this.currentLeaderboardMode = 'classic';
                 this.loadLeaderboardTab('global');
-
-                // 模式切换
-                document.querySelectorAll('.mode-btn').forEach(btn => {
-                    btn.addEventListener('click', (e) => {
-                        document.querySelectorAll('.mode-btn').forEach(b => {
-                            b.classList.remove('active');
-                            b.style.background = 'var(--glass-bg)';
-                            b.style.borderColor = 'var(--glass-border)';
-                            b.style.color = 'var(--text-secondary)';
-                        });
-                        e.target.classList.add('active');
-                        e.target.style.background = 'rgba(99,102,241,0.2)';
-                        e.target.style.borderColor = 'rgba(99,102,241,0.3)';
-                        e.target.style.color = '#818cf8';
-                        this.currentLeaderboardMode = e.target.dataset.mode;
-                        const activeTab = document.querySelector('.tab-btn.active').dataset.tab;
-                        this.loadLeaderboardTab(activeTab);
-                    });
-                });
 
                 // 标签切换
                 document.querySelectorAll('.tab-btn').forEach(btn => {
@@ -8528,21 +8503,19 @@ showLeaderboardPanel() {
 
             async loadLeaderboardTab(tab) {
                 const listEl = document.getElementById('leaderboardList');
-                const mode = this.currentLeaderboardMode || 'classic';
-                
-                if (tab === 'global' || tab === 'daily') {
-                    // 从API获取全球排行榜（带模式参数）
+
+                if (tab === 'global') {
+                    // 单体后端当前只提供不分模式和日期的全球总榜。
                     try {
-                        const data = await API.request(`/leaderboard/global?mode=${encodeURIComponent(mode)}&limit=20`);
+                        const data = await API.request('/leaderboard/global?limit=20');
                         
                         if (data.leaderboard && data.leaderboard.length > 0) {
                             listEl.innerHTML = this.renderGlobalLeaderboard(data.leaderboard);
                         } else {
-                            const modeNames = {classic:'经典',challenge:'挑战',timed:'限时',extreme:'极限'};
-                            listEl.innerHTML = `<div style="text-align:center;padding:40px;color:var(--text-secondary);"><div style="font-size:3rem;">🏆</div><div>${modeNames[mode]}模式暂无记录</div></div>`;
+                            listEl.innerHTML = '<div style="text-align:center;padding:40px;color:var(--text-secondary);"><div style="font-size:3rem;">🏆</div><div>全球总榜暂无记录</div></div>';
                         }
                     } catch (e) {
-                        listEl.innerHTML = Leaderboard.render('alltime');
+                        listEl.innerHTML = '<div style="text-align:center;padding:40px;color:var(--text-secondary);"><div style="font-size:3rem;">📡</div><div>全球总榜加载失败，请稍后重试</div></div>';
                     }
                 } else {
                     // 本地排行榜

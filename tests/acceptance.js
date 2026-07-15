@@ -297,6 +297,9 @@ async function main() {
         }
 
         await page.click('button[data-panel="leaderboard"]');
+        assert.ok(await page.$eval('.leaderboard-scope-note', (el) => el.textContent.includes('不分模式、不分日期')), 'leaderboard should disclose its actual global-only scope');
+        assert.equal(await page.$('.mode-btn'), null, 'unsupported mode leaderboard controls should be absent');
+        assert.equal(await page.$('[data-tab="daily"]'), null, 'unsupported daily leaderboard should be absent');
         await page.waitForFunction(() => document.getElementById('leaderboardList').textContent.includes('<img'));
         assert.equal(await page.$('#leaderboardList img'), null, 'leaderboard data should be rendered as text, not executable HTML');
         await closeModal(page);
@@ -387,9 +390,17 @@ async function main() {
         console.log('acceptance: refresh restore passed');
 
         await page.waitForFunction(async () => Boolean((await navigator.serviceWorker.getRegistration())?.active));
+        await page.evaluate(async () => {
+            const registrations = await navigator.serviceWorker.getRegistrations();
+            await Promise.all(registrations.map((registration) => registration.unregister()));
+            await caches.open('2048-v2-cache-stale-contract-test');
+        });
+        await page.reload({ waitUntil: 'domcontentloaded' });
+        await page.waitForFunction(async () => Boolean((await navigator.serviceWorker.getRegistration())?.active));
         await page.reload({ waitUntil: 'domcontentloaded' });
         await page.waitForFunction(() => Boolean(navigator.serviceWorker.controller));
         const cacheNames = await page.evaluate(() => caches.keys());
+        assert.ok(!cacheNames.includes('2048-v2-cache-stale-contract-test'), 'service worker activation should delete stale caches');
         assert.ok(cacheNames.some((name) => /^2048-v2-cache-\d{8}-\d+$/.test(name)), 'versioned app-shell cache should be installed');
         await page.setOfflineMode(true);
         await page.reload({ waitUntil: 'domcontentloaded' });

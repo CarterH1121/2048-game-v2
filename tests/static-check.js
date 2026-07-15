@@ -32,6 +32,11 @@ assert.ok(html.includes('viewport-fit=cover'), 'safe-area viewport support is re
 assert.ok(html.includes('env(safe-area-inset-bottom)'), 'bottom safe-area support is required');
 assert.ok(!html.includes('http://49.232.149.209:3001'), 'runtime code must not hard-code the production API host');
 assert.ok(!/PASSWORD\s*=|sshpass\s+-p/.test(deploy), 'deploy.sh must not contain or consume a plaintext password');
+assert.match(deploy, /index\.html[\s\S]*sw\.js|sw\.js[\s\S]*index\.html/, 'deploy.sh must publish index.html and sw.js as one release unit');
+assert.match(deploy, /rollback_release/, 'deploy.sh must implement paired rollback');
+assert.ok(!html.includes('data-tab="daily"'), 'daily leaderboard must not be shown without a backend contract');
+assert.ok(!html.includes('class="mode-btn'), 'mode leaderboard controls must not be shown while the backend ignores mode');
+assert.ok(!/leaderboard\/global\?mode=/.test(html), 'leaderboard requests must not send an ignored mode filter');
 assert.match(sw, /network-first/i, 'service worker should document its navigation update strategy');
 assert.match(sw, /2048-v2-cache-\d{8}-\d+/, 'service worker cache must have an explicit release version');
 
