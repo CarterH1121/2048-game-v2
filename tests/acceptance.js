@@ -6,6 +6,7 @@ const puppeteer = require('puppeteer');
 
 const root = path.resolve(__dirname, '..');
 const outputDir = path.join(root, 'output', 'playwright', 'acceptance');
+const apiRequests = [];
 const mimeTypes = {
     '.html': 'text/html; charset=utf-8',
     '.js': 'application/javascript; charset=utf-8',
@@ -39,7 +40,17 @@ function handleApi(req, res, pathname) {
 function createServer() {
     return http.createServer((req, res) => {
         const url = new URL(req.url, 'http://127.0.0.1');
-        if (url.pathname.startsWith('/api/')) return handleApi(req, res, url.pathname);
+        if (url.pathname.startsWith('/api/')) {
+            let rawBody = '';
+            req.on('data', (chunk) => { rawBody += chunk; });
+            req.on('end', () => {
+                let body = null;
+                try { body = rawBody ? JSON.parse(rawBody) : null; } catch { body = rawBody; }
+                apiRequests.push({ method: req.method, pathname: url.pathname, body });
+                handleApi(req, res, url.pathname);
+            });
+            return;
+        }
 
         const relative = url.pathname === '/' ? 'index.html' : decodeURIComponent(url.pathname.slice(1));
         const file = path.resolve(root, relative);
@@ -75,6 +86,14 @@ async function configurePage(page) {
 
 async function closeModal(page) {
     await page.evaluate(() => document.getElementById('modalOverlay').click());
+}
+
+async function waitFor(predicate, timeout = 3000) {
+    const started = Date.now();
+    while (!predicate()) {
+        if (Date.now() - started > timeout) throw new Error('Timed out waiting for test-side condition');
+        await new Promise((resolve) => setTimeout(resolve, 25));
+    }
 }
 
 async function setGridAndMove(page, direction, cells) {
@@ -157,6 +176,14 @@ async function main() {
         }
         console.log('acceptance: four-direction movement passed');
 
+        const previousSession = await page.evaluate(() => eval('GameCore').gameSessionId);
+        await page.evaluate(() => { const game = eval('GameCore'); game.score = 4; game.updateDisplay(); });
+        await page.click('#newGameBtn');
+        await page.waitForFunction(() => document.getElementById('modalContent').textContent.includes('重新开始'));
+        await page.click('#modalContent button[onclick="UI.confirmAction()"]');
+        await page.waitForFunction((sessionId) => eval('GameCore').gameSessionId !== sessionId && document.querySelectorAll('.tile').length === 2, {}, previousSession);
+        assert.equal(await page.$eval('#currentScore', (el) => el.textContent), '0', 'new-game control should reset score');
+
         const board = await page.$('.grid-container');
         const box = await board.boundingBox();
         for (let i = 0; i < 12; i++) {
@@ -181,6 +208,34 @@ async function main() {
         await page.click('#shuffleBtn');
         assert.deepEqual(await page.evaluate(() => { const p = eval('PowerupSystem'); return [p.hint, p.shuffle]; }), [0, 0], 'hint and shuffle should consume one item');
 
+        await page.evaluate(() => {
+            const game = eval('GameCore');
+            const powerups = eval('PowerupSystem');
+            game.grid = Array.from({ length: 4 }, () => Array(4).fill(null));
+            game.grid[0][0] = { id: ++game.tileIdCounter, value: 2, row: 0, col: 0, isNew: false, mergedFrom: null };
+            game.grid[1][1] = { id: ++game.tileIdCounter, value: 4, row: 1, col: 1, isNew: false, mergedFrom: null };
+            game.gameOver = false;
+            game.updateDisplay();
+            powerups.bomb = 1;
+            powerups.updateDisplay();
+        });
+        await page.click('#bombBtn');
+        await page.click('.tile[data-row="0"][data-col="0"]');
+        assert.deepEqual(await page.evaluate(() => { const p = eval('PowerupSystem'); return [p.bomb, p.bombMode, eval('GameCore').grid[0][0]]; }), [0, false, null], 'bomb should delete the selected tile and consume one item');
+
+        await page.evaluate(() => {
+            const game = eval('GameCore');
+            const powerups = eval('PowerupSystem');
+            game.grid[0][0] = { id: ++game.tileIdCounter, value: 2, row: 0, col: 0, isNew: false, mergedFrom: null };
+            game.gameOver = false;
+            game.updateDisplay();
+            powerups.upgrade = 1;
+            powerups.updateDisplay();
+        });
+        await page.click('#upgradeBtn');
+        await page.click('.tile[data-row="0"][data-col="0"]');
+        assert.deepEqual(await page.evaluate(() => { const p = eval('PowerupSystem'); return [p.upgrade, p.upgradeMode, eval('GameCore').grid[0][0].value]; }), [0, false, 4], 'upgrade should double the selected tile and consume one item');
+
         await page.evaluate(() => { const p = eval('PowerupSystem'); p.double = 1; p.updateDisplay(); });
         await page.click('#doubleBtn');
         const doubled = await setGridAndMove(page, 'left', [[0, 0, 2], [0, 1, 2]]);
@@ -199,7 +254,15 @@ async function main() {
         });
         await page.waitForSelector('#gameOverOverlay.active');
         assert.equal(await page.$eval('#gameOverTitle', (el) => el.textContent), '恭喜通关!', '2048 merge should show victory state');
-        await page.click('#restartBtn');
+        if (await page.$eval('#achievementOverlay', (el) => el.classList.contains('active'))) {
+            await page.$eval('#achievementClose', (el) => el.click());
+        }
+        const wonSession = await page.evaluate(() => eval('GameCore').gameSessionId);
+        await page.$eval('#restartBtn', (el) => el.click());
+        await page.waitForFunction((sessionId) => {
+            const game = eval('GameCore');
+            return game.gameSessionId !== sessionId && game.score === 0 && !game.gameOver && document.querySelectorAll('.tile').length === 2;
+        }, {}, wonSession);
 
         await page.evaluate(() => {
             const game = eval('GameCore');
@@ -212,6 +275,10 @@ async function main() {
         });
         await page.waitForSelector('#gameOverOverlay.active');
         assert.equal(await page.$eval('#gameOverTitle', (el) => el.textContent), '游戏结束!', 'blocked grid should show failure state');
+        await waitFor(() => apiRequests.some((request) => request.pathname === '/api/game/record'));
+        const recordRequest = apiRequests.findLast((request) => request.pathname === '/api/game/record');
+        assert.ok(recordRequest.body.gameSessionId, 'game record should include a session id for deduplication');
+        assert.equal(typeof recordRequest.body.score, 'number', 'game record should include a numeric score');
         await page.click('#restartBtn');
         console.log('acceptance: powerups and end states passed');
 
@@ -237,6 +304,20 @@ async function main() {
         await page.waitForFunction(() => document.getElementById('modalContent').textContent.includes('<script>'));
         assert.equal(await page.$('#modalContent img'), null, 'announcement data should be rendered as text, not executable HTML');
         await closeModal(page);
+
+        await page.click('#feedbackBtn');
+        await page.waitForFunction(() => document.getElementById('modalContent').textContent.includes('意见反馈'));
+        await closeModal(page);
+
+        for (const mode of ['classic', 'challenge', 'timed', 'extreme']) {
+            await page.click('#modeBtn');
+            await page.$eval(`.mode-option[data-mode="${mode}"]`, (el) => el.click());
+            await page.$eval('#modalContent button[onclick*="applyAndStart"]', (el) => el.click());
+            assert.equal(await page.evaluate(() => eval('GameModeManager').currentMode), mode, `${mode} mode should apply`);
+        }
+        await page.click('#modeBtn');
+        await page.$eval('.mode-option[data-mode="classic"]', (el) => el.click());
+        await page.$eval('#modalContent button[onclick*="applyAndStart"]', (el) => el.click());
 
         await page.click('#signinBtn');
         await page.waitForFunction(() => document.getElementById('modalContent').textContent.includes('每日签到'));

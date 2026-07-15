@@ -7696,6 +7696,7 @@ useUndo() {
                             () => {
                                 localStorage.removeItem('2048-game-state');
                                 GameCore.init();
+                                GameModeManager.resetForNewGame();
                                 this.closeGameOver();
                                 showToast('🎮 新游戏开始！');
                             }
@@ -7703,6 +7704,7 @@ useUndo() {
                     } else {
                         localStorage.removeItem('2048-game-state');
                         GameCore.init();
+                        GameModeManager.resetForNewGame();
                         this.closeGameOver();
                         showToast('🎮 新游戏开始！');
                     }
@@ -7809,7 +7811,9 @@ useUndo() {
                 // 游戏结束按钮
                 document.getElementById('restartBtn').addEventListener('click', () => {
                     this.closeGameOver();
+                    GameCore.clearGameState();
                     GameCore.init();
+                    GameModeManager.resetForNewGame();
                 });
                 
                 // 返回游戏按钮
@@ -9319,7 +9323,6 @@ showLeaderboardPanel() {
                     this.challengeWon = true;
                     showToast('🎉 挑战成功！目标已达成！');
                     Effects.celebrate();
-                    AchievementSystem.checkAchievement('challenge_complete');
                 }
             },
 
@@ -9390,7 +9393,6 @@ showLeaderboardPanel() {
                 
                 // 记录限时模式成绩
                 Leaderboard.addTimedScore(GameCore.score, this.timeLimit);
-                AchievementSystem.checkAchievement('timed_play');
             },
 
             // 重置游戏时调用
@@ -9539,6 +9541,7 @@ showLeaderboardPanel() {
             applyAndStart() {
                 this.saveMode();
                 this.updateDisplay();
+                GameCore.clearGameState();
                 GameCore.init();
                 this.resetForNewGame();
             }
