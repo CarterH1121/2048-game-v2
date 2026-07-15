@@ -390,6 +390,28 @@ async function main() {
         assert.equal(await page.evaluate(() => eval('GameModeManager').challengeWon), true, 'challenge mode should complete at its target score');
         assert.equal(await page.$eval('#targetProgressFill', (el) => el.style.width), '100%', 'challenge progress should reach 100%');
 
+        const timedBeforeRefresh = await page.evaluate(() => {
+            const mode = eval('GameModeManager');
+            const game = eval('GameCore');
+            mode.currentMode = 'timed';
+            mode.timeLimit = 12;
+            game.clearGameState();
+            game.init();
+            mode.resetForNewGame();
+            return { deadlineAt: mode.deadlineAt, remaining: mode.timeRemaining };
+        });
+        await new Promise((resolve) => setTimeout(resolve, 1200));
+        await page.reload({ waitUntil: 'domcontentloaded' });
+        await page.waitForFunction(() => document.querySelectorAll('.grid-cell').length === 16);
+        const timedAfterRefresh = await page.evaluate(() => ({
+            deadlineAt: eval('GameModeManager').deadlineAt,
+            remaining: eval('GameModeManager').timeRemaining,
+            savedDeadlineAt: JSON.parse(localStorage.getItem('2048-game-state')).timedDeadlineAt
+        }));
+        assert.equal(timedAfterRefresh.deadlineAt, timedBeforeRefresh.deadlineAt, 'timed refresh must preserve the absolute deadline');
+        assert.equal(timedAfterRefresh.savedDeadlineAt, timedBeforeRefresh.deadlineAt, 'timed deadline must persist in the saved game state');
+        assert.ok(timedAfterRefresh.remaining < timedBeforeRefresh.remaining && timedAfterRefresh.remaining > 0, 'timed refresh must subtract elapsed wall-clock time');
+
         await page.evaluate(() => {
             const mode = eval('GameModeManager');
             mode.currentMode = 'timed';
@@ -440,7 +462,7 @@ async function main() {
         assert.ok((await page.$eval('#modalContent', (el) => el.textContent)).includes('已连接'), 'settings should show account connection state');
         assert.equal(await page.$('#defaultModeSelect option[value="extreme"]'), null, 'settings should not offer an unimplemented default mode');
         assert.equal(await page.$('#syncDataBtn'), null, 'settings must not expose a fake full-progress sync action');
-        assert.ok((await page.$eval('#modalContent', (el) => el.textContent)).includes('没有完整进度云同步'), 'settings should disclose the actual persistence boundary');
+        assert.ok((await page.$eval('#modalContent', (el) => el.textContent)).includes('棋盘、设置、成就与主题仍保存在本机浏览器中'), 'settings should disclose the actual persistence boundary');
         await closeModal(page);
 
         const taskResult = await page.evaluate(() => {

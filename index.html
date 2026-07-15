@@ -4635,6 +4635,7 @@
             nickname: '玩家',  // 显示名称
             isLoggedIn: false,
             isGuest: false,
+            localAccountKey: '',
 
             async request(path, options = {}) {
                 const controller = new AbortController();
@@ -4664,16 +4665,38 @@
             },
             
             // 初始化 - 从本地恢复用户或显示注册界面
-            init() {
+            async init() {
                 const savedUserId = localStorage.getItem('api_userId');
                 const savedNickname = localStorage.getItem('user_nickname');
                 const savedMode = localStorage.getItem('api_user_mode');
+                const savedAccountKey = localStorage.getItem('local_v2_account_key') || '';
                 
                 if (savedUserId && savedNickname) {
                     this.isGuest = savedMode === 'guest';
                     this.userId = this.isGuest ? savedUserId : parseInt(savedUserId, 10);
                     this.nickname = savedNickname;
                     this.isLoggedIn = !this.isGuest && Number.isFinite(this.userId);
+                    this.localAccountKey = savedAccountKey;
+                    if (savedMode === 'account' && savedAccountKey) {
+                        try {
+                            const session = await this.request('/user/local-session', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ accountKey: savedAccountKey })
+                            });
+                            this.userId = Number(session.user.id);
+                            this.nickname = String(session.user.nickname);
+                            this.isLoggedIn = true;
+                            this.isGuest = false;
+                            localStorage.setItem('api_userId', String(this.userId));
+                            localStorage.setItem('user_nickname', this.nickname);
+                        } catch (error) {
+                            this.userId = localStorage.getItem('api_guest_origin_id') || `guest-recovery-${Date.now()}`;
+                            this.isLoggedIn = false;
+                            this.isGuest = true;
+                            console.log('本地测试账号会话恢复失败，保留本机游客数据:', error.message);
+                        }
+                    }
                     console.log(this.isGuest ? '恢复离线游客' : '恢复用户:', this.nickname);
                     return true;  // 用户已就绪
                 } else {
@@ -4769,6 +4792,7 @@
                     localStorage.setItem('api_userId', this.userId);
                     localStorage.setItem('user_nickname', name);
                     localStorage.setItem('api_user_mode', 'guest');
+                    localStorage.setItem('api_guest_origin_id', this.userId);
                 }
                 
                 // 关闭弹窗
@@ -4848,6 +4872,65 @@
                 if (!this.isLoggedIn) return { tasks: [], persistence: 'local' };
                 return this.request(`/tasks/user/${this.userId}`);
             },
+
+            buildGuestSnapshot() {
+                const games = (Leaderboard.scores?.alltime || []).slice(0, 50).map(entry => ({
+                    score: Math.max(0, Number(entry.score) || 0),
+                    maxTile: Math.max(0, Number(entry.maxTile) || 0),
+                    mode: entry.mode || 'classic',
+                    duration: Math.max(0, Number(entry.duration) || 0),
+                    moves: Math.max(0, Number(entry.moves) || 0)
+                }));
+                return {
+                    games,
+                    metrics: {
+                        games: Math.max(games.length, Number(Leaderboard.stats?.totalGames) || 0),
+                        score: Math.max(Number(Leaderboard.stats?.bestScore) || 0, ...games.map(game => game.score), 0),
+                        maxTile: Math.max(Number(Leaderboard.stats?.highestTile) || 0, ...games.map(game => game.maxTile), 0)
+                    }
+                };
+            },
+
+            async upgradeGuest(nickname) {
+                if (!this.isGuest) throw new Error('当前不是游客模式');
+                const migrationId = localStorage.getItem('guest_migration_id') || `migration-${crypto.randomUUID()}`;
+                const accountKey = localStorage.getItem('guest_upgrade_account_key') || crypto.randomUUID().replaceAll('-', '') + crypto.randomUUID().replaceAll('-', '');
+                localStorage.setItem('guest_migration_id', migrationId);
+                localStorage.setItem('guest_upgrade_account_key', accountKey);
+                const result = await this.request('/user/upgrade-guest', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        migrationId,
+                        guestId: this.userId,
+                        nickname,
+                        accountKey,
+                        snapshot: this.buildGuestSnapshot()
+                    })
+                });
+                localStorage.setItem('api_guest_origin_id', String(this.userId));
+                this.userId = Number(result.user.id);
+                this.nickname = String(result.user.nickname);
+                this.isLoggedIn = true;
+                this.isGuest = false;
+                this.localAccountKey = accountKey;
+                localStorage.setItem('api_userId', String(this.userId));
+                localStorage.setItem('user_nickname', this.nickname);
+                localStorage.setItem('api_user_mode', 'account');
+                localStorage.setItem('local_v2_account_key', accountKey);
+                localStorage.removeItem('guest_upgrade_account_key');
+                await Promise.all([PowerupSystem.syncFromAPI(), TaskSystem.refreshServerTasks()]);
+                return result;
+            },
+
+            async claimTask(taskId) {
+                if (!this.isLoggedIn) throw new Error('游客不能领取服务端任务奖励');
+                return this.request(`/tasks/${taskId}/claim`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ userId: this.userId })
+                });
+            },
             
             // 使用道具
             async useItem(itemType) {
@@ -4885,6 +4968,7 @@
             tileIdCounter: 0,
             gameStartTime: null,
             gameSessionId: null,  // 游戏会话ID，使用道具继续后保持不变
+            restoredGame: false,
 
             // 初始化游戏
             init() {
@@ -4892,6 +4976,7 @@
                 
                 // 尝试恢复之前的游戏状态
                 if (GameSettings.autoSave && this.loadGameState()) {
+                    this.restoredGame = true;
                     console.log('恢复游戏进度');
                     return;
                 }
@@ -4910,6 +4995,7 @@
                 this.gameStartTime = Date.now();
                 // 生成唯一游戏会话ID
                 this.gameSessionId = `game-${API.userId}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+                this.restoredGame = false;
                 this.milestone512 = false;
                 this.milestone1024 = false;
                 this.milestone2048 = false;
@@ -4933,6 +5019,8 @@
                     gameStartTime: this.gameStartTime,
                     gameSessionId: this.gameSessionId,  // 保存会话ID
                     mode: GameModeManager.currentMode,
+                    timedDeadlineAt: GameModeManager.deadlineAt,
+                    timedEnded: GameModeManager.timedEnded,
                     timestamp: Date.now()
                 };
                 localStorage.setItem('2048-game-state', JSON.stringify(state));
@@ -4945,8 +5033,9 @@
                 
                 try {
                     const state = JSON.parse(saved);
-                    // 超过1小时不恢复
-                    if (Date.now() - state.timestamp > 3600000) {
+                    // 普通局超过 1 小时不恢复；限时局必须按绝对截止时间恢复并结算，不能重新给满时长。
+                    const timedState = state.mode === 'timed' && Number.isFinite(Number(state.timedDeadlineAt));
+                    if (Date.now() - state.timestamp > 3600000 && !timedState) {
                         localStorage.removeItem('2048-game-state');
                         return false;
                     }
@@ -4964,6 +5053,8 @@
                     if (state.mode) {
                         GameModeManager.currentMode = GameModeManager.normalizeMode(state.mode);
                     }
+                    GameModeManager.deadlineAt = Number(state.timedDeadlineAt) || null;
+                    GameModeManager.timedEnded = Boolean(state.timedEnded);
                     document.getElementById('bestScore').textContent = this.bestScore;
                     this.updateDisplay();
                     GameModeManager.updateDisplay();
@@ -6831,13 +6922,19 @@ if (next && this.grid[next.row] && this.grid[next.row][next.col] && this.grid[ne
                 try {
                     const data = await API.getUserTasks();
                     this.serverTasks = (data.tasks || []).map(task => ({
-                        id: `server-${task.code}`,
+                        id: Number(task.id),
+                        code: String(task.code || ''),
                         name: String(task.name || '未命名任务'),
                         description: String(task.description || ''),
                         target: Math.max(1, Number(task.target_value) || 1),
                         progress: Math.max(0, Number(task.progress) || 0),
                         completed: Number(task.completed) === 1,
-                        reward: '仅记录进度',
+                        claimed: Number(task.claimed) === 1,
+                        rewardItem: String(task.reward_item || ''),
+                        rewardCount: Math.max(0, Number(task.reward_count) || 0),
+                        reward: task.reward_item && Number(task.reward_count) > 0
+                            ? `${PowerupSystem.getItemName(String(task.reward_item))} ×${Number(task.reward_count)}`
+                            : '奖励未配置',
                         type: task.target_type,
                         source: 'server'
                     }));
@@ -6875,7 +6972,7 @@ if (next && this.grid[next.row] && this.grid[next.row][next.col] && this.grid[ne
                     nameEl.textContent = '今日任务全部完成';
                     fillEl.style.width = '100%';
                     countEl.textContent = `${activeTasks.filter(task => task.completed).length}/${activeTasks.length}`;
-                    rewardEl.textContent = '今日已记录';
+                    rewardEl.textContent = activeTasks.every(task => !task.source || task.claimed) ? '今日奖励已领取' : '有奖励待领取';
                     return;
                 }
                 
@@ -7128,6 +7225,10 @@ if (next && this.grid[next.row] && this.grid[next.row][next.col] && this.grid[ne
             bombMode: false,     // 炸弹选择模式
 
             storageKey: '2048-powerups',
+
+            getItemName(itemType) {
+                return ({ undo: '撤销', hint: '提示', shuffle: '洗牌', bomb: '炸弹', upgrade: '升级', double: '翻倍' })[itemType] || itemType || '道具';
+            },
 
             init() {
                 this.load();
@@ -8274,6 +8375,45 @@ if (next && this.grid[next.row] && this.grid[next.row][next.col] && this.grid[ne
             },
 
 
+            showGuestUpgradeDialog() {
+                const snapshot = API.buildGuestSnapshot();
+                const content = `
+                    <div class="modal-title">${Icon.render('user')}升级为本地测试账号</div>
+                    <div class="modal-body">
+                        <div class="panel-note" style="margin-bottom:12px;">
+                            将 ${snapshot.games.length} 条本机完成记录及其任务指标写入隔离 MySQL。当前棋盘、设置和成就仍保留在本浏览器；账号道具采用服务端标准初始库存，不接受客户端自报数量。
+                        </div>
+                        <label class="feedback-label" for="upgradeNickname">账号昵称</label>
+                        <input type="text" id="upgradeNickname" value="${escapeHTML(API.nickname)}" maxlength="12" class="naming-input">
+                        <div id="upgradeError" class="capability-note" style="display:none;margin-top:10px;color:var(--danger-color);"></div>
+                        <button class="btn btn-primary" id="confirmGuestUpgrade" style="width:100%;margin-top:14px;">迁移并升级</button>
+                    </div>`;
+                this.showModal(content);
+                document.getElementById('confirmGuestUpgrade').addEventListener('click', async (event) => {
+                    const button = event.currentTarget;
+                    const nickname = document.getElementById('upgradeNickname').value.trim();
+                    const errorEl = document.getElementById('upgradeError');
+                    if (!nickname || nickname.length > 12) {
+                        errorEl.textContent = '昵称需要 1-12 个字符';
+                        errorEl.style.display = 'block';
+                        return;
+                    }
+                    button.disabled = true;
+                    button.textContent = '迁移中…';
+                    errorEl.style.display = 'none';
+                    try {
+                        const result = await API.upgradeGuest(nickname);
+                        this.closeModal();
+                        showToast(`已升级为本地测试账号，迁移 ${result.migration.games} 条记录`);
+                    } catch (error) {
+                        errorEl.textContent = error.payload?.error || '升级失败，数据库未写入，请重试';
+                        errorEl.style.display = 'block';
+                        button.disabled = false;
+                        button.textContent = '重试迁移';
+                    }
+                });
+            },
+
             showSettingsPanel() {
                 const nickname = API.nickname || '玩家';
                 const connectionLabel = API.isLoggedIn ? '账号已连接' : '本地游客模式';
@@ -8364,8 +8504,11 @@ if (next && this.grid[next.row] && this.grid[next.row][next.col] && this.grid[ne
                                 <span style="font-size: 0.7rem; color: ${connectionColor};">${connectionLabel}</span>
                             </div>
                             <div class="capability-note" style="margin-top:10px;">
-                                完成一局后会提交成绩；当前版本没有完整进度云同步。存档、任务、成就与主题保存在本机浏览器中。
+                                ${API.isLoggedIn
+                                    ? '完成一局后会提交成绩；服务端任务与库存可重登恢复。棋盘、设置、成就与主题仍保存在本机浏览器中。'
+                                    : '游客棋盘、记录和目标保存在本机。可升级为本地测试账号并迁移已完成记录与对应任务指标。'}
                             </div>
+                            ${API.isGuest ? '<button class="btn btn-primary" id="upgradeGuestBtn" style="width:100%;margin-top:10px;">升级为本地测试账号</button>' : ''}
                         </div>
                     </div>
                     <div style="text-align:center;margin-top:10px;font-size:0.75rem;color:var(--text-secondary);">
@@ -8373,6 +8516,9 @@ if (next && this.grid[next.row] && this.grid[next.row][next.col] && this.grid[ne
                     </div>
                 `;
                 this.showModal(content);
+
+                const upgradeButton = document.getElementById('upgradeGuestBtn');
+                if (upgradeButton) upgradeButton.addEventListener('click', () => this.showGuestUpgradeDialog());
                 
                 // 绑定昵称修改 - 同步到云端
                 document.getElementById('nicknameInput').addEventListener('change', async (e) => {
@@ -8811,7 +8957,7 @@ showLeaderboardPanel() {
                 if (API.isLoggedIn) await TaskSystem.refreshServerTasks();
                 const tasks = TaskSystem.getTasks();
                 const taskNote = TaskSystem.serverAvailable
-                    ? '任务配置和今日进度来自本地 V2 测试数据库。对局结束后服务端会更新进度；任务奖励领取尚未实现。'
+                    ? '任务、今日进度、领取状态和道具奖励均来自本地 V2 测试数据库。重复点击不会重复发奖。'
                     : API.isGuest
                         ? '游客目标只保存在本机并于次日重置；登录后可使用服务端持久化任务。'
                         : `服务端任务暂不可用，当前显示本机目标。${TaskSystem.serverError ? `原因：${escapeHTML(TaskSystem.serverError)}` : ''}`;
@@ -8831,12 +8977,34 @@ showLeaderboardPanel() {
                                         </div>
                                     </div>
                                 </div>
-                                <div class="task-reward">${task.completed ? '已记录' : escapeHTML(task.reward)}</div>
+                                <div class="task-reward">
+                                    ${task.source === 'server' && task.completed && !task.claimed && task.rewardItem && task.rewardCount > 0
+                                        ? `<button class="btn btn-primary task-claim-btn" data-task-id="${task.id}">领取 ${escapeHTML(task.reward)}</button>`
+                                        : task.claimed ? '已领取' : task.completed && task.source === 'server' && (!task.rewardItem || task.rewardCount < 1) ? '奖励未配置' : task.completed ? '已完成' : escapeHTML(task.reward)}
+                                </div>
                             </div>
                         `).join('')}
                     </div>
                 `;
                 this.showModal(content);
+
+                document.querySelectorAll('.task-claim-btn').forEach(button => {
+                    button.addEventListener('click', async () => {
+                        const taskId = Number(button.dataset.taskId);
+                        button.disabled = true;
+                        button.textContent = '领取中…';
+                        try {
+                            const result = await API.claimTask(taskId);
+                            await Promise.all([TaskSystem.refreshServerTasks(), PowerupSystem.syncFromAPI()]);
+                            showToast(result.alreadyClaimed ? '该奖励已领取，库存未重复增加' : `已领取 ${PowerupSystem.getItemName(result.reward.item)} ×${result.reward.count}`);
+                            await this.showTasksPanel();
+                        } catch (error) {
+                            showToast(error.payload?.error || '领取失败，请重试');
+                            button.disabled = false;
+                            button.textContent = '重试领取';
+                        }
+                    });
+                });
             },
 
             showSharePanel() {
@@ -9329,6 +9497,9 @@ showLeaderboardPanel() {
             timerInterval: null,     // 定时器
             challengeWon: false,     // 挑战是否成功
             timedEnded: false,       // 限时是否结束
+            deadlineAt: null,        // 限时模式绝对截止时间（Unix ms）
+            lastTimeRemaining: null,
+            visibilityBound: false,
             extremeSpeed: 1,         // 极限模式速度倍数
             extremeMultiplier: 1,    // 极限模式分数倍数
 
@@ -9386,6 +9557,16 @@ showLeaderboardPanel() {
                 document.getElementById('modeBtn').addEventListener('click', () => {
                     this.showModePanel();
                 });
+                if (!this.visibilityBound) {
+                    document.addEventListener('visibilitychange', () => {
+                        if (document.visibilityState === 'visible') this.syncTimer();
+                        else if (GameSettings.autoSave) GameCore.saveGameState();
+                    });
+                    window.addEventListener('pagehide', () => {
+                        if (GameSettings.autoSave) GameCore.saveGameState();
+                    });
+                    this.visibilityBound = true;
+                }
             },
 
             setMode(mode, options = {}) {
@@ -9396,6 +9577,9 @@ showLeaderboardPanel() {
                 }
                 if (normalizedMode === 'timed') {
                     this.timeLimit = options.timeLimit || 180;
+                } else {
+                    this.deadlineAt = null;
+                    this.stopTimer();
                 }
                 this.saveMode();
                 this.updateDisplay();
@@ -9427,7 +9611,9 @@ showLeaderboardPanel() {
                     } else if (this.currentMode === 'timed') {
                         targetDisplay.style.display = 'none';
                         timerDisplay.style.display = 'flex';
-                        this.timeRemaining = this.timeLimit;
+                        this.timeRemaining = this.deadlineAt
+                            ? Math.max(0, Math.ceil((this.deadlineAt - Date.now()) / 1000))
+                            : this.timeLimit;
                         this.updateTimerDisplay();
                     }
                 }
@@ -9461,34 +9647,35 @@ showLeaderboardPanel() {
                 }
             },
 
-            startTimer() {
-                if (this.currentMode !== 'timed' || this.timerInterval) return;
-                
-                this.timeRemaining = this.timeLimit;
+            startTimer({ restart = true } = {}) {
+                if (this.currentMode !== 'timed') return;
+                this.stopTimer();
+                if (restart || !Number.isFinite(this.deadlineAt)) {
+                    this.deadlineAt = Date.now() + this.timeLimit * 1000;
+                }
                 this.timedEnded = false;
-                this.updateTimerDisplay();
-                
+                this.lastTimeRemaining = null;
+                this.syncTimer();
+                if (this.timedEnded) return;
+                if (GameSettings.autoSave) GameCore.saveGameState();
                 this.timerInterval = setInterval(() => {
-                    this.timeRemaining--;
-                    this.updateTimerDisplay();
-                    
-                    // 倒计时警告音效
-                    if (this.timeRemaining === 30) {
-                        AudioManager.playWarning();
-                        showToast('还剩 30 秒');
-                    }
-                    if (this.timeRemaining === 10) {
-                        AudioManager.playWarning();
-                    }
-                    if (this.timeRemaining <= 5 && this.timeRemaining > 0) {
-                        AudioManager.playTone(880, 0.1, 'square', 0.6);
-                    }
-                    
-                    // 时间结束
-                    if (this.timeRemaining <= 0) {
-                        this.endTimedMode();
-                    }
+                    this.syncTimer();
                 }, 1000);
+            },
+
+            syncTimer() {
+                if (this.currentMode !== 'timed' || this.timedEnded || !Number.isFinite(this.deadlineAt)) return;
+                const previous = this.lastTimeRemaining;
+                this.timeRemaining = Math.max(0, Math.ceil((this.deadlineAt - Date.now()) / 1000));
+                this.updateTimerDisplay();
+                if ((previous === null || previous > 30) && this.timeRemaining <= 30 && this.timeRemaining > 0) {
+                    AudioManager.playWarning();
+                    showToast('还剩 30 秒');
+                }
+                if ((previous === null || previous > 10) && this.timeRemaining <= 10 && this.timeRemaining > 0) AudioManager.playWarning();
+                if (this.timeRemaining <= 5 && this.timeRemaining > 0 && this.timeRemaining !== previous) AudioManager.playTone(880, 0.1, 'square', 0.6);
+                this.lastTimeRemaining = this.timeRemaining;
+                if (this.timeRemaining <= 0) this.endTimedMode();
             },
 
             stopTimer() {
@@ -9499,9 +9686,12 @@ showLeaderboardPanel() {
             },
 
             endTimedMode() {
+                if (this.timedEnded) return;
                 this.stopTimer();
                 this.timedEnded = true;
+                this.deadlineAt = null;
                 GameCore.gameOver = true;
+                GameCore.clearGameState();
                 
                 // 显示结果
                 const overlay = document.getElementById('gameOverOverlay');
@@ -9516,14 +9706,17 @@ showLeaderboardPanel() {
             },
 
             // 重置游戏时调用
-            resetForNewGame() {
+            resetForNewGame({ resume = false } = {}) {
                 this.challengeWon = false;
-                this.timedEnded = false;
                 this.stopTimer();
+                if (!resume) {
+                    this.timedEnded = false;
+                    this.deadlineAt = null;
+                }
                 this.updateDisplay();
                 
                 if (this.currentMode === 'timed') {
-                    this.startTimer();
+                    this.startTimer({ restart: !resume });
                 }
             },
 
@@ -9643,9 +9836,9 @@ showLeaderboardPanel() {
         };
 
         // ==================== 初始化 ====================
-        function init() {
+        async function init() {
             // 先初始化API，检查用户状态
-            const userReady = API.init();
+            const userReady = await API.init();
             
             // 如果用户未注册，等待命名完成后再初始化游戏
             if (!userReady) {
@@ -9828,7 +10021,7 @@ showLeaderboardPanel() {
             // 等待渲染完成后初始化游戏
             requestAnimationFrame(() => {
                 GameCore.init();
-                GameModeManager.resetForNewGame();
+                GameModeManager.resetForNewGame({ resume: GameCore.restoredGame });
                 TutorialSystem.init();
                 SocialShare.checkChallengeLink();
             });

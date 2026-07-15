@@ -52,8 +52,13 @@ assert.match(html, /if \(!await API\.useItem\('bomb'\)\) return false/, 'account
 assert.match(html, /supportedThemes: \['classic', 'neon', 'sakura', 'tech', 'nature', 'minimal'\]/, 'all supported themes must share one validated boundary');
 assert.match(html, /getComputedStyle\(document\.body\)\.getPropertyValue\(token\)/, 'tile rendering must consume theme tokens instead of a second hard-coded palette');
 assert.ok(html.includes('/tasks/user/${this.userId}'), 'logged-in task UI must consume the persisted server contract');
-assert.ok(html.includes('任务奖励领取尚未实现'), 'task UI must disclose the remaining reward boundary');
+assert.ok(html.includes('/tasks/${taskId}/claim'), 'logged-in task UI must use the persisted claim contract');
+assert.ok(html.includes('alreadyClaimed'), 'task UI must disclose idempotent repeated claims');
 assert.ok(html.includes('游客目标只保存在本机'), 'guest task UI must disclose its local-only boundary');
+assert.ok(html.includes('timedDeadlineAt'), 'timed mode must persist an absolute deadline');
+assert.ok(html.includes('visibilitychange'), 'timed mode must reconcile the deadline after backgrounding');
+assert.ok(html.includes('/user/upgrade-guest'), 'guest upgrade must use the local V2 migration endpoint');
+assert.ok(html.includes('/user/local-session'), 'upgraded local accounts must restore through a server session check');
 assert.ok(html.includes('navigator.clipboard?.writeText'), 'share copy must detect unsupported clipboard environments');
 assert.ok(html.includes('复制失败，请手动选择分享文案'), 'share copy must not claim success after a failed clipboard write');
 assert.ok(html.includes("(t/10000) + '万'"), 'challenge target labels must convert scores to ten-thousands correctly');
