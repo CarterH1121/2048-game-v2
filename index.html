@@ -9432,7 +9432,7 @@ showLeaderboardPanel() {
                         <!-- 挑战目标选择 -->
                         <div class="challenge-targets" id="challengeTargets" style="${this.currentMode === 'challenge' ? '' : 'display:none'}">
                             ${this.modeConfig.challenge.targets.map(t => 
-                                `<button class="challenge-target-btn ${this.targetScore === t ? 'selected' : ''}" data-target="${t}">${t >= 10000 ? (t/1000) + '万' : t}</button>`
+                                `<button class="challenge-target-btn ${this.targetScore === t ? 'selected' : ''}" data-target="${t}">${t >= 10000 ? (t/10000) + '万' : t}</button>`
                             ).join('')}
                         </div>
                         

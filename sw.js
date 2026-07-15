@@ -1,6 +1,6 @@
 // 2048 Enhanced - Service Worker
 const CACHE_PREFIX = '2048-v2-cache-';
-const CACHE_NAME = '2048-v2-cache-20260715-3';
+const CACHE_NAME = '2048-v2-cache-20260715-4';
 const urlsToCache = [
     './',
     './index.html',

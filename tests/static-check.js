@@ -41,6 +41,7 @@ assert.ok(!html.includes('class="mode-btn'), 'mode leaderboard controls must not
 assert.ok(!/leaderboard\/global\?mode=/.test(html), 'leaderboard requests must not send an ignored mode filter');
 assert.ok(!html.includes('data-mode="extreme"'), 'unimplemented extreme mode must not be offered as a playable mode');
 assert.ok(!html.includes('option value="extreme"'), 'unimplemented extreme mode must not be offered as a default mode');
+assert.ok(html.includes("(t/10000) + '万'"), 'challenge target labels must convert scores to ten-thousands correctly');
 assert.match(sw, /network-first/i, 'service worker should document its navigation update strategy');
 assert.match(sw, /2048-v2-cache-\d{8}-\d+/, 'service worker cache must have an explicit release version');
 assert.match(sw, /cacheName\.startsWith\(CACHE_PREFIX\)/, 'service worker must only delete this app cache namespace');

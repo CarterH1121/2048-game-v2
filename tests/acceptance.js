@@ -319,6 +319,13 @@ async function main() {
         for (const mode of ['classic', 'challenge', 'timed']) {
             await page.click('#modeBtn');
             await page.$eval(`.mode-option[data-mode="${mode}"]`, (el) => el.click());
+            if (mode === 'challenge') {
+                assert.deepEqual(
+                    await page.$$eval('.challenge-target-btn', (buttons) => buttons.map((button) => button.textContent.trim())),
+                    ['5000', '1万', '2万', '5万'],
+                    'challenge target labels should match their numeric values'
+                );
+            }
             await page.$eval('#modalContent button[onclick*="applyAndStart"]', (el) => el.click());
             assert.equal(await page.evaluate(() => eval('GameModeManager').currentMode), mode, `${mode} mode should apply`);
         }
