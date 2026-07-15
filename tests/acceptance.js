@@ -6,6 +6,7 @@ const puppeteer = require('puppeteer');
 
 const root = path.resolve(__dirname, '..');
 const outputDir = path.join(root, 'output', 'playwright', 'acceptance');
+const themeOutputDir = path.join(root, 'output', 'playwright', 'refinement-after', 'themes');
 const apiRequests = [];
 const mimeTypes = {
     '.html': 'text/html; charset=utf-8',
@@ -33,7 +34,7 @@ function handleApi(req, res, pathname) {
         return json(res, { leaderboard: [{ user_id: 99, nickname: '<img src=x onerror=alert(1)>', score: 4096, max_tile: 512 }] });
     }
     if (pathname === '/api/sign/status') return json(res, { signedToday: false, continuousDays: 2, totalDays: 8 });
-    if (pathname === '/api/sign/do') return json(res, { success: true, continuousDays: 3 });
+    if (pathname === '/api/sign/do') return json(res, { success: true, continuousDays: 3, totalDays: 9, rewards: [{ item: 'hint', count: 1 }] });
     return json(res, { success: true });
 }
 
@@ -123,6 +124,7 @@ async function setGridAndMove(page, direction, cells) {
 
 async function main() {
     fs.mkdirSync(outputDir, { recursive: true });
+    fs.mkdirSync(themeOutputDir, { recursive: true });
     const server = createServer();
     await new Promise((resolve) => server.listen(0, '127.0.0.1', resolve));
     const { port } = server.address();
@@ -195,8 +197,9 @@ async function main() {
 
         await setGridAndMove(page, 'right', [[0, 0, 2]]);
         await page.evaluate(() => { const p = eval('PowerupSystem'); p.undo = 1; p.updateDisplay(); });
+        await page.click('#undoBtn');
+        await page.waitForFunction(() => eval('PowerupSystem').undo === 0 && eval('GameCore').history.length === 0);
         const undoState = await page.evaluate(() => {
-            document.getElementById('undoBtn').click();
             const game = eval('GameCore');
             const powerups = eval('PowerupSystem');
             return { moveCount: game.moveCount, remaining: powerups.undo, history: game.history.length };
@@ -205,7 +208,9 @@ async function main() {
 
         await page.evaluate(() => { const p = eval('PowerupSystem'); p.hint = 1; p.shuffle = 1; p.updateDisplay(); });
         await page.click('#hintBtn');
+        await page.waitForFunction(() => eval('PowerupSystem').hint === 0);
         await page.click('#shuffleBtn');
+        await page.waitForFunction(() => eval('PowerupSystem').shuffle === 0);
         assert.deepEqual(await page.evaluate(() => { const p = eval('PowerupSystem'); return [p.hint, p.shuffle]; }), [0, 0], 'hint and shuffle should consume one item');
 
         await page.evaluate(() => {
@@ -220,9 +225,26 @@ async function main() {
             powerups.updateDisplay();
         });
         await page.click('#bombBtn');
-        await page.$eval('.tile[data-row="0"][data-col="0"]', (el) => {
-            el.dispatchEvent(new MouseEvent('click', { bubbles: true }));
-        });
+        await page.waitForFunction(() => eval('PowerupSystem').bombMode === true);
+        const bombApplied = await page.evaluate(() => new Promise((resolve) => {
+            const powerups = eval('PowerupSystem');
+            const original = powerups.executeBomb;
+            const timeout = setTimeout(() => {
+                powerups.executeBomb = original;
+                resolve(false);
+            }, 3000);
+            powerups.executeBomb = async function(...args) {
+                try { return await original.apply(powerups, args); }
+                finally {
+                    clearTimeout(timeout);
+                    powerups.executeBomb = original;
+                    resolve(true);
+                }
+            };
+            document.querySelector('.tile[data-row="0"][data-col="0"]').dispatchEvent(new MouseEvent('click', { bubbles: true }));
+        }));
+        assert.equal(bombApplied, true, 'bomb selection click should reach the confirmed item action');
+        await page.waitForFunction(() => eval('PowerupSystem').bomb === 0 && eval('GameCore').grid[0][0] === null);
         assert.deepEqual(await page.evaluate(() => { const p = eval('PowerupSystem'); return [p.bomb, p.bombMode, eval('GameCore').grid[0][0]]; }), [0, false, null], 'bomb should delete the selected tile and consume one item');
 
         await page.evaluate(() => {
@@ -235,13 +257,31 @@ async function main() {
             powerups.updateDisplay();
         });
         await page.click('#upgradeBtn');
-        await page.$eval('.tile[data-row="0"][data-col="0"]', (el) => {
-            el.dispatchEvent(new MouseEvent('click', { bubbles: true }));
-        });
+        await page.waitForFunction(() => eval('PowerupSystem').upgradeMode === true);
+        const upgradeApplied = await page.evaluate(() => new Promise((resolve) => {
+            const powerups = eval('PowerupSystem');
+            const original = powerups.executeUpgrade;
+            const timeout = setTimeout(() => {
+                powerups.executeUpgrade = original;
+                resolve(false);
+            }, 3000);
+            powerups.executeUpgrade = async function(...args) {
+                try { return await original.apply(powerups, args); }
+                finally {
+                    clearTimeout(timeout);
+                    powerups.executeUpgrade = original;
+                    resolve(true);
+                }
+            };
+            document.querySelector('.tile[data-row="0"][data-col="0"]').dispatchEvent(new MouseEvent('click', { bubbles: true }));
+        }));
+        assert.equal(upgradeApplied, true, 'upgrade selection click should reach the confirmed item action');
+        await page.waitForFunction(() => eval('PowerupSystem').upgrade === 0 && eval('GameCore').grid[0][0].value === 4);
         assert.deepEqual(await page.evaluate(() => { const p = eval('PowerupSystem'); return [p.upgrade, p.upgradeMode, eval('GameCore').grid[0][0].value]; }), [0, false, 4], 'upgrade should double the selected tile and consume one item');
 
         await page.evaluate(() => { const p = eval('PowerupSystem'); p.double = 1; p.updateDisplay(); });
         await page.click('#doubleBtn');
+        await page.waitForFunction(() => eval('PowerupSystem').double === 0 && eval('PowerupSystem').doubleActive);
         const doubled = await setGridAndMove(page, 'left', [[0, 0, 2], [0, 1, 2]]);
         assert.equal(doubled.score, 8, 'double item should double the next merge score');
 
@@ -288,11 +328,11 @@ async function main() {
 
         const panels = [
             ['button[data-panel="leaderboard"]', '排行榜'],
-            ['button[data-panel="achievements"]', '成就殿堂'],
-            ['button[data-panel="tasks"]', '每日任务'],
-            ['button[onclick*="showSkinPanel"]', '皮肤中心'],
+            ['button[data-panel="achievements"]', '成就里程碑'],
+            ['button[data-panel="tasks"]', '今日目标'],
+            ['button[onclick*="showSkinPanel"]', '主题与棋盘'],
             ['button[data-panel="share"]', '分享成绩'],
-            ['button[data-panel="profile"]', '游戏数据统计']
+            ['button[data-panel="profile"]', '游戏数据']
         ];
         for (const [selector, title] of panels) {
             await page.click(selector);
@@ -301,7 +341,7 @@ async function main() {
         }
 
         await page.click('button[data-panel="leaderboard"]');
-        assert.ok(await page.$eval('.leaderboard-scope-note', (el) => el.textContent.includes('不分模式、不分日期')), 'leaderboard should disclose its actual global-only scope');
+        assert.ok(await page.$eval('.panel-note', (el) => el.textContent.includes('不分模式、不分日期')), 'leaderboard should disclose its actual global-only scope');
         assert.equal(await page.$('.mode-btn'), null, 'unsupported mode leaderboard controls should be absent');
         assert.equal(await page.$('[data-tab="daily"]'), null, 'unsupported daily leaderboard should be absent');
         await page.waitForFunction(() => document.getElementById('leaderboardList').textContent.includes('<img'));
@@ -399,7 +439,96 @@ async function main() {
         await page.click('#settingsBtn');
         assert.ok((await page.$eval('#modalContent', (el) => el.textContent)).includes('已连接'), 'settings should show account connection state');
         assert.equal(await page.$('#defaultModeSelect option[value="extreme"]'), null, 'settings should not offer an unimplemented default mode');
+        assert.equal(await page.$('#syncDataBtn'), null, 'settings must not expose a fake full-progress sync action');
+        assert.ok((await page.$eval('#modalContent', (el) => el.textContent)).includes('没有完整进度云同步'), 'settings should disclose the actual persistence boundary');
         await closeModal(page);
+
+        const taskResult = await page.evaluate(() => {
+            const tasks = eval('TaskSystem');
+            const powerups = eval('PowerupSystem');
+            tasks.clearAllTaskData();
+            const inventoryBefore = [powerups.undo, powerups.hint, powerups.shuffle, powerups.bomb, powerups.upgrade, powerups.double];
+            tasks.updateTask('score', 2048);
+            tasks.resetRoundTasks();
+            tasks.load();
+            return {
+                completed: tasks.completedTasks.includes('score'),
+                progress: tasks.tasks.find((task) => task.id === 'score').progress,
+                inventoryBefore,
+                inventoryAfter: [powerups.undo, powerups.hint, powerups.shuffle, powerups.bomb, powerups.upgrade, powerups.double]
+            };
+        });
+        assert.equal(taskResult.completed, true, 'completed daily goals must survive round reset and reload');
+        assert.equal(taskResult.progress, 2048, 'completed score progress must remain truthful after reload');
+        assert.deepEqual(taskResult.inventoryAfter, taskResult.inventoryBefore, 'local tasks must not mint account inventory');
+        assert.equal(await page.$eval('#achievementOverlay', (el) => el.classList.contains('active')), false, 'achievement feedback must remain non-blocking');
+
+        const rejectedUse = await page.evaluate(async () => {
+            const api = eval('API');
+            const powerups = eval('PowerupSystem');
+            const game = eval('GameCore');
+            const originalUseItem = api.useItem;
+            api.useItem = async () => false;
+            powerups.undo = 1;
+            game.history = [{ grid: game.grid, score: game.score, moveCount: game.moveCount, maxTile: game.maxTile }];
+            const result = await powerups.useUndo();
+            api.useItem = originalUseItem;
+            return { result, remaining: powerups.undo, history: game.history.length };
+        });
+        assert.deepEqual(rejectedUse, { result: false, remaining: 1, history: 1 }, 'rejected account item use must not change local inventory or board history');
+
+        await page.setViewport({ width: 390, height: 844, isMobile: true, hasTouch: true, deviceScaleFactor: 1 });
+        await page.evaluate(() => {
+            document.getElementById('confettiContainer').innerHTML = '';
+            document.getElementById('toast').classList.remove('active');
+            document.getElementById('achievementOverlay').classList.remove('active');
+            document.getElementById('gameOverOverlay').classList.remove('active');
+        });
+        const themeEvidence = [];
+        for (const theme of ['classic', 'neon', 'sakura', 'tech', 'nature', 'minimal']) {
+            await page.evaluate((themeName) => {
+                const settings = eval('GameSettings');
+                settings.setTheme(themeName);
+                eval('Renderer').render();
+                eval('UI').showSkinPanel();
+            }, theme);
+            await new Promise((resolve) => setTimeout(resolve, 550));
+            const evidence = await page.evaluate((themeName) => {
+                const styles = getComputedStyle(document.body);
+                const parse = (color) => (color.match(/[\d.]+/g) || []).slice(0, 3).map(Number);
+                const channel = (value) => {
+                    const normalized = value / 255;
+                    return normalized <= 0.03928 ? normalized / 12.92 : ((normalized + 0.055) / 1.055) ** 2.4;
+                };
+                const luminance = (color) => {
+                    const [r, g, b] = parse(color).map(channel);
+                    return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+                };
+                const foreground = styles.color;
+                const background = styles.backgroundColor;
+                const bright = Math.max(luminance(foreground), luminance(background));
+                const dark = Math.min(luminance(foreground), luminance(background));
+                return {
+                    classApplied: document.body.classList.contains(`theme-${themeName}`),
+                    foreground,
+                    background,
+                    action: styles.getPropertyValue('--action-primary').trim(),
+                    tile2: styles.getPropertyValue('--tile-2').trim(),
+                    contrast: (bright + 0.05) / (dark + 0.05),
+                    modalBackground: getComputedStyle(document.querySelector('.modal')).backgroundColor
+                };
+            }, theme);
+            console.log('acceptance: theme', theme, evidence);
+            assert.equal(evidence.classApplied, true, `${theme} theme class should apply`);
+            assert.ok(evidence.action && evidence.tile2, `${theme} theme should define action and tile tokens`);
+            assert.ok(evidence.contrast >= 4.5, `${theme} page text contrast should meet WCAG AA`);
+            assert.notEqual(evidence.modalBackground, 'rgba(0, 0, 0, 0)', `${theme} modal should follow a concrete themed surface`);
+            themeEvidence.push({ theme, ...evidence });
+            await page.screenshot({ path: path.join(themeOutputDir, `${theme}-390x844.png`) });
+            await closeModal(page);
+        }
+        assert.equal(new Set(themeEvidence.map((item) => item.tile2)).size, 6, 'each theme should expose a distinct tile palette');
+        await page.evaluate(() => eval('GameSettings').setTheme('classic'));
         console.log('acceptance: panels and API rendering passed');
 
         const viewports = [[360,800],[375,812],[390,844],[430,932]];
@@ -523,7 +652,7 @@ async function main() {
             domInteractive: Math.round(performance.getEntriesByType('navigation')[0]?.domInteractive || 0),
             resources: performance.getEntriesByType('resource').length
         }));
-        console.log(JSON.stringify({ viewports: viewportResults, landscape, cacheNames, performance }, null, 2));
+        console.log(JSON.stringify({ viewports: viewportResults, landscape, themeEvidence, cacheNames, performance }, null, 2));
         console.log('acceptance: PASS');
     } finally {
         await browser.close();

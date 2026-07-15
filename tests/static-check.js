@@ -43,6 +43,15 @@ assert.ok(!html.includes('class="mode-btn'), 'mode leaderboard controls must not
 assert.ok(!/leaderboard\/global\?mode=/.test(html), 'leaderboard requests must not send an ignored mode filter');
 assert.ok(!html.includes('data-mode="extreme"'), 'unimplemented extreme mode must not be offered as a playable mode');
 assert.ok(!html.includes('option value="extreme"'), 'unimplemented extreme mode must not be offered as a default mode');
+assert.ok(!html.includes('id="syncDataBtn"'), 'settings must not expose a fake full-progress cloud sync action');
+assert.ok(!/submitGame\([^\n]*['"]sync['"]/.test(html), 'game record submission must not masquerade as cloud sync');
+assert.ok(!html.includes('SeasonSystem.init();'), 'local-only season rewards must stay disabled without a backend contract');
+assert.ok(!/completeTask[\s\S]{0,500}PowerupSystem\.addItem/.test(html), 'local tasks must not mint account inventory without a reward contract');
+assert.match(html, /if \(!await API\.useItem\('undo'\)\) return false/, 'account item use must be confirmed before applying undo');
+assert.match(html, /if \(!await API\.useItem\('bomb'\)\) return false/, 'account item use must be confirmed before applying destructive board effects');
+assert.match(html, /supportedThemes: \['classic', 'neon', 'sakura', 'tech', 'nature', 'minimal'\]/, 'all supported themes must share one validated boundary');
+assert.match(html, /getComputedStyle\(document\.body\)\.getPropertyValue\(token\)/, 'tile rendering must consume theme tokens instead of a second hard-coded palette');
+assert.ok(html.includes('服务端尚无任务进度与领奖契约'), 'task UI must disclose its local-only capability boundary');
 assert.ok(html.includes("(t/10000) + '万'"), 'challenge target labels must convert scores to ten-thousands correctly');
 assert.ok(html.includes('targetScore: 10000'), 'challenge mode must have a valid default target before the first selection');
 assert.ok(html.includes("window.addEventListener('resize', this.resizeHandler"), 'renderer must recalculate tile geometry after viewport changes');

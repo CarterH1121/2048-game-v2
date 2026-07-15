@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>2048 Enhanced - Material Design 3 Edition</title>
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' rx='14' fill='%236366F1'/><text x='32' y='43' font-size='34' text-anchor='middle' fill='white'>2</text></svg>">
+    <title>2048 · 每一步都算数</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' rx='14' fill='%238b6f56'/><text x='32' y='40' font-size='22' font-weight='700' text-anchor='middle' fill='white'>2048</text></svg>">
     
     <!-- ==================== Google Fonts ==================== -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -12,14 +12,14 @@
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@600;800&family=Outfit:wght@400;600;800;900&display=swap" rel="stylesheet">
     
     <!-- ==================== PWA 配置 ==================== -->
-    <meta name="theme-color" content="#6366F1">
+    <meta name="theme-color" content="#8b6f56">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="description" content="2048 Enhanced - Material Design 3 Edition. 移动端适配、经典挑战与限时玩法。">
+    <meta name="description" content="轻量、专注的 2048：经典、挑战与限时玩法。">
     <meta name="mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-title" content="2048 Enhanced">
-    <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect fill='%236366F1' width='100' height='100' rx='20'/><text x='50' y='70' font-size='60' text-anchor='middle' fill='white'>2️⃣</text></svg>">
-    <link rel="manifest" href="data:application/json,{%22name%22:%222048%20Enhanced%22,%22short_name%22:%222048%22,%22start_url%22:%22.%22,%22display%22:%22standalone%22,%22background_color%22:%22%230F0F1A%22,%22theme_color%22:%22%236366F1%22,%22icons%22:[{%22src%22:%22data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><rect fill='%236366F1' width='512' height='512' rx='100'/><text x='256' y='350' font-size='300' text-anchor='middle' fill='white'>2️⃣</text></svg>%22,%22sizes%22:%22512x512%22,%22type%22:%22image/svg+xml%22}],%22categories%22:[%22games%22],%22orientation%22:%22portrait%22}">
+    <meta name="apple-mobile-web-app-title" content="2048">
+    <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect fill='%238b6f56' width='100' height='100' rx='20'/><text x='50' y='61' font-size='32' font-weight='700' text-anchor='middle' fill='white'>2048</text></svg>">
+    <link rel="manifest" href="data:application/json,{%22name%22:%222048%22,%22short_name%22:%222048%22,%22start_url%22:%22.%22,%22display%22:%22standalone%22,%22background_color%22:%22%23f6f2e8%22,%22theme_color%22:%22%238b6f56%22,%22icons%22:[{%22src%22:%22data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><rect fill='%238b6f56' width='512' height='512' rx='100'/><text x='256' y='306' font-size='150' font-weight='700' text-anchor='middle' fill='white'>2048</text></svg>%22,%22sizes%22:%22512x512%22,%22type%22:%22image/svg+xml%22}],%22categories%22:[%22games%22],%22orientation%22:%22portrait%22}">
     
     <script>
         // 注册 Service Worker
@@ -4024,35 +4024,345 @@
             opacity: 1 !important;
             visibility: visible !important;
         }
+
+        /* ========== 产品精修：统一视觉与主题语义边界 ========== */
+        :root {
+            --surface-page: #f6f2e8;
+            --surface-card: #fffaf0;
+            --surface-muted: #e9e0d3;
+            --surface-strong: #d4c6b7;
+            --border-color: #d0c2b2;
+            --text-strong: #4d443c;
+            --text-muted: #776d63;
+            --action-primary: #8b6f56;
+            --action-primary-hover: #735944;
+            --action-accent: #d68c45;
+            --status-success: #3f7957;
+            --status-warning: #9d6d2f;
+            --status-error: #a64d4d;
+            --focus-ring: rgba(139, 111, 86, 0.28);
+            --elevation-soft: 0 6px 18px rgba(77, 68, 60, 0.09);
+        }
+
+        body.theme-classic {
+            --surface-page: #f6f2e8; --surface-card: #fffaf0; --surface-muted: #e9e0d3;
+            --surface-strong: #d4c6b7; --border-color: #d0c2b2; --text-strong: #4d443c;
+            --text-muted: #776d63; --action-primary: #8b6f56; --action-primary-hover: #735944;
+            --action-accent: #d68c45; --focus-ring: rgba(139,111,86,.28);
+            --tile-2: #eee4da; --tile-4: #ede0c8; --tile-8: #e9a86d; --tile-16: #dd895a;
+            --tile-32: #d76c55; --tile-64: #c8553d; --tile-128: #d9b85d; --tile-256: #d2a946;
+            --tile-512: #c99b38; --tile-1024: #b9852f; --tile-2048: #9b6829; --tile-super: #3c3a32;
+        }
+        body.theme-neon {
+            --surface-page: #101820; --surface-card: #18242f; --surface-muted: #233240;
+            --surface-strong: #314454; --border-color: #405566; --text-strong: #f2eee6;
+            --text-muted: #b7c3cc; --action-primary: #63b6b8; --action-primary-hover: #7bc8ca;
+            --action-accent: #e2a65f; --focus-ring: rgba(99,182,184,.32);
+            --tile-2: #d9e5e3; --tile-4: #bdd5d2; --tile-8: #78b6b3; --tile-16: #4f9998;
+            --tile-32: #327b7d; --tile-64: #245f67; --tile-128: #d8ad67; --tile-256: #c38a48;
+            --tile-512: #a86e35; --tile-1024: #86542f; --tile-2048: #633d2a; --tile-super: #26333c;
+        }
+        body.theme-sakura {
+            --surface-page: #fff6f6; --surface-card: #fffdfc; --surface-muted: #f5e2e6;
+            --surface-strong: #e8c9d0; --border-color: #dbb9c2; --text-strong: #593f47;
+            --text-muted: #80646d; --action-primary: #ad6175; --action-primary-hover: #914d61;
+            --action-accent: #c58c4f; --focus-ring: rgba(173,97,117,.28);
+            --tile-2: #f7e2e5; --tile-4: #efcbd2; --tile-8: #dfa7b2; --tile-16: #cc8494;
+            --tile-32: #b86679; --tile-64: #9d4c61; --tile-128: #d7b66f; --tile-256: #c99b56;
+            --tile-512: #b97f43; --tile-1024: #a26339; --tile-2048: #854b39; --tile-super: #56333d;
+        }
+        body.theme-tech {
+            --surface-page: #0e1a27; --surface-card: #172637; --surface-muted: #21364a;
+            --surface-strong: #304a60; --border-color: #3e5b70; --text-strong: #edf4f7;
+            --text-muted: #afc1cd; --action-primary: #6ba9c7; --action-primary-hover: #84bed8;
+            --action-accent: #dda65d; --focus-ring: rgba(107,169,199,.32);
+            --tile-2: #d7e5ec; --tile-4: #b8cfdb; --tile-8: #7eacc2; --tile-16: #5b91ad;
+            --tile-32: #427594; --tile-64: #315d7a; --tile-128: #dfbd72; --tile-256: #ca9e54;
+            --tile-512: #b47f40; --tile-1024: #996236; --tile-2048: #7d4932; --tile-super: #23374a;
+        }
+        body.theme-nature {
+            --surface-page: #edf3ed; --surface-card: #f9fbf7; --surface-muted: #dce8dc;
+            --surface-strong: #bfd2c1; --border-color: #adc4b0; --text-strong: #253b2b;
+            --text-muted: #506655; --action-primary: #426c4f; --action-primary-hover: #345a40;
+            --action-accent: #9b703b; --focus-ring: rgba(66,108,79,.28);
+            --tile-2: #dce8dc; --tile-4: #c5d9c7; --tile-8: #9fbea4; --tile-16: #79a182;
+            --tile-32: #5c8469; --tile-64: #426a52; --tile-128: #d5b96e; --tile-256: #c49d54;
+            --tile-512: #ad803f; --tile-1024: #916438; --tile-2048: #704b32; --tile-super: #304a38;
+        }
+        body.theme-minimal {
+            --surface-page: #f4f4f1; --surface-card: #ffffff; --surface-muted: #e8e8e3;
+            --surface-strong: #d3d3cc; --border-color: #c8c8c1; --text-strong: #2e2e2b;
+            --text-muted: #66665f; --action-primary: #3e3e3a; --action-primary-hover: #222220;
+            --action-accent: #8a6d4e; --focus-ring: rgba(62,62,58,.24);
+            --tile-2: #e3e3df; --tile-4: #cecec8; --tile-8: #b5b5ae; --tile-16: #999992;
+            --tile-32: #7c7c76; --tile-64: #62625d; --tile-128: #a99a81; --tile-256: #8d7a62;
+            --tile-512: #705c49; --tile-1024: #564437; --tile-2048: #3c312b; --tile-super: #20201e;
+        }
+
+        body[class*="theme-"] {
+            --bg-primary: var(--surface-page);
+            --bg-secondary: var(--surface-muted);
+            --glass-bg: var(--surface-card);
+            --glass-border: var(--border-color);
+            --brand-primary: var(--action-primary);
+            --brand-primary-dark: var(--action-primary-hover);
+            --brand-primary-light: var(--surface-strong);
+            --brand-secondary: var(--action-accent);
+            --accent-color: var(--action-accent);
+            --bg-grid: var(--surface-strong);
+            --text-primary: var(--text-strong);
+            --text-secondary: var(--text-muted);
+            --shadow-1: none;
+            --shadow-2: var(--elevation-soft);
+            --shadow-3: var(--elevation-soft);
+            --shadow-4: var(--elevation-soft);
+            background: var(--surface-page);
+            color: var(--text-strong);
+        }
+
+        .game-wrapper { background: var(--surface-page); }
+        .grid-container { background: var(--surface-strong); border-color: var(--border-color); box-shadow: none; backdrop-filter: none; -webkit-backdrop-filter: none; }
+        .grid-cell { background: var(--surface-muted); }
+        .game-title {
+            color: var(--text-strong);
+            background: none;
+            -webkit-text-fill-color: currentColor;
+            letter-spacing: -1.5px;
+        }
+        .md3-badge {
+            background: var(--surface-muted);
+            color: var(--text-muted);
+            box-shadow: none;
+            border: 1px solid var(--border-color);
+            -webkit-text-fill-color: currentColor;
+            text-transform: uppercase;
+        }
+        .score-box, .level-badge, .daily-progress, .powerup-bar {
+            background: var(--surface-card);
+            border: 1px solid var(--border-color);
+            box-shadow: none;
+            backdrop-filter: none;
+            -webkit-backdrop-filter: none;
+        }
+        .score-value { color: var(--text-strong); }
+        .daily-task-fill, .progress-fill, .target-progress-fill {
+            background: var(--action-primary);
+        }
+        .daily-task-reward {
+            color: var(--text-strong);
+            background: var(--surface-muted);
+            border-color: var(--border-color);
+        }
+        .icon-btn, .powerup-btn, .powerup-toggle, .nav-item {
+            color: var(--text-muted);
+            background: transparent;
+            box-shadow: none;
+        }
+        .icon-btn {
+            border: 1px solid var(--border-color);
+            background: var(--surface-card);
+        }
+        .icon-btn:hover, .icon-btn:focus-visible, .nav-item:hover, .nav-item:focus-visible,
+        .powerup-btn:hover:not(:disabled), .powerup-btn:focus-visible {
+            color: var(--action-primary);
+            background: var(--surface-muted);
+            outline: 3px solid var(--focus-ring);
+            outline-offset: 1px;
+        }
+        .powerup-new, .powerup-rare { border-color: var(--border-color) !important; }
+        .bottom-nav {
+            background: var(--surface-card);
+            border-top: 1px solid var(--border-color);
+            box-shadow: none;
+            backdrop-filter: none;
+            -webkit-backdrop-filter: none;
+        }
+        .nav-item { border-radius: 10px; }
+        .modal-overlay { background: rgba(26, 24, 22, .54); backdrop-filter: none; }
+        .modal, .tutorial-box, .achievement-unlock {
+            background: var(--surface-card);
+            color: var(--text-strong);
+            border: 1px solid var(--border-color);
+            box-shadow: 0 18px 48px rgba(31, 28, 25, .2);
+            backdrop-filter: none;
+            -webkit-backdrop-filter: none;
+        }
+        .modal-title, .mode-select-title { color: var(--text-strong); }
+        .btn { box-shadow: none; }
+        .btn-primary {
+            background: var(--action-primary);
+            border: 1px solid var(--action-primary);
+            color: #fff;
+        }
+        .btn-primary:hover { background: var(--action-primary-hover); }
+        .btn-secondary {
+            background: var(--surface-muted);
+            border: 1px solid var(--border-color);
+            color: var(--text-strong);
+        }
+        .btn-danger { background: var(--status-error); border: 1px solid var(--status-error); color: #fff; }
+        .confirm-icon { display: grid; place-items: center; margin-bottom: 14px; color: var(--status-warning); }
+        .confirm-icon .ui-icon { width: 42px; height: 42px; }
+        .mode-option, .skin-card, .task-item, .achievement-item, .leaderboard-item,
+        .panel-summary-item, .panel-note, .empty-state {
+            background: var(--surface-muted) !important;
+            border: 1px solid var(--border-color) !important;
+            box-shadow: none !important;
+        }
+        .mode-option.active, .skin-card.active, .leaderboard-item.highlight {
+            border-color: var(--action-primary) !important;
+            background: var(--surface-card) !important;
+        }
+        .skin-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+        .skin-card { padding: 14px; border-radius: 12px; cursor: pointer; text-align: left; color: var(--text-strong); }
+        .skin-swatch { display: flex; gap: 4px; margin-bottom: 10px; }
+        .skin-swatch span { width: 20px; height: 20px; border-radius: 6px; border: 1px solid rgba(0,0,0,.08); }
+        .skin-name { font-weight: 700; }
+        .skin-desc { margin-top: 3px; color: var(--text-muted); font-size: 12px; }
+        .panel-note { padding: 10px 12px; border-radius: 10px; color: var(--text-muted); font-size: 12px; line-height: 1.55; }
+        .panel-summary { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 14px 0; }
+        .panel-summary-item { padding: 12px 8px; border-radius: 10px; text-align: center; }
+        .panel-summary-value { color: var(--text-strong); font-size: 1.25rem; font-weight: 800; }
+        .panel-summary-label { color: var(--text-muted); font-size: 11px; margin-top: 2px; }
+        .empty-state { padding: 28px 16px; border-radius: 12px; text-align: center; color: var(--text-muted); }
+        .achievement-item.locked { opacity: .58; }
+        .achievement-icon, .rank-icon, .task-icon { color: var(--action-primary); }
+        .particle-burst, .corner-glow, .ring-wave, .star-particles { display: none !important; }
+        .settings-section { border-color: var(--border-color); background: transparent; }
+        .settings-item { border-color: var(--border-color); }
+        .toggle-switch { background: var(--surface-strong); }
+        .toggle-switch.active { background: var(--action-primary); }
+        .toast {
+            display: flex;
+            align-items: center;
+            gap: 9px;
+            max-width: min(88vw, 360px);
+            background: var(--text-strong);
+            color: var(--surface-card);
+            border: 0;
+            box-shadow: var(--elevation-soft);
+            backdrop-filter: none;
+            -webkit-backdrop-filter: none;
+        }
+        .toast[data-tone="warning"] { background: var(--status-warning); color: #fff; }
+        .toast[data-tone="error"] { background: var(--status-error); color: #fff; }
+        .toast[data-tone="success"] { background: var(--status-success); color: #fff; }
+        .toast .ui-icon { width: 18px; height: 18px; }
+        .ui-icon { width: 1.25em; height: 1.25em; display: inline-block; flex: 0 0 auto; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; vertical-align: -0.2em; }
+        .modal-title, .settings-section-title, .mode-option-icon, .signin-status-icon {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .modal-title .ui-icon, .settings-section-title .ui-icon { color: var(--action-primary); }
+        .mode-option-icon .ui-icon { width: 24px; height: 24px; color: var(--action-primary); }
+        .signin-status-icon { justify-content: center; margin-bottom: 10px; color: var(--action-primary); }
+        .signin-status-icon .ui-icon { width: 44px; height: 44px; }
+        .capability-note {
+            padding: 10px 12px;
+            border-radius: 10px;
+            border: 1px solid var(--border-color);
+            background: var(--surface-muted);
+            color: var(--text-muted);
+            font-size: 12px;
+            line-height: 1.55;
+        }
+        button.skin-card { font: inherit; appearance: none; width: 100%; }
+        .leaderboard-rank {
+            width: 28px;
+            height: 28px;
+            display: grid;
+            place-items: center;
+            border-radius: 8px;
+            background: var(--surface-card);
+            border: 1px solid var(--border-color);
+            color: var(--text-strong);
+            font-weight: 800;
+        }
+        .merge-effect-container .merge-number {
+            min-width: 58px;
+            padding: 7px 11px;
+            border-radius: 999px;
+            background: var(--text-strong);
+            color: var(--surface-card);
+            border: 2px solid var(--surface-card);
+            box-shadow: var(--elevation-soft);
+            font-size: 1rem;
+            font-weight: 800;
+            text-align: center;
+            animation: numberPop .65s ease-out forwards;
+        }
+        .merge-effect-container.epic .merge-number,
+        .merge-effect-container.legendary .merge-number { background: var(--action-primary); color: #fff; }
+        .icon-btn .ui-icon { width: 21px; height: 21px; }
+        .nav-icon .ui-icon { width: 22px; height: 22px; }
+        .powerup-btn-icon .ui-icon { width: 20px; height: 20px; }
+        .level-rank-icon .ui-icon, .daily-task-icon .ui-icon { width: 18px; height: 18px; }
+        .unread-badge { background: var(--status-error); border-color: var(--surface-card); }
+        @media (max-width: 380px) {
+            .skin-grid { grid-template-columns: 1fr; }
+            .panel-summary { gap: 6px; }
+        }
     </style>
 </head>
 <body>
+    <svg aria-hidden="true" width="0" height="0" style="position:absolute;overflow:hidden">
+        <defs>
+            <symbol id="icon-calendar" viewBox="0 0 24 24"><path d="M7 3v3M17 3v3M4 9h16M5 5h14a1 1 0 0 1 1 1v14H4V6a1 1 0 0 1 1-1Z"/><path d="M8 13h3v3H8z"/></symbol>
+            <symbol id="icon-message" viewBox="0 0 24 24"><path d="M5 5h14a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H9l-5 4v-4H5a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2Z"/><path d="M8 11h.01M12 11h.01M16 11h.01"/></symbol>
+            <symbol id="icon-megaphone" viewBox="0 0 24 24"><path d="M4 13v-2l13-5v12L4 13Z"/><path d="m7 14 1 5h3l-1-4M20 9v6"/></symbol>
+            <symbol id="icon-settings" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19 12a7 7 0 0 0-.1-1l2-1.6-2-3.4-2.4 1A8 8 0 0 0 15 6l-.4-2.6h-4L10 6a8 8 0 0 0-1.5 1L6 6 4 9.4 6 11a7 7 0 0 0 0 2l-2 1.6L6 18l2.4-1a8 8 0 0 0 1.6 1l.5 2.6h4L15 18a8 8 0 0 0 1.5-1l2.4 1 2-3.4-2-1.6a7 7 0 0 0 .1-1Z"/></symbol>
+            <symbol id="icon-gamepad" viewBox="0 0 24 24"><path d="M7 8h10a4 4 0 0 1 3.8 5.2l-1.1 3.5a2 2 0 0 1-3.4.7L14.8 16H9.2l-1.5 1.4a2 2 0 0 1-3.4-.7l-1.1-3.5A4 4 0 0 1 7 8Z"/><path d="M8 11v4M6 13h4M16 12h.01M18 14h.01"/></symbol>
+            <symbol id="icon-target" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3"/><path d="m14 10 6-6M17 4h3v3"/></symbol>
+            <symbol id="icon-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></symbol>
+            <symbol id="icon-bolt" viewBox="0 0 24 24"><path d="m13 2-8 12h7l-1 8 8-12h-7l1-8Z"/></symbol>
+            <symbol id="icon-undo" viewBox="0 0 24 24"><path d="m9 7-5 5 5 5"/><path d="M5 12h8a6 6 0 0 1 6 6"/></symbol>
+            <symbol id="icon-bulb" viewBox="0 0 24 24"><path d="M9 18h6M10 22h4M8.5 15.5A7 7 0 1 1 15.5 15.5C14.5 16.3 14 17 14 18h-4c0-1-.5-1.7-1.5-2.5Z"/></symbol>
+            <symbol id="icon-shuffle" viewBox="0 0 24 24"><path d="M4 7h3c4 0 6 10 10 10h3M17 14l3 3-3 3M4 17h3c1.5 0 2.8-1.4 4-3.2M14 7.8c1-1 2-1.8 3-1.8h3M17 3l3 3-3 3"/></symbol>
+            <symbol id="icon-bomb" viewBox="0 0 24 24"><circle cx="11" cy="14" r="7"/><path d="m15 8 2-2M16 4l1 2 2 1M9 4h4v3H9z"/></symbol>
+            <symbol id="icon-upgrade" viewBox="0 0 24 24"><path d="m12 4-5 6h3v8h4v-8h3l-5-6Z"/><path d="M5 21h14"/></symbol>
+            <symbol id="icon-double" viewBox="0 0 24 24"><path d="M5 7h5l-5 10h5M14 7h5l-5 10h5"/></symbol>
+            <symbol id="icon-refresh" viewBox="0 0 24 24"><path d="M20 11a8 8 0 0 0-14-4L4 9M4 4v5h5M4 13a8 8 0 0 0 14 4l2-2M20 20v-5h-5"/></symbol>
+            <symbol id="icon-ranking" viewBox="0 0 24 24"><path d="M5 20v-7h4v7M10 20V5h4v15M15 20v-10h4v10M3 20h18"/></symbol>
+            <symbol id="icon-trophy" viewBox="0 0 24 24"><path d="M8 4h8v4a4 4 0 0 1-8 0V4Z"/><path d="M8 6H4v2a4 4 0 0 0 4 4M16 6h4v2a4 4 0 0 1-4 4M12 12v5M8 21h8M9 17h6"/></symbol>
+            <symbol id="icon-tasks" viewBox="0 0 24 24"><path d="M9 5h11M9 12h11M9 19h11M4 5l1 1 2-2M4 12l1 1 2-2M4 19l1 1 2-2"/></symbol>
+            <symbol id="icon-palette" viewBox="0 0 24 24"><path d="M12 3a9 9 0 0 0 0 18h1.5a2 2 0 0 0 0-4H12a1.5 1.5 0 0 1 0-3h4a5 5 0 0 0 5-5c0-3.3-4-6-9-6Z"/><path d="M7 9h.01M10 6h.01M15 7h.01"/></symbol>
+            <symbol id="icon-share" viewBox="0 0 24 24"><circle cx="18" cy="5" r="2"/><circle cx="6" cy="12" r="2"/><circle cx="18" cy="19" r="2"/><path d="m8 11 8-5M8 13l8 5"/></symbol>
+            <symbol id="icon-user" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M5 21a7 7 0 0 1 14 0"/></symbol>
+            <symbol id="icon-medal" viewBox="0 0 24 24"><circle cx="12" cy="14" r="5"/><path d="m9 3 3 6 3-6M8 3h8"/></symbol>
+            <symbol id="icon-check" viewBox="0 0 24 24"><path d="m5 12 4 4L19 6"/></symbol>
+            <symbol id="icon-lock" viewBox="0 0 24 24"><rect x="5" y="10" width="14" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></symbol>
+            <symbol id="icon-gift" viewBox="0 0 24 24"><path d="M4 10h16v10H4zM3 7h18v3H3zM12 7v13"/><path d="M12 7H8a2 2 0 1 1 2-3l2 3ZM12 7h4a2 2 0 1 0-2-3l-2 3Z"/></symbol>
+            <symbol id="icon-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7h.01"/></symbol>
+            <symbol id="icon-alert" viewBox="0 0 24 24"><path d="M12 3 2.5 20h19L12 3Z"/><path d="M12 9v5M12 17h.01"/></symbol>
+        </defs>
+    </svg>
     <div class="game-wrapper">
         <!-- 顶部状态区 -->
         <header class="header">
             <div class="header-left">
-                <h1 class="game-title">2048 <span class="md3-badge">v2</span></h1>
+                <h1 class="game-title">2048 <span class="md3-badge">Play</span></h1>
             </div>
             <div class="header-right">
                 <div class="header-btn-item">
-                    <button class="icon-btn" id="signinBtn" title="签到">📅</button>
+                    <button class="icon-btn" id="signinBtn" title="签到" aria-label="签到"><svg class="ui-icon"><use href="#icon-calendar"></use></svg></button>
                     <span class="header-btn-label">签到</span>
                 </div>
                 <div class="header-btn-item">
-                    <button class="icon-btn" id="feedbackBtn" title="反馈">💬</button>
+                    <button class="icon-btn" id="feedbackBtn" title="反馈" aria-label="反馈"><svg class="ui-icon"><use href="#icon-message"></use></svg></button>
                     <span class="header-btn-label">反馈</span>
                 </div>
                 <div class="header-btn-item">
-                    <button class="icon-btn" id="announcementBtn" title="公告">📢</button>
+                    <button class="icon-btn" id="announcementBtn" title="公告" aria-label="公告"><svg class="ui-icon"><use href="#icon-megaphone"></use></svg></button>
                     <span class="header-btn-label">公告</span>
                     <span class="unread-badge" id="announcementBadge" style="display:none"></span>
                 </div>
                 <div class="header-btn-item">
-                    <button class="icon-btn" id="settingsBtn" title="设置">⚙️</button>
+                    <button class="icon-btn" id="settingsBtn" title="设置" aria-label="设置"><svg class="ui-icon"><use href="#icon-settings"></use></svg></button>
                     <span class="header-btn-label">设置</span>
                 </div>
                 <div class="header-btn-item">
-                    <button class="icon-btn" id="modeBtn" title="模式">🎮</button>
+                    <button class="icon-btn" id="modeBtn" title="模式" aria-label="游戏模式"><svg class="ui-icon"><use href="#icon-gamepad"></use></svg></button>
                     <span class="header-btn-label">模式</span>
                 </div>
             </div>
@@ -4068,7 +4378,7 @@
                 </div>
                 <div class="level-badge" id="levelBadge">
                     <div class="level-number">Lv.1</div>
-                    <div class="level-rank"><span class="level-rank-icon">🥉</span>新手</div>
+                    <div class="level-rank"><span class="level-rank-icon"><svg class="ui-icon"><use href="#icon-medal"></use></svg></span>新手</div>
                 </div>
                 <div class="score-box">
                     <div class="score-label">最高分</div>
@@ -4079,7 +4389,7 @@
             <!-- 游戏模式指示器 -->
             <div class="mode-indicator" id="modeIndicator" style="display: none;">
                 <div class="mode-info">
-                    <span class="mode-icon" id="modeIcon">🎯</span>
+                    <span class="mode-icon" id="modeIcon"><svg class="ui-icon"><use href="#icon-target"></use></svg></span>
                     <span class="mode-name" id="modeName">经典模式</span>
                 </div>
                 <div class="mode-target" id="modeTarget">
@@ -4093,7 +4403,7 @@
                     </div>
                     <!-- 限时模式显示倒计时 -->
                     <div class="timer-display" id="timerDisplay" style="display: none;">
-                        <span class="timer-icon">⏱️</span>
+                        <span class="timer-icon"><svg class="ui-icon"><use href="#icon-clock"></use></svg></span>
                         <span class="timer-value" id="timerValue">03:00</span>
                     </div>
                 </div>
@@ -4101,13 +4411,13 @@
             
             <!-- 每日任务进度 -->
             <div class="daily-progress" id="dailyProgress">
-                <span class="daily-task-icon" id="dailyTaskIcon">🎯</span>
+                <span class="daily-task-icon" id="dailyTaskIcon"><svg class="ui-icon"><use href="#icon-target"></use></svg></span>
                 <span class="daily-task-name" id="dailyTaskName">每日任务</span>
                 <div class="daily-task-bar">
                     <div class="daily-task-fill" id="dailyTaskFill" style="width: 0%"></div>
                 </div>
                 <span class="daily-task-count" id="dailyTaskCount">0/3</span>
-                <span class="daily-task-reward" id="dailyTaskReward">💰随机道具</span>
+                <span class="daily-task-reward" id="dailyTaskReward">完成记录</span>
             </div>
             
             <div class="grid-container" id="gameGrid">
@@ -4123,7 +4433,7 @@
             <div class="powerup-bar" id="powerupBar">
                 <!-- 展开/收起按钮 -->
                 <button class="powerup-toggle" id="powerupToggle" title="展开/收起道具栏">
-                    <span class="powerup-toggle-icon">⚡</span>
+                    <span class="powerup-toggle-icon"><svg class="ui-icon"><use href="#icon-bolt"></use></svg></span>
                     <span class="powerup-toggle-label">道具</span>
                 </button>
                 
@@ -4131,42 +4441,42 @@
                 <div class="powerup-items-container expanded" id="powerupItemsContainer">
                     <div class="powerup-item" title="撤销上一步操作">
                         <button class="powerup-btn" id="undoBtn" disabled>
-                            <span class="powerup-btn-icon">↩</span>
+                            <span class="powerup-btn-icon"><svg class="ui-icon"><use href="#icon-undo"></use></svg></span>
                             <span class="powerup-btn-label">撤销</span>
                             <span class="powerup-count" id="undoCount">0</span>
                         </button>
                     </div>
                     <div class="powerup-item" title="提示最佳移动方向">
                         <button class="powerup-btn" id="hintBtn">
-                            <span class="powerup-btn-icon">💡</span>
+                            <span class="powerup-btn-icon"><svg class="ui-icon"><use href="#icon-bulb"></use></svg></span>
                             <span class="powerup-btn-label">提示</span>
                             <span class="powerup-count" id="hintCount">3</span>
                         </button>
                     </div>
                     <div class="powerup-item" title="随机打乱所有方块">
                         <button class="powerup-btn" id="shuffleBtn">
-                            <span class="powerup-btn-icon">🔀</span>
+                            <span class="powerup-btn-icon"><svg class="ui-icon"><use href="#icon-shuffle"></use></svg></span>
                             <span class="powerup-btn-label">洗牌</span>
                             <span class="powerup-count" id="shuffleCount">2</span>
                         </button>
                     </div>
                     <div class="powerup-item" title="清除指定方块">
                         <button class="powerup-btn powerup-new" id="bombBtn">
-                            <span class="powerup-btn-icon">💣</span>
+                            <span class="powerup-btn-icon"><svg class="ui-icon"><use href="#icon-bomb"></use></svg></span>
                             <span class="powerup-btn-label">炸弹</span>
                             <span class="powerup-count" id="bombCount">1</span>
                         </button>
                     </div>
                     <div class="powerup-item" title="升级方块数值">
                         <button class="powerup-btn powerup-new" id="upgradeBtn">
-                            <span class="powerup-btn-icon">⬆️</span>
+                            <span class="powerup-btn-icon"><svg class="ui-icon"><use href="#icon-upgrade"></use></svg></span>
                             <span class="powerup-btn-label">升级</span>
                             <span class="powerup-count" id="upgradeCount">1</span>
                         </button>
                     </div>
                     <div class="powerup-item" title="下次合成分数翻倍">
                         <button class="powerup-btn powerup-rare" id="doubleBtn">
-                            <span class="powerup-btn-icon">✨</span>
+                            <span class="powerup-btn-icon"><svg class="ui-icon"><use href="#icon-double"></use></svg></span>
                             <span class="powerup-btn-label">翻倍</span>
                             <span class="powerup-count" id="doubleCount">0</span>
                         </button>
@@ -4176,7 +4486,7 @@
                 <!-- 新游戏按钮 -->
                 <div class="powerup-item" title="重新开始游戏">
                     <button class="powerup-btn powerup-btn-newgame" id="newGameBtn">
-                        <span class="powerup-btn-icon">🎮</span>
+                        <span class="powerup-btn-icon"><svg class="ui-icon"><use href="#icon-refresh"></use></svg></span>
                         <span class="powerup-btn-label">新局</span>
                     </button>
                 </div>
@@ -4186,27 +4496,27 @@
         <!-- 底部导航 -->
         <nav class="bottom-nav">
             <button class="nav-item" data-panel="leaderboard">
-                <span class="nav-icon">📊</span>
+                <span class="nav-icon"><svg class="ui-icon"><use href="#icon-ranking"></use></svg></span>
                 <span>排行</span>
             </button>
             <button class="nav-item" data-panel="achievements">
-                <span class="nav-icon">🏆</span>
+                <span class="nav-icon"><svg class="ui-icon"><use href="#icon-trophy"></use></svg></span>
                 <span>成就</span>
             </button>
             <button class="nav-item" data-panel="tasks">
-                <span class="nav-icon">📋</span>
+                <span class="nav-icon"><svg class="ui-icon"><use href="#icon-tasks"></use></svg></span>
                 <span>任务</span>
             </button>
             <button class="nav-item" onclick="UI.showSkinPanel()">
-                <span class="nav-icon">🎨</span>
+                <span class="nav-icon"><svg class="ui-icon"><use href="#icon-palette"></use></svg></span>
                 <span>皮肤</span>
             </button>
             <button class="nav-item" data-panel="share">
-                <span class="nav-icon">📤</span>
+                <span class="nav-icon"><svg class="ui-icon"><use href="#icon-share"></use></svg></span>
                 <span>分享</span>
             </button>
             <button class="nav-item" data-panel="profile">
-                <span class="nav-icon">👤</span>
+                <span class="nav-icon"><svg class="ui-icon"><use href="#icon-user"></use></svg></span>
                 <span>我的</span>
             </button>
         </nav>
@@ -4223,7 +4533,7 @@
     <div class="modal-overlay" id="gameOverOverlay">
         <div class="modal">
             <div class="gameover-content">
-                <div class="gameover-icon">🎮</div>
+                <div class="gameover-icon"><svg class="ui-icon"><use href="#icon-gamepad"></use></svg></div>
                 <div class="gameover-title" id="gameOverTitle">游戏结束!</div>
                 <div class="gameover-stats">
                     <div class="stat-item">
@@ -4258,7 +4568,7 @@
             <div class="tutorial-desc" id="tutorialDesc">
                 上下左右滑动来移动方块，相同数字的方块会合并!
             </div>
-            <div class="tutorial-arrow" id="tutorialArrow">👆</div>
+            <div class="tutorial-arrow" id="tutorialArrow"><svg class="ui-icon"><use href="#icon-gamepad"></use></svg></div>
             <div class="modal-actions">
                 <button class="btn btn-primary" id="tutorialNext">下一步</button>
                 <button class="btn btn-secondary" id="tutorialSkip">跳过</button>
@@ -4278,7 +4588,7 @@
             <div class="ring-wave"></div>
             <div class="star-particles"></div>
             <!-- 内容区 -->
-            <div class="unlock-icon" id="achievementIcon">🏆</div>
+            <div class="unlock-icon" id="achievementIcon"><svg class="ui-icon"><use href="#icon-trophy"></use></svg></div>
             <div class="gameover-title" id="achievementName">成就解锁!</div>
             <div class="tutorial-desc" id="achievementDesc">恭喜你完成了这个成就!</div>
             <div class="modal-actions">
@@ -4310,6 +4620,12 @@
                 .replaceAll('"', '&quot;')
                 .replaceAll("'", '&#039;');
         }
+
+        const Icon = {
+            render(name, className = 'ui-icon') {
+                return `<svg class="${className}" aria-hidden="true"><use href="#icon-${name}"></use></svg>`;
+            }
+        };
 
         // ==================== API 集成模块 ====================
         const API = {
@@ -4373,13 +4689,13 @@
                 
                 const content = `
                     <div class="naming-dialog">
-                        <div class="naming-icon">🎮</div>
+                        <div class="naming-icon">${Icon.render('gamepad')}</div>
                         <div class="naming-title">欢迎来到 2048</div>
                         <div class="naming-subtitle">请输入你的昵称</div>
                         <input type="text" id="nicknameInput" value="${randomName}" maxlength="12" placeholder="输入昵称" class="naming-input">
                         <div class="naming-buttons">
-                            <button class="btn btn-secondary" id="randomNameBtn">🎲 随机</button>
-                            <button class="btn btn-primary" id="confirmNameBtn">✅ 开始游戏</button>
+                            <button class="btn btn-secondary" id="randomNameBtn">换一个昵称</button>
+                            <button class="btn btn-primary" id="confirmNameBtn">开始游戏</button>
                         </div>
                     </div>
                 `;
@@ -4458,8 +4774,8 @@
                 // 关闭弹窗
                 document.getElementById('modalOverlay').classList.remove('active');
                 showToast(this.isGuest
-                    ? `📴 已进入离线游客模式，${this.nickname} 的进度仅保存在本机`
-                    : `✅ 欢迎，${this.nickname}！`);
+                    ? `已进入离线游客模式，${this.nickname} 的进度仅保存在本机`
+                    : `欢迎，${this.nickname}`);
                 
                 // 初始化游戏
                 if (typeof initGame === 'function') {
@@ -4529,9 +4845,9 @@
             
             // 使用道具
             async useItem(itemType) {
-                if (!this.isLoggedIn) return;
+                if (!this.isLoggedIn) return true;
                 try {
-                    await this.request('/items/use', {
+                    const data = await this.request('/items/use', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({
@@ -4539,8 +4855,11 @@
                             itemType: itemType
                         })
                     });
+                    return data.success === true;
                 } catch (e) {
                     console.log('使用道具失败:', e.message);
+                    showToast(e.payload?.error || '道具验证失败，本次未使用');
+                    return false;
                 }
             }
         };
@@ -4636,14 +4955,14 @@
                     this.gameStartTime = state.gameStartTime;
                     this.gameSessionId = state.gameSessionId;  // 恢复会话ID
                     
-                    document.getElementById('bestScore').textContent = this.bestScore;
-                    this.updateDisplay();
-                    
                     if (state.mode) {
                         GameModeManager.currentMode = GameModeManager.normalizeMode(state.mode);
                     }
-                    
-                    showToast('✅ 已恢复游戏进度');
+                    document.getElementById('bestScore').textContent = this.bestScore;
+                    this.updateDisplay();
+                    GameModeManager.updateDisplay();
+
+                    showToast('已恢复游戏进度');
                     return true;
                 } catch (e) {
                     return false;
@@ -4755,7 +5074,7 @@ if (next && this.grid[next.row] && this.grid[next.row][next.col] && this.grid[ne
                                 if (PowerupSystem.doubleActive) {
                                     addScore *= 2;
                                     PowerupSystem.doubleActive = false;
-                                    showToast('✨ 翻倍生效! +' + addScore);
+                                    showToast('双倍分数生效，+' + addScore);
                                 }
                                 this.score += addScore;
                                 this.maxTile = Math.max(this.maxTile, merged.value);
@@ -4777,15 +5096,15 @@ if (next && this.grid[next.row] && this.grid[next.row][next.col] && this.grid[ne
                                 // 里程碑弹出提示
                                 if (merged.value === 512 && !this.milestone512) {
                                     this.milestone512 = true;
-                                    showToast('🎉 达成里程碑: 512!');
+                                    showToast('达成 512 方块里程碑');
                                 }
                                 if (merged.value === 1024 && !this.milestone1024) {
                                     this.milestone1024 = true;
-                                    showToast('🎊 达成里程碑: 1024!');
+                                    showToast('达成 1024 方块里程碑');
                                 }
                                 if (merged.value === 2048 && !this.milestone2048) {
                                     this.milestone2048 = true;
-                                    showToast('🏆 恭喜达成2048! 你赢了!');
+                                    showToast('达成 2048，仍可继续挑战');
                                 }
 
                                 // 检查是否赢得游戏
@@ -5220,6 +5539,7 @@ if (next && this.grid[next.row] && this.grid[next.row][next.col] && this.grid[ne
                 
                 // 更新累计分数
                 LevelSystem.addScore(this.score);
+                AchievementSystem.check(this);
                 
                 // 更新任务进度
                 TaskSystem.updateTask('games', 1);
@@ -5355,106 +5675,16 @@ if (next && this.grid[next.row] && this.grid[next.row][next.col] && this.grid[ne
             },
 
             getTileColor(value) {
-                const theme = GameSettings.theme;
-                const colors = {
-                    classic: {
-                        2: { bg: '#eee4da', text: '#776e65' },
-                        4: { bg: '#ede0c8', text: '#776e65' },
-                        8: { bg: '#f2b179', text: '#f9f6f2' },
-                        16: { bg: '#f59563', text: '#f9f6f2' },
-                        32: { bg: '#f67c5f', text: '#f9f6f2' },
-                        64: { bg: '#f65e3b', text: '#f9f6f2' },
-                        128: { bg: '#edcf72', text: '#f9f6f2' },
-                        256: { bg: '#edcc61', text: '#f9f6f2' },
-                        512: { bg: '#edc850', text: '#f9f6f2' },
-                        1024: { bg: '#edc53f', text: '#f9f6f2' },
-                        2048: { bg: '#edc22e', text: '#f9f6f2' },
-                        4096: { bg: '#3c3a32', text: '#f9f6f2' },
-                        8192: { bg: '#3c3a32', text: '#f9f6f2' }
-                    },
-                    neon: {
-                        2: { bg: '#0066ff', text: '#ffffff' },
-                        4: { bg: '#0088ff', text: '#ffffff' },
-                        8: { bg: '#00ccff', text: '#0a0a1a' },
-                        16: { bg: '#00ffff', text: '#0a0a1a' },
-                        32: { bg: '#00ff88', text: '#0a0a1a' },
-                        64: { bg: '#ff00ff', text: '#ffffff' },
-                        128: { bg: '#ff66ff', text: '#0a0a1a' },
-                        256: { bg: '#ffff00', text: '#0a0a1a' },
-                        512: { bg: '#ffcc00', text: '#0a0a1a' },
-                        1024: { bg: '#ff9900', text: '#0a0a1a' },
-                        2048: { bg: '#ffffff', text: '#0a0a1a' },
-                        4096: { bg: '#ffffff', text: '#ff00ff' },
-                        8192: { bg: '#ffffff', text: '#00ffff' }
-                    },
-                    sakura: {
-                        2: { bg: '#f8bbd9', text: '#ffffff' },
-                        4: { bg: '#f48fb1', text: '#ffffff' },
-                        8: { bg: '#f06292', text: '#ffffff' },
-                        16: { bg: '#ec407a', text: '#ffffff' },
-                        32: { bg: '#e91e63', text: '#ffffff' },
-                        64: { bg: '#d81b60', text: '#ffffff' },
-                        128: { bg: '#ffd54f', text: '#ffffff' },
-                        256: { bg: '#ffca28', text: '#ffffff' },
-                        512: { bg: '#ffc107', text: '#ffffff' },
-                        1024: { bg: '#ffb300', text: '#ffffff' },
-                        2048: { bg: '#ffa000', text: '#ffffff' },
-                        4096: { bg: '#ff6f00', text: '#ffffff' },
-                        8192: { bg: '#e65100', text: '#ffffff' }
-                    },
-                    tech: {
-                        2: { bg: '#1565c0', text: '#ffffff' },
-                        4: { bg: '#1976d2', text: '#ffffff' },
-                        8: { bg: '#1e88e5', text: '#ffffff' },
-                        16: { bg: '#2196f3', text: '#ffffff' },
-                        32: { bg: '#42a5f5', text: '#ffffff' },
-                        64: { bg: '#64b5f6', text: '#0d47a1' },
-                        128: { bg: '#ffd600', text: '#0d47a1' },
-                        256: { bg: '#ffea00', text: '#0d47a1' },
-                        512: { bg: '#ffc400', text: '#0d47a1' },
-                        1024: { bg: '#ffab00', text: '#0d47a1' },
-                        2048: { bg: '#ff6d00', text: '#ffffff' },
-                        4096: { bg: '#ffffff', text: '#1a237e' },
-                        8192: { bg: '#00e5ff', text: '#0d47a1' }
-                    },
-                    nature: {
-                        2: { bg: '#a5d6a7', text: '#1b5e20' },
-                        4: { bg: '#81c784', text: '#ffffff' },
-                        8: { bg: '#66bb6a', text: '#ffffff' },
-                        16: { bg: '#4caf50', text: '#ffffff' },
-                        32: { bg: '#43a047', text: '#ffffff' },
-                        64: { bg: '#388e3c', text: '#ffffff' },
-                        128: { bg: '#ffd54f', text: '#ffffff' },
-                        256: { bg: '#ffca28', text: '#ffffff' },
-                        512: { bg: '#ffc107', text: '#ffffff' },
-                        1024: { bg: '#ffb300', text: '#ffffff' },
-                        2048: { bg: '#ff8f00', text: '#ffffff' },
-                        4096: { bg: '#ff6f00', text: '#ffffff' },
-                        8192: { bg: '#e65100', text: '#ffffff' }
-                    },
-                    minimal: {
-                        2: { bg: '#e0e0e0', text: '#212121' },
-                        4: { bg: '#bdbdbd', text: '#212121' },
-                        8: { bg: '#9e9e9e', text: '#ffffff' },
-                        16: { bg: '#757575', text: '#ffffff' },
-                        32: { bg: '#616161', text: '#ffffff' },
-                        64: { bg: '#424242', text: '#ffffff' },
-                        128: { bg: '#212121', text: '#ffffff' },
-                        256: { bg: '#212121', text: '#ffffff' },
-                        512: { bg: '#212121', text: '#ffffff' },
-                        1024: { bg: '#212121', text: '#ffffff' },
-                        2048: { bg: '#000000', text: '#ffffff' },
-                        4096: { bg: '#000000', text: '#ffffff' },
-                        8192: { bg: '#000000', text: '#ffffff' }
-                    }
-                };
-
-                const themeColors = colors[theme] || colors.classic;
-                if (themeColors[value]) {
-                    return themeColors[value];
-                }
-                // 超出范围
-                return { bg: '#3c3a32', text: '#f9f6f2' };
+                const supportedValues = [2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048];
+                const token = supportedValues.includes(value) ? `--tile-${value}` : '--tile-super';
+                const bg = getComputedStyle(document.body).getPropertyValue(token).trim() || '#3c3a32';
+                const hex = bg.replace('#', '');
+                const normalized = hex.length === 3 ? hex.split('').map(char => char + char).join('') : hex;
+                const rgb = /^([0-9a-f]{6})$/i.test(normalized)
+                    ? [0, 2, 4].map(index => parseInt(normalized.slice(index, index + 2), 16))
+                    : [60, 58, 50];
+                const luminance = (0.2126 * rgb[0] + 0.7152 * rgb[1] + 0.0722 * rgb[2]) / 255;
+                return { bg, text: luminance > 0.62 ? '#3d3833' : '#fffdf8' };
             }
         };
 
@@ -5699,6 +5929,7 @@ if (next && this.grid[next.row] && this.grid[next.row][next.col] && this.grid[ne
             mergeEffects: true,
             particleEffects: true,
             defaultMode: 'classic',
+            supportedThemes: ['classic', 'neon', 'sakura', 'tech', 'nature', 'minimal'],
             
             storageKey: '2048-settings',
 
@@ -5714,7 +5945,7 @@ if (next && this.grid[next.row] && this.grid[next.row][next.col] && this.grid[ne
                     this.vibrationEnabled = data.vibrationEnabled !== false;
                     this.autoSave = data.autoSave !== false;
                     this.difficulty = data.difficulty || 'normal';
-                    this.theme = data.theme || 'classic';
+                    this.theme = this.supportedThemes.includes(data.theme) ? data.theme : 'classic';
                     this.showHints = data.showHints !== false;
                     this.confirmExit = data.confirmExit !== false;
                     this.mergeEffects = data.mergeEffects !== false;
@@ -5746,7 +5977,12 @@ if (next && this.grid[next.row] && this.grid[next.row][next.col] && this.grid[ne
                 const themeClasses = ['theme-classic', 'theme-neon', 'theme-sakura', 'theme-tech', 'theme-nature', 'theme-minimal'];
                 themeClasses.forEach(cls => document.body.classList.remove(cls));
                 document.body.classList.add('theme-' + this.theme);
-                console.log('🎨 主题已切换为:', this.theme);
+                const themeColors = {
+                    classic: '#8b6f56', neon: '#63b6b8', sakura: '#ad6175',
+                    tech: '#6ba9c7', nature: '#527b5e', minimal: '#3e3e3a'
+                };
+                document.querySelector('meta[name="theme-color"]')?.setAttribute('content', themeColors[this.theme] || themeColors.classic);
+                console.log('主题已切换为:', this.theme);
             },
 
             toggleSound() {
@@ -5797,7 +6033,7 @@ if (next && this.grid[next.row] && this.grid[next.row][next.col] && this.grid[ne
             },
 
             setTheme(theme) {
-                this.theme = theme;
+                this.theme = this.supportedThemes.includes(theme) ? theme : 'classic';
                 this.applyTheme();
                 this.save();
             },
@@ -5973,13 +6209,13 @@ if (next && this.grid[next.row] && this.grid[next.row][next.col] && this.grid[ne
             gamesPlayed: 0,
 
             ranks: [
-                { name: '新手', icon: '🥉', minScore: 0 },
-                { name: '入门', icon: '🥈', minScore: 10000 },
-                { name: '进阶', icon: '🥇', minScore: 50000 },
-                { name: '高手', icon: '⭐', minScore: 200000 },
-                { name: '专家', icon: '💎', minScore: 500000 },
-                { name: '大师', icon: '👑', minScore: 1000000 },
-                { name: '传奇', icon: '🏆', minScore: 5000000 }
+                { name: '新手', icon: 'medal', minScore: 0 },
+                { name: '入门', icon: 'target', minScore: 10000 },
+                { name: '进阶', icon: 'ranking', minScore: 50000 },
+                { name: '高手', icon: 'trophy', minScore: 200000 },
+                { name: '专家', icon: 'double', minScore: 500000 },
+                { name: '大师', icon: 'upgrade', minScore: 1000000 },
+                { name: '传奇', icon: 'trophy', minScore: 5000000 }
             ],
 
             storageKey: '2048-level',
@@ -6067,7 +6303,7 @@ if (next && this.grid[next.row] && this.grid[next.row][next.col] && this.grid[ne
                 const badge = document.getElementById('levelBadge');
                 badge.innerHTML = `
                     <div class="level-number">Lv.${this.level}</div>
-                    <div class="level-rank"><span class="level-rank-icon">${rank.icon}</span>${rank.name}</div>
+                    <div class="level-rank"><span class="level-rank-icon">${Icon.render(rank.icon)}</span>${rank.name}</div>
                 `;
             },
 
@@ -6094,42 +6330,20 @@ if (next && this.grid[next.row] && this.grid[next.row][next.col] && this.grid[ne
             achievements: [],
             
             definitions: {
-                // 基础成就 (15个)
-                first_merge: { name: '初试身手', desc: '完成第一次合并', icon: '🎯', type: 'basic', reward: '1个道具' },
-                first_128: { name: '小试牛刀', desc: '合成128方块', icon: '🔶', type: 'basic', reward: '1个道具' },
-                first_256: { name: '渐入佳境', desc: '合成256方块', icon: '🔸', type: 'basic', reward: '2个道具' },
-                first_512: { name: '巅峰挑战', desc: '合成512方块', icon: '💎', type: 'basic', reward: '2个道具' },
-                first_1024: { name: '千人斩', desc: '合成1024方块', icon: '🌟', type: 'basic', reward: '3个道具' },
-                first_2048: { name: '2048大师', desc: '合成2048方块', icon: '👑', type: 'basic', reward: '5个道具' },
-                first_4096: { name: '超越极限', desc: '合成4096方块', icon: '🔥', type: 'basic', reward: '5个道具' },
-                first_8192: { name: '传说之最', desc: '合成8192方块', icon: '⚡', type: 'basic', reward: '10个道具' },
-                days_7: { name: '周常玩家', desc: '连续登录7天', icon: '📅', type: 'basic', reward: '3个道具' },
-                days_30: { name: '月度冠军', desc: '连续登录30天', icon: '📅', type: 'basic', reward: '10个道具' },
-                games_10: { name: '初学者', desc: '累计完成10局', icon: '🎮', type: 'basic', reward: '1个提示' },
-                games_50: { name: '熟练玩家', desc: '累计完成50局', icon: '🎮', type: 'basic', reward: '2个提示' },
-                games_100: { name: '百局老兵', desc: '累计完成100局', icon: '🎮', type: 'basic', reward: '5个道具' },
-                games_500: { name: '游戏大师', desc: '累计完成500局', icon: '🎮', type: 'basic', reward: '10个道具' },
-                
-                // 挑战成就 (8个)
-                score_10000: { name: '万分达人', desc: '单局得分超过10000', icon: '🥇', type: 'challenge', reward: '2个道具' },
-                score_50000: { name: '分数猎人', desc: '单局得分超过50000', icon: '🏅', type: 'challenge', reward: '5个道具' },
-                score_100000: { name: '分数王者', desc: '单局得分超过100000', icon: '🏆', type: 'challenge', reward: '10个道具' },
-                speed_5min: { name: '神速玩家', desc: '5分钟内达成1024', icon: '⚡', type: 'challenge', reward: '3个道具' },
-                speed_2min: { name: '闪电之手', desc: '2分钟内达成512', icon: '⚡', type: 'challenge', reward: '5个道具' },
-                no_powerup: { name: '纯净挑战', desc: '不使用道具通关2048', icon: '🧪', type: 'challenge', reward: '10个道具' },
-                perfect_2048: { name: '完美2048', desc: '合并2048后继续达成4096', icon: '💎', type: 'challenge', reward: '15个道具' },
-                streak_10: { name: '十连胜', desc: '连续10局创新高', icon: '🔥', type: 'challenge', reward: '10个道具' },
-                
-                // 特殊成就 (4个)
-                powerup_master: { name: '道具大师', desc: '累计使用道具100次', icon: '🧙', type: 'special', reward: '10个道具' },
-                theme_collector: { name: '主题收藏家', desc: '解锁所有主题', icon: '🎨', type: 'special', reward: '5个道具' },
-                social_master: { name: '社交达人', desc: '分享10次', icon: '📢', type: 'special', reward: '3个道具' },
-                comeback: { name: '逆转乾坤', desc: '使用道具后获胜', icon: '🔄', type: 'special', reward: '5个道具' },
-                
-                // 隐藏成就 (3个)
-                lucky: { name: '幸运儿', desc: '单局连续生成3个4', icon: '🍀', type: 'hidden', reward: '5个道具', secret: true },
-                perfect: { name: '完美主义', desc: '合并效率超过95%', icon: '✨', type: 'hidden', reward: '10个道具', secret: true },
-                ultimate: { name: '终极成就', desc: '解锁所有其他成就', icon: '🌟', type: 'hidden', reward: '无限道具', secret: true }
+                first_merge: { name: '第一步', desc: '完成第一次有效合并', icon: 'target', type: 'starter', metric: 'score', target: 4 },
+                first_128: { name: '站稳脚跟', desc: '合成 128 方块', icon: 'upgrade', type: 'starter', metric: 'tile', target: 128 },
+                first_256: { name: '渐入佳境', desc: '合成 256 方块', icon: 'upgrade', type: 'growth', metric: 'tile', target: 256 },
+                first_512: { name: '掌控棋盘', desc: '合成 512 方块', icon: 'ranking', type: 'growth', metric: 'tile', target: 512 },
+                first_1024: { name: '只差一步', desc: '合成 1024 方块', icon: 'medal', type: 'growth', metric: 'tile', target: 1024 },
+                first_2048: { name: '达成 2048', desc: '第一次合成 2048 方块', icon: 'trophy', type: 'growth', metric: 'tile', target: 2048 },
+                first_4096: { name: '继续向上', desc: '合成 4096 方块', icon: 'double', type: 'challenge', metric: 'tile', target: 4096 },
+                score_5000: { name: '五千分', desc: '单局得分达到 5000', icon: 'ranking', type: 'challenge', metric: 'score', target: 5000 },
+                score_10000: { name: '万分局', desc: '单局得分达到 10000', icon: 'medal', type: 'challenge', metric: 'score', target: 10000 },
+                score_25000: { name: '高分耐力', desc: '单局得分达到 25000', icon: 'trophy', type: 'challenge', metric: 'score', target: 25000 },
+                games_5: { name: '熟悉节奏', desc: '累计完成 5 局', icon: 'gamepad', type: 'growth', metric: 'games', target: 5 },
+                games_20: { name: '稳定玩家', desc: '累计完成 20 局', icon: 'gamepad', type: 'growth', metric: 'games', target: 20 },
+                games_50: { name: '长期挑战', desc: '累计完成 50 局', icon: 'gamepad', type: 'challenge', metric: 'games', target: 50 },
+                comeback: { name: '继续作战', desc: '使用道具脱离死局并继续游戏', icon: 'refresh', type: 'special', metric: 'event' }
             },
 
             storageKey: '2048-achievements',
@@ -6141,19 +6355,20 @@ if (next && this.grid[next.row] && this.grid[next.row][next.col] && this.grid[ne
 
             load() {
                 const saved = localStorage.getItem(this.storageKey);
+                let previous = {};
                 if (saved) {
-                    this.achievements = JSON.parse(saved);
-                } else {
-                    // 初始化所有成就
-                    this.achievements = {};
-                    for (const key in this.definitions) {
-                        this.achievements[key] = {
-                            unlocked: false,
-                            unlockedAt: null,
-                            progress: 0
-                        };
-                    }
+                    try { previous = JSON.parse(saved) || {}; } catch { previous = {}; }
                 }
+                this.achievements = {};
+                for (const key in this.definitions) {
+                    const existing = previous[key] || {};
+                    this.achievements[key] = {
+                        unlocked: existing.unlocked === true,
+                        unlockedAt: existing.unlockedAt || null,
+                        progress: Number(existing.progress) || 0
+                    };
+                }
+                this.save();
             },
 
             save() {
@@ -6161,39 +6376,22 @@ if (next && this.grid[next.row] && this.grid[next.row][next.col] && this.grid[ne
             },
 
             check(game) {
-                // 检查方块成就
-                this.checkTileAchievement('first_128', game.maxTile >= 128);
-                this.checkTileAchievement('first_256', game.maxTile >= 256);
-                this.checkTileAchievement('first_512', game.maxTile >= 512);
-                this.checkTileAchievement('first_1024', game.maxTile >= 1024);
-                this.checkTileAchievement('first_2048', game.maxTile >= 2048);
-                this.checkTileAchievement('first_4096', game.maxTile >= 4096);
-                this.checkTileAchievement('first_8192', game.maxTile >= 8192);
-
-                // 检查分数成就
-                this.checkScoreAchievement('score_50000', game.score);
-                this.checkScoreAchievement('score_100000', game.score);
-            },
-
-            checkTileAchievement(id, condition) {
-                if (!condition) return;
-                if (!this.achievements[id].unlocked) {
-                    this.unlock(id);
-                }
-            },
-
-            checkScoreAchievement(id, score) {
-                const thresholds = {
-                    score_50000: 50000,
-                    score_100000: 100000
+                const metrics = {
+                    score: Number(game.score) || 0,
+                    tile: Number(game.maxTile) || 0,
+                    games: Number(LevelSystem.gamesPlayed) || 0
                 };
-                if (score >= thresholds[id] && !this.achievements[id].unlocked) {
-                    this.unlock(id);
+                for (const [id, definition] of Object.entries(this.definitions)) {
+                    if (definition.metric === 'event') continue;
+                    const progress = metrics[definition.metric] || 0;
+                    this.achievements[id].progress = Math.min(progress, definition.target);
+                    if (progress >= definition.target && !this.achievements[id].unlocked) this.unlock(id);
                 }
+                this.save();
             },
 
             unlock(id) {
-                if (this.achievements[id].unlocked) return;
+                if (!this.definitions[id] || !this.achievements[id] || this.achievements[id].unlocked) return;
                 
                 this.achievements[id].unlocked = true;
                 this.achievements[id].unlockedAt = Date.now();
@@ -6204,10 +6402,7 @@ if (next && this.grid[next.row] && this.grid[next.row][next.col] && this.grid[ne
 
             showUnlock(id) {
                 const def = this.definitions[id];
-                document.getElementById('achievementIcon').textContent = def.icon;
-                document.getElementById('achievementName').textContent = def.name;
-                document.getElementById('achievementDesc').textContent = def.desc;
-                document.getElementById('achievementOverlay').classList.add('active');
+                showToast(`解锁成就：${def.name}`);
                 
                 if (GameSettings.soundEnabled) {
                     AudioManager.playAchievement();
@@ -6331,10 +6526,10 @@ if (next && this.grid[next.row] && this.grid[next.row][next.col] && this.grid[ne
             
             // 获取排名徽章
             getRankBadge(rank) {
-                if (rank === 1) return { icon: '🥇', class: 'gold', label: '冠军' };
-                if (rank === 2) return { icon: '🥈', class: 'silver', label: '亚军' };
-                if (rank === 3) return { icon: '🥉', class: 'bronze', label: '季军' };
-                return { icon: rank, class: 'normal', label: '第' + rank + '名' };
+                if (rank === 1) return { icon: '1', class: 'gold', label: '冠军' };
+                if (rank === 2) return { icon: '2', class: 'silver', label: '亚军' };
+                if (rank === 3) return { icon: '3', class: 'bronze', label: '季军' };
+                return { icon: String(rank), class: 'normal', label: '第' + rank + '名' };
             },
             
             // 渲染排行榜
@@ -6344,18 +6539,18 @@ if (next && this.grid[next.row] && this.grid[next.row][next.col] && this.grid[ne
                              this.scores.alltime;
                 
                 if (data.length === 0) {
-                    return '<div style="text-align:center;padding:40px;color:var(--text-secondary);\"><div style=\"font-size:3rem;margin-bottom:16px;\">🎯</div><div>暂无记录</div><div style=\"font-size:0.85rem;margin-top:8px;\">完成游戏后记录将显示在这里</div></div>';
+                    return `<div class="empty-state">${Icon.render('target')}<div>暂无本机记录</div><div style="font-size:0.85rem;margin-top:8px;">完成游戏后记录将显示在这里</div></div>`;
                 }
                 
                 return data.map((entry, index) => {
                     const rank = this.getRankBadge(index + 1);
                     const timeAgo = this.getTimeAgo(entry.time);
-                    const modeIcon = entry.mode === 'challenge' ? '🎯' : entry.mode === 'timed' ? '⏱️' : '🎮';
-                    const playerName = entry.name || '玩家';  // 显示名称
+                    const modeLabel = entry.mode === 'challenge' ? '挑战' : entry.mode === 'timed' ? '限时' : '经典';
+                    const playerName = escapeHTML(entry.name || '玩家');
                     
                     return `
                         <div class="leaderboard-item rank-${rank.class}" style="display:flex;align-items:center;padding:12px 16px;background:rgba(255,255,255,0.05);border-radius:12px;margin-bottom:8px;transition:all 0.2s;">
-                            <div class="rank-badge" style="width:50px;text-align:center;font-size:1.5rem;">
+                            <div class="leaderboard-rank">
                                 ${rank.icon}
                             </div>
                             <div class="score-info" style="flex:1;margin-left:12px;">
@@ -6364,7 +6559,7 @@ if (next && this.grid[next.row] && this.grid[next.row][next.col] && this.grid[ne
                                     <span style="font-size:1.2rem;font-weight:700;color:var(--text-primary);">${entry.score.toLocaleString()}分</span>
                                 </div>
                                 <div style="font-size:0.8rem;color:var(--text-secondary);display:flex;gap:12px;margin-top:4px;">
-                                    <span>${modeIcon} 最高${entry.maxTile || 2}</span>
+                                    <span>${modeLabel} · 最高方块 ${entry.maxTile || 2}</span>
                                     <span>${timeAgo}</span>
                                 </div>
                             </div>
@@ -6594,10 +6789,10 @@ if (next && this.grid[next.row] && this.grid[next.row][next.col] && this.grid[ne
             storageKey: '2048-tasks',
 
             defaultTasks: [
-                { id: 'games', name: '完成3局游戏', target: 3, progress: 0, reward: '1个道具', type: 'count' },
-                { id: 'score', name: '单局得分超过5000', target: 5000, progress: 0, reward: '2个道具', type: 'score' },
-                { id: 'tile256', name: '合成256方块', target: 256, progress: 0, reward: '1个提示', type: 'tile' },
-                { id: 'powerup', name: '使用2次道具', target: 2, progress: 0, reward: '1个撤销', type: 'count' }
+                { id: 'games', name: '完成 2 局', target: 2, progress: 0, reward: '完成记录', type: 'count' },
+                { id: 'score', name: '单局达到 2048 分', target: 2048, progress: 0, reward: '完成记录', type: 'score' },
+                { id: 'tile256', name: '合成 256 方块', target: 256, progress: 0, reward: '完成记录', type: 'tile' },
+                { id: 'powerup', name: '使用 1 次道具', target: 1, progress: 0, reward: '完成记录', type: 'count' }
             ],
             
             // 清零所有任务数据
@@ -6634,11 +6829,11 @@ if (next && this.grid[next.row] && this.grid[next.row][next.col] && this.grid[ne
                 // 检查是否所有任务都完成了
                 if (incompleteTasks.length === 0) {
                     progressEl.classList.add('completed');
-                    iconEl.textContent = '🎉';
+                    iconEl.innerHTML = Icon.render('check');
                     nameEl.textContent = '今日任务全部完成';
                     fillEl.style.width = '100%';
                     countEl.textContent = `${this.completedTasks.length}/${this.tasks.length}`;
-                    rewardEl.textContent = '✅已领取';
+                    rewardEl.textContent = '今日已记录';
                     return;
                 }
                 
@@ -6648,23 +6843,34 @@ if (next && this.grid[next.row] && this.grid[next.row][next.col] && this.grid[ne
                 const percent = Math.min(100, (progress / currentTask.target) * 100);
                 
                 progressEl.classList.remove('completed');
-                iconEl.textContent = '🎯';
+                iconEl.innerHTML = Icon.render('target');
                 nameEl.textContent = currentTask.name;
                 fillEl.style.width = `${percent}%`;
                 countEl.textContent = `${progress}/${currentTask.target}`;
-                rewardEl.textContent = `💰${currentTask.reward || '随机道具'}`;
+                rewardEl.textContent = currentTask.reward || '本机奖励';
             },
 
             load() {
                 const saved = localStorage.getItem(this.storageKey);
+                let previousTasks = [];
+                let previousCompleted = [];
                 if (saved) {
-                    const data = JSON.parse(saved);
-                    this.tasks = data.tasks || this.defaultTasks;
-                    this.completedTasks = data.completedTasks || [];
-                    this.lastReset = data.lastReset;
-                } else {
-                    this.tasks = JSON.parse(JSON.stringify(this.defaultTasks));
+                    try {
+                        const data = JSON.parse(saved);
+                        previousTasks = Array.isArray(data.tasks) ? data.tasks : [];
+                        previousCompleted = Array.isArray(data.completedTasks) ? data.completedTasks : [];
+                        this.lastReset = data.lastReset;
+                    } catch {
+                        previousTasks = [];
+                    }
                 }
+                const previousById = new Map(previousTasks.map(task => [task.id, task]));
+                this.tasks = this.defaultTasks.map(definition => ({
+                    ...definition,
+                    progress: Math.max(0, Number(previousById.get(definition.id)?.progress) || 0)
+                }));
+                const activeIds = new Set(this.tasks.map(task => task.id));
+                this.completedTasks = previousCompleted.filter(id => activeIds.has(id));
             },
 
             save() {
@@ -6690,16 +6896,11 @@ if (next && this.grid[next.row] && this.grid[next.row][next.col] && this.grid[ne
             },
 
             resetRoundTasks() {
-                // 重置单局任务进度（分数、方块）
+                // 单局峰值重新计算，但已经完成并发奖的每日任务保留到次日。
                 this.tasks.forEach(task => {
-                    if (task.type === 'score' || task.type === 'tile') {
+                    if (!this.completedTasks.includes(task.id) && (task.type === 'score' || task.type === 'tile')) {
                         task.progress = 0;
                     }
-                });
-                // 从已完成列表中移除单局任务
-                this.completedTasks = this.completedTasks.filter(id => {
-                    const task = this.tasks.find(t => t.id === id);
-                    return task && task.type !== 'score' && task.type !== 'tile';
                 });
                 this.save();
                 this.updateDailyProgressUI();
@@ -6733,20 +6934,8 @@ if (next && this.grid[next.row] && this.grid[next.row][next.col] && this.grid[ne
                 // 标记为已完成
                 this.completedTasks.push(id);
                 
-                // 发放奖励
-                const reward = task.reward || '随机道具';
-                if (reward.includes('道具')) {
-                    PowerupSystem.addRandomItem();
-                } else if (reward.includes('提示')) {
-                    PowerupSystem.addItem('hint', 1);
-                    showToast('🎉 任务完成！获得1个提示');
-                } else if (reward.includes('撤销')) {
-                    PowerupSystem.addItem('undo', 1);
-                    showToast('🎉 任务完成！获得1个撤销');
-                } else {
-                    PowerupSystem.addRandomItem();
-                    showToast('🎉 任务完成！奖励：' + reward);
-                }
+                // 服务端没有任务进度/领奖契约；只记录真实完成状态，不伪造道具奖励。
+                showToast(`今日目标完成：${task.name}`);
                 
                 this.save();
             },
@@ -6828,7 +7017,7 @@ if (next && this.grid[next.row] && this.grid[next.row][next.col] && this.grid[ne
             }
         },
         
-        showAllTasksCompleted() {
+            showAllTasksCompleted() {
             const progressEl = document.getElementById('dailyProgress');
             const iconEl = document.getElementById('dailyTaskIcon');
             const nameEl = document.getElementById('dailyTaskName');
@@ -6838,12 +7027,12 @@ if (next && this.grid[next.row] && this.grid[next.row][next.col] && this.grid[ne
             
             if (!progressEl) return;
             
-            progressEl.classList.add('completed');
-            iconEl.textContent = '🎉';
+                progressEl.classList.add('completed');
+                iconEl.innerHTML = Icon.render('check');
             nameEl.textContent = '今日任务全部完成';
             fillEl.style.width = '100%';
             countEl.textContent = `${this.completedTasks.length}/${this.tasks.length}`;
-            rewardEl.textContent = '✅已领取';
+                rewardEl.textContent = '今日已记录';
         },
         
         showCurrentTask(task) {
@@ -6857,7 +7046,7 @@ if (next && this.grid[next.row] && this.grid[next.row][next.col] && this.grid[ne
             if (!progressEl || !task) return;
             
             progressEl.classList.remove('completed');
-            iconEl.textContent = task.icon || '🎯';
+                iconEl.innerHTML = Icon.render(task.icon || 'target');
             nameEl.textContent = task.name;
             
             let progressPercent = 0;
@@ -6869,13 +7058,8 @@ if (next && this.grid[next.row] && this.grid[next.row][next.col] && this.grid[ne
             
             fillEl.style.width = progressPercent + '%';
             
-            if (task.type === 'count') {
-                countEl.textContent = `${task.progress}/${task.target} 💰${task.reward}`;
-            } else {
-                countEl.textContent = `${task.progress}/${task.target} 💰${task.reward}`;
-            }
-            
-            rewardEl.textContent = `💰${task.reward}`;
+            countEl.textContent = `${task.progress}/${task.target}`;
+            rewardEl.textContent = task.reward;
         },
 
             getTasks() {
@@ -6908,17 +7092,22 @@ if (next && this.grid[next.row] && this.grid[next.row][next.col] && this.grid[ne
             },
 
             load() {
+                const localDefaults = API.isLoggedIn
+                    ? { undo: 0, hint: 0, shuffle: 0, bomb: 0, upgrade: 0, double: 0 }
+                    : { undo: 0, hint: 3, shuffle: 2, bomb: 1, upgrade: 1, double: 0 };
                 const saved = localStorage.getItem(this.storageKey);
                 if (saved) {
                     const data = JSON.parse(saved);
-                    this.undo = data.undo || 0;
-                    this.hint = data.hint || 3;
-                    this.shuffle = data.shuffle || 2;
-                    this.bomb = data.bomb || 1;
-                    this.upgrade = data.upgrade || 1;
-                    this.double = data.double || 0;
+                    this.undo = Number.isFinite(Number(data.undo)) ? Math.max(0, Number(data.undo)) : localDefaults.undo;
+                    this.hint = Number.isFinite(Number(data.hint)) ? Math.max(0, Number(data.hint)) : localDefaults.hint;
+                    this.shuffle = Number.isFinite(Number(data.shuffle)) ? Math.max(0, Number(data.shuffle)) : localDefaults.shuffle;
+                    this.bomb = Number.isFinite(Number(data.bomb)) ? Math.max(0, Number(data.bomb)) : localDefaults.bomb;
+                    this.upgrade = Number.isFinite(Number(data.upgrade)) ? Math.max(0, Number(data.upgrade)) : localDefaults.upgrade;
+                    this.double = Number.isFinite(Number(data.double)) ? Math.max(0, Number(data.double)) : localDefaults.double;
                     this.usedPowerupAt = data.usedPowerupAt || 0;
                     this.hintUsedAt = data.hintUsedAt || 0;
+                } else {
+                    Object.assign(this, localDefaults);
                 }
                 
                 // 🔧 从后端API同步道具数据（如果已登录）
@@ -6930,33 +7119,27 @@ if (next && this.grid[next.row] && this.grid[next.row][next.col] && this.grid[ne
                 if (!API.isLoggedIn || !API.userId) return;
                 
                 try {
-                    const response = await fetch(`${API.baseUrl}/items/user/${API.userId}`);
-                    if (response.ok) {
-                        const data = await response.json();
-                        if (data.items) {
+                    const data = await API.getUserItems();
+                    if (data.items) {
+                            const serverInventory = { undo: 0, hint: 0, shuffle: 0, bomb: 0, upgrade: 0, double: 0 };
                             // 支持两种格式：对象格式 {undo:3, hint:3} 或数组格式 [{item_type:'undo', count:3}]
                             if (Array.isArray(data.items)) {
                                 data.items.forEach(item => {
-                                    if (item.item_type === 'undo') this.undo = item.count;
-                                    if (item.item_type === 'hint') this.hint = item.count;
-                                    if (item.item_type === 'shuffle') this.shuffle = item.count;
-                                    if (item.item_type === 'bomb') this.bomb = item.count;
-                                    if (item.item_type === 'upgrade') this.upgrade = item.count;
-                                    if (item.item_type === 'double') this.double = item.count;
+                                    if (Object.hasOwn(serverInventory, item.item_type)) {
+                                        serverInventory[item.item_type] = Math.max(0, Number(item.count) || 0);
+                                    }
                                 });
                             } else {
-                                // 对象格式
-                                if (data.items.undo !== undefined) this.undo = data.items.undo;
-                                if (data.items.hint !== undefined) this.hint = data.items.hint;
-                                if (data.items.shuffle !== undefined) this.shuffle = data.items.shuffle;
-                                if (data.items.bomb !== undefined) this.bomb = data.items.bomb;
-                                if (data.items.upgrade !== undefined) this.upgrade = data.items.upgrade;
-                                if (data.items.double !== undefined) this.double = data.items.double;
+                                Object.keys(serverInventory).forEach(itemType => {
+                                    if (data.items[itemType] !== undefined) {
+                                        serverInventory[itemType] = Math.max(0, Number(data.items[itemType]) || 0);
+                                    }
+                                });
                             }
+                            Object.assign(this, serverInventory);
                             this.updateDisplay();
                             this.save();
                             console.log('道具数据已从API同步:', data.items);
-                        }
                     }
                 } catch (e) {
                     console.log('道具API同步失败，使用本地数据:', e);
@@ -7004,7 +7187,7 @@ if (next && this.grid[next.row] && this.grid[next.row][next.col] && this.grid[ne
                 }
             },
 
-useUndo() {
+            async useUndo() {
                 if (this.undo <= 0) {
                     showToast('撤销次数不足');
                     return false;
@@ -7013,6 +7196,7 @@ useUndo() {
                     showToast('没有可撤销的操作');
                     return false;
                 }
+                if (!await API.useItem('undo')) return false;
                 
                 this.undo--;
                 this.usedPowerup = true;
@@ -7023,9 +7207,6 @@ useUndo() {
                 // 🔧 记录道具使用统计
                 StatsPanel.recordItemUse('undo');
                 
-                // 🔧 同步到数据库
-                API.useItem('undo');
-                
                 if (GameSettings.vibrationEnabled && navigator.vibrate) {
                     navigator.vibrate(30);
                 }
@@ -7035,12 +7216,13 @@ useUndo() {
                 return true;
             },
             
-            useHint() {
+            async useHint() {
                 if (this.hint <= 0) {
                     showToast('提示次数不足');
                     return false;
                 }
                 if (this.hintShown) return false;
+                if (!await API.useItem('hint')) return false;
                 
                 this.hint--;
                 this.hintShown = true;
@@ -7048,18 +7230,13 @@ useUndo() {
                 TaskSystem.updateTask('powerup', 1);
                 
                 const hint = GameCore.getHint();
-                const arrows = {
-                    up: '⬆️',
-                    down: '⬇️',
-                    left: '⬅️',
-                    right: '➡️'
-                };
+                const arrows = { up: '上', down: '下', left: '左', right: '右' };
                 
                 const analysis = GameCore.lastHintAnalysis;
                 const reasons = analysis?.reasons || [];
                 const reasonText = reasons.length > 0 ? '\n' + reasons.join('、') : '';
                 
-                showToast('🤖 AI建议: ' + arrows[hint] + reasonText);
+                showToast('方向建议：' + arrows[hint] + reasonText);
                 if (this.showAIAnalysis && analysis) {
                     // ...
                 }
@@ -7067,9 +7244,6 @@ useUndo() {
                 if (GameSettings.soundEnabled) {
                     AudioManager.playClick();
                 }
-                
-                // 🔧 同步到数据库
-                API.useItem('hint');
                 
                 this.updateDisplay();
                 this.save();
@@ -7081,11 +7255,12 @@ useUndo() {
                 return true;
             },
             
-            useShuffle() {
+            async useShuffle() {
                 if (this.shuffle <= 0) {
                     showToast('洗牌次数不足');
                     return false;
                 }
+                if (!await API.useItem('shuffle')) return false;
                 
                 this.shuffle--;
                 this.usedPowerup = true;
@@ -7095,9 +7270,6 @@ useUndo() {
                 // 🔧 记录道具使用统计
                 StatsPanel.recordItemUse('shuffle');
                 TaskSystem.updateTask('powerup', 1);
-                
-                // 🔧 同步到数据库
-                API.useItem('shuffle');
                 
                 const canMove = GameCore.movesAvailable();
                 
@@ -7159,12 +7331,13 @@ useUndo() {
             },
             
             // 执行炸弹删除
-            executeBomb(row, col) {
+            async executeBomb(row, col) {
                 const tile = GameCore.grid[row][col];
                 if (!tile) {
                     showToast('请选择一个有效方块');
                     return false;
                 }
+                if (!await API.useItem('bomb')) return false;
                 
                 // 显示爆炸特效
                 this.showBombEffect(row, col);
@@ -7177,9 +7350,6 @@ useUndo() {
                 this.bombMode = false;
                 this.usedPowerup = true;
                 TaskSystem.updateTask('powerup', 1);
-                
-                // 🔧 同步到数据库
-                API.useItem('bomb');
                 
                 // 清除高亮并立即重新渲染
                 const tiles = document.querySelectorAll('.tile');
@@ -7309,12 +7479,13 @@ useUndo() {
             },
             
             // 执行升级
-            executeUpgrade(row, col) {
+            async executeUpgrade(row, col) {
                 const tile = GameCore.grid[row][col];
                 if (!tile) {
                     showToast('请选择一个有效方块');
                     return false;
                 }
+                if (!await API.useItem('upgrade')) return false;
                 
                 // 升级数值
                 const oldValue = tile.value;
@@ -7329,9 +7500,6 @@ useUndo() {
                 this.upgradeMode = false;
                 this.usedPowerup = true;
                 TaskSystem.updateTask('powerup', 1);
-                
-                // 🔧 同步到数据库
-                API.useItem('upgrade');
                 
                 // 清除高亮
                 const tiles = document.querySelectorAll('.tile');
@@ -7371,7 +7539,7 @@ useUndo() {
             },
             
             // 新道具：激活分数翻倍
-            useDouble() {
+            async useDouble() {
                 if (this.double <= 0) {
                     showToast('翻倍次数不足');
                     return false;
@@ -7381,14 +7549,12 @@ useUndo() {
                     showToast('翻倍效果已激活');
                     return false;
                 }
+                if (!await API.useItem('double')) return false;
                 
                 this.double--;
                 this.doubleActive = true;
                 this.usedPowerup = true;
                 TaskSystem.updateTask('powerup', 1);
-                
-                // 🔧 同步到数据库
-                API.useItem('double');
                 
                 showToast('✨ 下次合成分数翻倍！');
                 
@@ -7454,9 +7620,9 @@ useUndo() {
                 }
             },
 
-            // 显示AI分析面板
+            // 显示方向评估面板。计算完全在本机完成，不对外宣称在线 AI 能力。
             showAIAnalysis(bestDir, analysis) {
-                const arrows = { up: '⬆️ 上', down: '⬇️ 下', left: '⬅️ 左', right: '➡️ 右' };
+                const arrows = { up: '上', down: '下', left: '左', right: '右' };
                 
                 let evaluations = '';
                 ['up', 'down', 'left', 'right'].forEach(dir => {
@@ -7482,7 +7648,7 @@ useUndo() {
                 });
                 
                 const content = `
-                    <div class="modal-title">🤖 AI策略分析</div>
+                    <div class="modal-title">${Icon.render('bulb')}方向评估</div>
                     <div class="modal-body">
                         <div class="ai-analysis-container">
                             ${evaluations}
@@ -7501,19 +7667,19 @@ useUndo() {
                 {
                     title: '欢迎来到 2048!',
                     desc: '一个数字合并的魔法世界',
-                    arrow: '👆',
+                    arrow: '1',
                     step: '步骤 1/3'
                 },
                 {
                     title: '滑动控制',
                     desc: '上下左右滑动来移动方块',
-                    arrow: '↔️',
+                    arrow: '↔',
                     step: '步骤 2/3'
                 },
                 {
                     title: '合并得分!',
                     desc: '相同数字的方块碰撞会合并成更大的数字，目标是2048!',
-                    arrow: '✨',
+                    arrow: '2048',
                     step: '步骤 3/3'
                 }
             ],
@@ -7567,26 +7733,30 @@ useUndo() {
             celebrate() {
                 const container = document.getElementById('confettiContainer');
                 container.innerHTML = '';
-                
-                const colors = ['#ff0000', '#00ff00', '#0000ff', '#ffff00', '#ff00ff', '#00ffff'];
-                const shapes = ['square', 'circle'];
-                
-                for (let i = 0; i < 50; i++) {
+
+                const styles = getComputedStyle(document.body);
+                const colors = [
+                    styles.getPropertyValue('--action-primary').trim(),
+                    styles.getPropertyValue('--action-accent').trim(),
+                    styles.getPropertyValue('--surface-strong').trim()
+                ];
+
+                for (let i = 0; i < 18; i++) {
                     const confetti = document.createElement('div');
                     confetti.className = 'confetti';
                     confetti.style.left = Math.random() * 100 + '%';
                     confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
-                    confetti.style.borderRadius = shapes[Math.floor(Math.random() * shapes.length)] === 'circle' ? '50%' : '0';
-                    confetti.style.width = (Math.random() * 10 + 5) + 'px';
+                    confetti.style.borderRadius = i % 3 === 0 ? '50%' : '2px';
+                    confetti.style.width = (Math.random() * 5 + 4) + 'px';
                     confetti.style.height = confetti.style.width;
                     
                     const animation = confetti.animate([
                         { transform: 'translateY(-10vh) rotate(0deg)', opacity: 1 },
                         { transform: `translateY(100vh) rotate(${Math.random() * 720}deg)`, opacity: 0 }
                     ], {
-                        duration: (Math.random() * 2000 + 2000),
+                        duration: (Math.random() * 500 + 1000),
                         easing: 'cubic-bezier(0.25, 0.46, 0.45, 0.94)',
-                        delay: Math.random() * 500
+                        delay: Math.random() * 150
                     });
                     
                     container.appendChild(confetti);
@@ -7594,28 +7764,14 @@ useUndo() {
                 
                 setTimeout(() => {
                     container.innerHTML = '';
-                }, 4000);
+                }, 1800);
             }
         };
 
         // ==================== 社交分享模块 ====================
         const SocialShare = {
-            shareMessages: [
-                '我在2048里达到了{score}分！你能超越我吗？',
-                '第{games}局，终于达成{maxTile}！来试试？',
-                '{rank}段位达成！这个分数你行吗？',
-                '手速与策略的较量，我的最高分是{score}！',
-                '停不下来！2048真的有毒...',
-                '又一个午休没了，但分数上去了！',
-                '老板问我为什么盯着手机笑...',
-                '不服来战！我的2048最高分是{score}！',
-                '好友挑战：超越我的{score}分，我就服你！',
-                '2048高手榜有你的名字吗？'
-            ],
-
             generateMessage(score, maxTile, games, rank) {
-                const idx = Math.floor(Math.random() * this.shareMessages.length);
-                return this.shareMessages[idx]
+                return '我在 2048 中取得 {score} 分，最高合成 {maxTile} 方块。'
                     .replace('{score}', score)
                     .replace('{maxTile}', maxTile)
                     .replace('{games}', games)
@@ -7649,9 +7805,9 @@ useUndo() {
             showChallengeDialog(score) {
                 const content = `
                     <div class="gameover-content">
-                        <div class="gameover-icon">🎯</div>
-                        <div class="gameover-title">好友挑战!</div>
-                        <div class="tutorial-desc">Ta的分数: ${score}<br>你能超越Ta吗?</div>
+                        <div class="gameover-icon">${Icon.render('target')}</div>
+                        <div class="gameover-title">好友挑战</div>
+                        <div class="tutorial-desc">对方分数：${score}<br>开始一局并尝试超过它</div>
                         <div class="modal-actions">
                             <button class="btn btn-primary" onclick="UI.closeModal(); GameCore.init();">接受挑战</button>
                             <button class="btn btn-secondary" onclick="UI.closeModal();">稍后</button>
@@ -7706,14 +7862,14 @@ useUndo() {
                     // 智能确认：游戏进行中才提示
                     if (GameCore.score > 0 && !GameCore.gameOver) {
                         this.showConfirmModal(
-                            '🎮 重新开始',
+                            '重新开始',
                             '当前游戏进度将丢失，确定要重新开始吗？',
                             () => {
                                 localStorage.removeItem('2048-game-state');
                                 GameCore.init();
                                 GameModeManager.resetForNewGame();
                                 this.closeGameOver();
-                                showToast('🎮 新游戏开始！');
+                                showToast('新游戏已开始');
                             }
                         );
                     } else {
@@ -7721,7 +7877,7 @@ useUndo() {
                         GameCore.init();
                         GameModeManager.resetForNewGame();
                         this.closeGameOver();
-                        showToast('🎮 新游戏开始！');
+                        showToast('新游戏已开始');
                     }
                 });
 
@@ -7737,12 +7893,12 @@ useUndo() {
                         powerupContainer.classList.remove('collapsed');
                         powerupContainer.classList.add('expanded');
                         powerupToggle.classList.remove('collapsed');
-                        toggleIcon.textContent = '⚡';
+                        toggleIcon.innerHTML = Icon.render('bolt');
                     } else {
                         powerupContainer.classList.remove('expanded');
                         powerupContainer.classList.add('collapsed');
                         powerupToggle.classList.add('collapsed');
-                        toggleIcon.textContent = '⚡';
+                        toggleIcon.innerHTML = Icon.render('bolt');
                     }
                 });
 
@@ -7856,14 +8012,14 @@ useUndo() {
 
             showFeedbackPanel() {
                 const content = `
-                    <div class="modal-title">💬 意见反馈</div>
+                    <div class="modal-title">${Icon.render('message')}意见反馈</div>
                     <div class="modal-body">
                         <div class="feedback-section">
                             <div class="feedback-label">反馈类型</div>
                             <select class="feedback-select" id="feedbackType">
-                                <option value="bug">🐛 问题反馈</option>
-                                <option value="feature">💡 功能建议</option>
-                                <option value="other">📝 其他意见</option>
+                                <option value="bug">问题反馈</option>
+                                <option value="feature">功能建议</option>
+                                <option value="other">其他意见</option>
                             </select>
                         </div>
                         
@@ -7879,7 +8035,7 @@ useUndo() {
                             <div class="feedback-upload-area" id="feedbackUploadArea">
                                 <input type="file" id="feedbackImage" accept="image/*" hidden>
                                 <div class="upload-placeholder" id="uploadPlaceholder">
-                                    <span class="upload-icon">📷</span>
+                                    <span class="upload-icon">+</span>
                                     <span class="upload-text">点击上传图片</span>
                                 </div>
                                 <div class="upload-preview" id="uploadPreview" style="display:none;">
@@ -7890,7 +8046,7 @@ useUndo() {
                         </div>
                         
                         <div class="feedback-actions">
-                            <button class="btn btn-primary" id="submitFeedbackBtn">📤 提交反馈</button>
+                            <button class="btn btn-primary" id="submitFeedbackBtn">提交反馈</button>
                         </div>
                     </div>
                 `;
@@ -7956,14 +8112,14 @@ useUndo() {
                         });
                         
                         if (data.success) {
-                            showToast('✅ 反馈已提交，感谢您的意见！');
+                            showToast('反馈已提交，感谢你的意见');
                             this.closeModal();
                         } else {
-                            showToast('⚠️ 提交失败：' + (data.error || '网络错误'));
+                            showToast('提交失败：' + (data.error || '网络错误'));
                         }
                     } catch (e) {
                         console.error('反馈提交错误:', e);
-                        showToast('⚠️ 提交失败，请稍后重试');
+                        showToast('提交失败，请稍后重试');
                     }
                 });
             },
@@ -7987,7 +8143,7 @@ useUndo() {
                         
                         const content = `
                             <div class="announcement-header">
-                                <div class="announcement-icon">📢</div>
+                                <div class="announcement-icon">${Icon.render('megaphone')}</div>
                                 <div class="announcement-title">游戏公告</div>
                             </div>
                             <div class="announcement-list">
@@ -8020,7 +8176,7 @@ useUndo() {
                     })
                     .catch(err => {
                         console.error('获取公告失败:', err);
-                        showToast('⚠️ 获取公告失败');
+                        showToast('获取公告失败');
                     });
             },
             
@@ -8048,12 +8204,12 @@ useUndo() {
             showConfirmModal(title, message, onConfirm) {
                 const content = `
                     <div style="text-align:center;padding:20px;">
-                        <div style="font-size:48px;margin-bottom:16px;">⚠️</div>
-                        <div style="font-size:18px;font-weight:700;color:var(--text-primary);margin-bottom:8px;">${title}</div>
-                        <div style="font-size:14px;color:var(--text-secondary);margin-bottom:20px;">${message}</div>
+                        <div class="confirm-icon">${Icon.render('alert')}</div>
+                        <div style="font-size:18px;font-weight:700;color:var(--text-primary);margin-bottom:8px;">${escapeHTML(title)}</div>
+                        <div style="font-size:14px;color:var(--text-secondary);margin-bottom:20px;">${escapeHTML(message)}</div>
                         <div style="display:flex;gap:12px;justify-content:center;">
-                            <button onclick="UI.closeModal()" style="flex:1;max-width:120px;padding:10px 16px;background:var(--glass-bg);border:1px solid var(--glass-border);color:var(--text-primary);border-radius:8px;font-size:14px;cursor:pointer;">取消</button>
-                            <button onclick="UI.confirmAction()" style="flex:1;max-width:120px;padding:10px 16px;background:linear-gradient(135deg,#ef4444,#dc2626);border:none;color:white;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;">确定</button>
+                            <button class="btn btn-secondary" onclick="UI.closeModal()" style="flex:1;max-width:120px;">取消</button>
+                            <button class="btn btn-danger" onclick="UI.confirmAction()" style="flex:1;max-width:120px;">确定</button>
                         </div>
                     </div>
                 `;
@@ -8072,14 +8228,14 @@ useUndo() {
 
             showSettingsPanel() {
                 const nickname = API.nickname || '玩家';
-                const connectionLabel = API.isLoggedIn ? '✅ 已连接' : '📴 本地游客模式';
+                const connectionLabel = API.isLoggedIn ? '账号已连接' : '本地游客模式';
                 const connectionColor = API.isLoggedIn ? 'var(--brand-primary)' : 'var(--text-secondary)';
                 const content = `
-                    <div class="modal-title">⚙️ 设置</div>
+                    <div class="modal-title">${Icon.render('settings')}设置</div>
                     <div class="modal-body">
                         <!-- 用户信息 -->
                         <div class="settings-section">
-                            <div class="settings-section-title">👤 用户信息</div>
+                            <div class="settings-section-title">${Icon.render('user')}用户信息</div>
                             <div class="settings-item">
                                 <span class="settings-label">昵称</span>
                                 <input type="text" id="nicknameInput" value="${escapeHTML(nickname)}" maxlength="12" style="width:120px;padding:5px 10px;border-radius:8px;border:1px solid var(--glass-border);background:var(--glass-bg);color:var(--text-primary);text-align:right;">
@@ -8091,7 +8247,7 @@ useUndo() {
                         
                         <!-- 音频设置 -->
                         <div class="settings-section">
-                            <div class="settings-section-title">🔊 音频</div>
+                            <div class="settings-section-title">音频</div>
                             <div class="settings-item">
                                 <span class="settings-label">音效</span>
                                 <div class="toggle-switch ${GameSettings.soundEnabled ? 'active' : ''}" id="soundToggle"></div>
@@ -8112,7 +8268,7 @@ useUndo() {
                         
                         <!-- 视觉设置 -->
                         <div class="settings-section">
-                            <div class="settings-section-title">🎨 视觉</div>
+                            <div class="settings-section-title">${Icon.render('palette')}视觉</div>
                             <div class="settings-item">
                                 <span class="settings-label">合成特效</span>
                                 <div class="toggle-switch ${GameSettings.mergeEffects ? 'active' : ''}" id="mergeEffectsToggle"></div>
@@ -8129,9 +8285,9 @@ useUndo() {
                         
                         <!-- 游戏设置 -->
                         <div class="settings-section">
-                            <div class="settings-section-title">🎮 游戏</div>
+                            <div class="settings-section-title">${Icon.render('gamepad')}游戏</div>
                             <div class="settings-item">
-                                <span class="settings-label">显示AI提示</span>
+                                <span class="settings-label">显示方向建议</span>
                                 <div class="toggle-switch ${GameSettings.showHints ? 'active' : ''}" id="showHintsToggle"></div>
                             </div>
                             <div class="settings-item">
@@ -8145,29 +8301,27 @@ useUndo() {
                             <div class="settings-item">
                                 <span class="settings-label">默认模式</span>
                                 <select class="settings-select" id="defaultModeSelect">
-                                    <option value="classic" ${GameSettings.defaultMode === 'classic' ? 'selected' : ''}>🎯 经典</option>
-                                    <option value="challenge" ${GameSettings.defaultMode === 'challenge' ? 'selected' : ''}>🏆 挑战</option>
-                                    <option value="timed" ${GameSettings.defaultMode === 'timed' ? 'selected' : ''}>⏱️ 限时</option>
+                                    <option value="classic" ${GameSettings.defaultMode === 'classic' ? 'selected' : ''}>经典</option>
+                                    <option value="challenge" ${GameSettings.defaultMode === 'challenge' ? 'selected' : ''}>挑战</option>
+                                    <option value="timed" ${GameSettings.defaultMode === 'timed' ? 'selected' : ''}>限时</option>
                                 </select>
                             </div>
                         </div>
                         
                         <!-- 数据管理 -->
                         <div class="settings-section">
-                            <div class="settings-section-title">💾 数据管理</div>
+                            <div class="settings-section-title">${Icon.render('refresh')}数据与联网</div>
                             <div class="settings-item" style="padding: 8px 0; border-bottom: 1px solid var(--glass-border);">
-                                <span class="settings-label">云端同步</span>
+                                <span class="settings-label">联网状态</span>
                                 <span style="font-size: 0.7rem; color: ${connectionColor};">${connectionLabel}</span>
                             </div>
-                            <div class="settings-actions" style="margin-top:10px;">
-                                <button class="btn btn-secondary" id="syncDataBtn" style="width:100%">
-                                    🔄 同步云端数据
-                                </button>
+                            <div class="capability-note" style="margin-top:10px;">
+                                完成一局后会提交成绩；当前版本没有完整进度云同步。存档、任务、成就与主题保存在本机浏览器中。
                             </div>
-                            </div>
+                        </div>
                     </div>
                     <div style="text-align:center;margin-top:10px;font-size:0.75rem;color:var(--text-secondary);">
-                        💡 主题和模式请点击顶部相应按钮
+                        主题和模式可从顶部入口切换
                     </div>
                 `;
                 this.showModal(content);
@@ -8181,7 +8335,7 @@ useUndo() {
                         localStorage.setItem('user_nickname', newName);
 
                         if (!API.isLoggedIn) {
-                            showToast('✅ 昵称已保存到本机');
+                            showToast('昵称已保存到本机');
                             return;
                         }
                         
@@ -8193,18 +8347,18 @@ useUndo() {
                                 body: JSON.stringify({ userId: API.userId, nickname: newName })
                             });
                             if (data.success) {
-                                showToast('✅ 昵称已同步云端');
+                                showToast('昵称已同步到账号');
                                 // 刷新排行榜显示
                                 if (typeof LeaderboardUI !== 'undefined') {
                                     LeaderboardUI.refresh();
                                 }
                             } else if (data.error) {
-                                showToast('⚠️ ' + data.error);
+                                showToast(data.error);
                                 // 恢复旧名字
                                 e.target.value = localStorage.getItem('user_nickname');
                             }
                         } catch (err) {
-                            showToast('✅ 昵称本地已保存');
+                            showToast('联网更新失败，昵称仅保存到本机');
                         }
                     }
                 });
@@ -8265,29 +8419,19 @@ useUndo() {
                     GameSettings.setDefaultMode(e.target.value);
                 });
                 
-                // 绑定数据管理按钮
-                document.getElementById('syncDataBtn').addEventListener('click', () => {
-                    // 手动同步云端数据
-                    if (API.isLoggedIn) {
-                        API.submitGame(GameCore.bestScore, 0, GameCore.maxTile, 'sync', 0);
-                        showToast('✅ 数据已同步到云端');
-                    } else {
-                        showToast('📴 当前为本地游客模式，联网账号同步将在后续版本完善');
-                    }
-                });
             },
 
             showSigninPanel() {
                 this.closeModal();
 
                 if (!API.isLoggedIn) {
-                    showToast('📴 游客模式下不可签到，请联网后重新进入');
+                    showToast('游客模式下不可签到，请联网后重新进入');
                     return;
                 }
                 
                 const userId = API.userId || API.nickname;
                 if (!userId) {
-                    showToast('⚠️ 请先登录');
+                    showToast('请先登录');
                     return;
                 }
                 
@@ -8298,52 +8442,32 @@ useUndo() {
                         const consecutiveDays = data.continuousDays || 0;
                         const totalDays = data.totalDays || 0;
                         
-                        // 本周签到（简化显示）
-                        const dayNames = ['周一', '周二', '周三', '周四', '周五', '周六', '周日'];
-                        const todayIndex = (new Date().getDay() + 6) % 7;
-                        
-                        // 奖励列表
-                        const rewards = [
-                            { day: 1, reward: '撤销+1', icon: '↩️' },
-                            { day: 3, reward: '提示+1', icon: '💡' },
-                            { day: 7, reward: '洗牌+1', icon: '🔀' },
-                            { day: 15, reward: '炸弹+1', icon: '💣' },
-                            { day: 30, reward: '升级+1', icon: '⬆️' }
-                        ];
-                        
-                        // 计算下一个奖励
-                        const nextReward = rewards.find(r => consecutiveDays < r.day);
-                        const currentRewardStr = consecutiveDays >= 1 ? `已获得：撤销+1` : '签到即可获得道具';
-                        
                         const content = `
-                            <div class="modal-title">📅 每日签到</div>
+                            <div class="modal-title">${Icon.render('calendar')}每日签到</div>
                             <div class="modal-body" style="padding:20px;">
                                 <div style="text-align:center;margin-bottom:20px;">
-                                    <div style="font-size:48px;margin-bottom:10px;">${hasSignedToday ? '✅' : '🎁'}</div>
+                                    <div class="signin-status-icon">${Icon.render(hasSignedToday ? 'check' : 'gift')}</div>
                                     <div style="font-size:24px;font-weight:700;color:var(--text-primary);margin-bottom:5px;">
                                         ${hasSignedToday ? '今日已签到' : '签到领取奖励'}
                                     </div>
                                     <div style="font-size:14px;color:var(--text-secondary);">
-                                        连续签到 <span style="color:#22c55e;font-weight:600;">${consecutiveDays}</span> 天 ｜ 
-                                        累计 <span style="color:#6366f1;font-weight:600;">${totalDays}</span> 天
+                                        连续签到 <strong>${consecutiveDays}</strong> 天 ｜ 累计 <strong>${totalDays}</strong> 天
                                     </div>
                                 </div>
                                 
                                 <!-- 今日状态 -->
-                                <div style="background:linear-gradient(135deg,rgba(99,102,241,0.2),rgba(139,92,246,0.1));border-radius:12px;padding:15px;margin-bottom:15px;">
-                                    <div style="font-size:12px;color:var(--text-secondary);margin-bottom:8px;">${hasSignedToday ? '明日签到奖励' : '今日签到奖励'}</div>
-                                    <div style="font-size:14px;color:var(--text-primary);">${hasSignedToday ? '签到可获得：撤销+1' : currentRewardStr}</div>
-                                    ${nextReward ? `<div style="font-size:12px;color:var(--text-secondary);margin-top:8px;">再签到 ${nextReward.day - consecutiveDays} 天可获得：${nextReward.icon} ${nextReward.reward}</div>` : ''}
+                                <div class="capability-note" style="margin-bottom:15px;">
+                                    签到奖励由服务端规则决定，成功后会显示本次实际发放内容。这里不预告未经接口确认的奖励。
                                 </div>
                                 
                                 <!-- 签到按钮 -->
                                 ${hasSignedToday ? `
                                     <div style="text-align:center;color:var(--text-secondary);font-size:14px;padding:10px;">
-                                        明日再来签到吧！
+                                        今日记录已保存，明日再来
                                     </div>
                                 ` : `
-                                    <button onclick="UI.doSignin()" style="width:100%;padding:12px;background:linear-gradient(135deg,#6366f1,#8b5cf6);color:white;border:none;border-radius:10px;font-size:16px;font-weight:600;cursor:pointer;">
-                                        立即签到 🎁
+                                    <button class="btn btn-primary" onclick="UI.doSignin()" style="width:100%;">
+                                        立即签到
                                     </button>
                                 `}
                             </div>
@@ -8352,18 +8476,18 @@ useUndo() {
                     })
                     .catch(err => {
                         console.error('获取签到状态失败:', err);
-                        showToast('⚠️ 获取签到状态失败');
+                        showToast('获取签到状态失败');
                     });
             },
             
             doSignin() {
                 if (!API.isLoggedIn) {
-                    showToast('📴 游客模式下不可签到');
+                    showToast('游客模式下不可签到');
                     return;
                 }
                 const userId = API.userId || API.nickname;
                 if (!userId) {
-                    showToast('⚠️ 请先登录');
+                    showToast('请先登录');
                     return;
                 }
                 
@@ -8381,17 +8505,24 @@ useUndo() {
                             }
                             
                             this.closeModal();
-                            showToast(`✅ 签到成功！连续${data.continuousDays}天`);
+                            const itemNames = { undo: '撤销', hint: '提示', shuffle: '洗牌', bomb: '炸弹', upgrade: '升级', double: '双倍' };
+                            const rewards = Array.isArray(data.rewards)
+                                ? data.rewards
+                                    .filter(reward => reward && reward.item && Number(reward.count) > 0)
+                                    .map(reward => `${itemNames[reward.item] || reward.item} ×${Number(reward.count)}`)
+                                : [];
+                            const rewardText = rewards.length ? `，获得${rewards.join('、')}` : '';
+                            showToast(`签到成功，连续 ${Number(data.continuousDays) || 1} 天${rewardText}`);
                             
                             // 重新打开面板
                             setTimeout(() => this.showSigninPanel(), 500);
                         } else {
-                            showToast('⚠️ ' + (data.error || '签到失败'));
+                            showToast(data.error || '签到失败');
                         }
                     })
                     .catch(err => {
                         console.error('签到失败:', err);
-                        showToast('⚠️ 签到失败，请重试');
+                        showToast('签到失败，请重试');
                     });
             },
 
@@ -8400,26 +8531,25 @@ useUndo() {
                 this.closeModal();
                 
                 const skins = [
-                    { id: 'classic', name: '经典', icon: '🎨', desc: '默认皮肤', gradient: 'linear-gradient(135deg,#faf8ef,#bbada0)', textColor: '#333' },
-                    { id: 'neon', name: '霓虹', icon: '⚡', desc: '深蓝炫彩', gradient: 'linear-gradient(135deg,#0a0a1a,#1a1a3e)', textColor: '#00ffff' },
-                    { id: 'sakura', name: '樱花', icon: '🌸', desc: '粉色清新', gradient: 'linear-gradient(135deg,#fce4ec,#f8bbd9)', textColor: '#880e4f' },
-                    { id: 'tech', name: '科技', icon: '🎮', desc: '电竞蓝紫', gradient: 'linear-gradient(135deg,#1a237e,#0d47a1)', textColor: '#00e5ff' },
-                    { id: 'nature', name: '自然', icon: '🌿', desc: '清新绿色', gradient: 'linear-gradient(135deg,#e8f5e9,#c8e6c9)', textColor: '#1b5e20' },
-                    { id: 'minimal', name: '极简', icon: '☁️', desc: '纯白简约', gradient: 'linear-gradient(135deg,#ffffff,#f5f5f5)', textColor: '#212121' }
+                    { id: 'classic', name: '原木', desc: '温暖、熟悉的经典棋盘', colors: ['#f6f2e8', '#d4c6b7', '#8b6f56'] },
+                    { id: 'neon', name: '夜航', desc: '克制的深色青灰', colors: ['#101820', '#233240', '#63b6b8'] },
+                    { id: 'sakura', name: '莓粉', desc: '柔和粉调，保持文字清晰', colors: ['#fff6f6', '#f5e2e6', '#ad6175'] },
+                    { id: 'tech', name: '深海', desc: '深蓝界面与冷色方块', colors: ['#0e1a27', '#21364a', '#6ba9c7'] },
+                    { id: 'nature', name: '松林', desc: '低饱和绿色与自然纸感', colors: ['#edf3ed', '#dce8dc', '#527b5e'] },
+                    { id: 'minimal', name: '纸白', desc: '黑白中性、减少视觉干扰', colors: ['#f4f4f1', '#e8e8e3', '#3e3e3a'] }
                 ];
 
                 const content = `
-                    <div class="modal-title">🎨 皮肤中心</div>
-                    <div class="modal-body" style="padding:20px;">
-                        <div style="text-align:center;margin-bottom:20px;color:#22c55e;">🎁 所有皮肤免费开放</div>
-                        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;">
+                    <div class="modal-title">${Icon.render('palette')} 主题与棋盘</div>
+                    <div class="modal-body">
+                        <div class="panel-note">六套主题会同步页面、棋盘、按钮、弹窗和状态色，并保存在本机。服务端皮肤资产尚未接入当前玩家端。</div>
+                        <div class="skin-grid" style="margin-top:12px;">
                             ${skins.map(t => `
-                                <div onclick="UI.applySkin('${t.id}')"
-                                     style="padding:16px;background:${t.gradient};border-radius:12px;cursor:pointer;text-align:center;transition:transform 0.2s;border:2px solid ${GameSettings.theme === t.id ? '#22c55e' : 'transparent'};">
-                                    <div style="font-size:24px;margin-bottom:8px;">${t.icon}</div>
-                                    <div style="font-weight:600;color:${t.textColor};">${t.name}</div>
-                                    <div style="font-size:12px;opacity:0.8;color:${t.textColor};">${t.desc}</div>
-                                </div>
+                                <button type="button" class="skin-card ${GameSettings.theme === t.id ? 'active' : ''}" onclick="UI.applySkin('${t.id}')">
+                                    <span class="skin-swatch">${t.colors.map(color => `<span style="background:${color}"></span>`).join('')}</span>
+                                    <span class="skin-name">${t.name}</span>
+                                    <span class="skin-desc">${t.desc}</span>
+                                </button>
                             `).join('')}
                         </div>
                     </div>
@@ -8431,7 +8561,7 @@ useUndo() {
                 GameSettings.setTheme(skinId);
                 this.showSkinPanel(); // 刷新面板显示选中状态
                 Renderer.render();
-                showToast('✅ 皮肤已切换');
+                showToast('主题已切换并保存在本机');
             },
 
             showPanel(panel) {
@@ -8457,32 +8587,30 @@ useUndo() {
 showLeaderboardPanel() {
                 const stats = Leaderboard.getStats();
                 const content = `
-                    <div class="modal-title">📊 排行榜</div>
+                    <div class="modal-title">${Icon.render('ranking')} 排行榜</div>
                     <div class="modal-body">
-                        <!-- 统计摘要 -->
-                        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:16px;">
-                            <div style="text-align:center;padding:12px;background:rgba(255,255,255,0.05);border-radius:12px;">
-                                <div style="font-size:1.5rem;font-weight:700;color:var(--brand-primary);">${stats.totalGames}</div>
-                                <div style="font-size:0.75rem;color:var(--text-secondary);">我的场次</div>
+                        <div class="panel-summary">
+                            <div class="panel-summary-item">
+                                <div class="panel-summary-value">${stats.totalGames}</div>
+                                <div class="panel-summary-label">本机场次</div>
                             </div>
-                            <div style="text-align:center;padding:12px;background:rgba(255,255,255,0.05);border-radius:12px;">
-                                <div style="font-size:1.5rem;font-weight:700;color:#ffd700;">${stats.bestScore.toLocaleString()}</div>
-                                <div style="font-size:0.75rem;color:var(--text-secondary);">我的最高分</div>
+                            <div class="panel-summary-item">
+                                <div class="panel-summary-value">${stats.bestScore.toLocaleString()}</div>
+                                <div class="panel-summary-label">本机最高分</div>
                             </div>
-                            <div style="text-align:center;padding:12px;background:rgba(255,255,255,0.05);border-radius:12px;">
-                                <div style="font-size:1.5rem;font-weight:700;color:#00ff88;">${stats.avgScore.toLocaleString()}</div>
-                                <div style="font-size:0.75rem;color:var(--text-secondary);">我的平均分</div>
+                            <div class="panel-summary-item">
+                                <div class="panel-summary-value">${stats.avgScore.toLocaleString()}</div>
+                                <div class="panel-summary-label">本机平均分</div>
                             </div>
                         </div>
-                        
-                        <div class="leaderboard-scope-note" style="padding:10px 12px;margin-bottom:12px;border:1px solid rgba(99,102,241,0.3);border-radius:8px;background:rgba(99,102,241,0.1);color:var(--text-secondary);font-size:12px;line-height:1.5;">
+                        <div class="panel-note" style="margin-bottom:12px;">
                             当前后端仅提供不分模式、不分日期的全球总榜；每日排行和模式排行暂不展示。
                         </div>
                         
                         <!-- 标签切换 -->
                         <div class="tab-buttons" style="display:flex;gap:8px;margin-bottom:12px;">
-                            <button class="tab-btn active" data-tab="global" style="flex:1;padding:8px;background:var(--brand-primary);border:1px solid var(--brand-primary);border-radius:8px;color:white;cursor:pointer;">🌍 全球总榜</button>
-                            <button class="tab-btn" data-tab="local" style="flex:1;padding:8px;background:var(--glass-bg);border:1px solid var(--glass-border);border-radius:8px;color:var(--text-primary);cursor:pointer;">👤 本机记录</button>
+                            <button class="tab-btn active" data-tab="global" style="flex:1;padding:8px;background:var(--brand-primary);border:1px solid var(--brand-primary);border-radius:8px;color:white;cursor:pointer;">全球总榜</button>
+                            <button class="tab-btn" data-tab="local" style="flex:1;padding:8px;background:var(--glass-bg);border:1px solid var(--glass-border);border-radius:8px;color:var(--text-primary);cursor:pointer;">本机记录</button>
                         </div>
                         
                         <!-- 排行榜列表 -->
@@ -8526,10 +8654,10 @@ showLeaderboardPanel() {
                         if (data.leaderboard && data.leaderboard.length > 0) {
                             listEl.innerHTML = this.renderGlobalLeaderboard(data.leaderboard);
                         } else {
-                            listEl.innerHTML = '<div style="text-align:center;padding:40px;color:var(--text-secondary);"><div style="font-size:3rem;">🏆</div><div>全球总榜暂无记录</div></div>';
+                            listEl.innerHTML = `<div class="empty-state">${Icon.render('trophy')}<div>全球总榜暂无记录</div></div>`;
                         }
                     } catch (e) {
-                        listEl.innerHTML = '<div style="text-align:center;padding:40px;color:var(--text-secondary);"><div style="font-size:3rem;">📡</div><div>全球总榜加载失败，请稍后重试</div></div>';
+                        listEl.innerHTML = `<div class="empty-state">${Icon.render('alert')}<div>全球总榜加载失败，请稍后重试</div></div>`;
                     }
                 } else {
                     // 本地排行榜
@@ -8540,22 +8668,21 @@ showLeaderboardPanel() {
             renderGlobalLeaderboard(data) {
                 return data.map((entry, index) => {
                     const rank = index + 1;
-                    const rankIcon = rank === 1 ? '🥇' : rank === 2 ? '🥈' : rank === 3 ? '🥉' : rank;
                     const name = escapeHTML(entry.nickname || entry.username || '玩家');
                     const score = Number(entry.score) || 0;
                     const maxTile = Number(entry.max_tile) || 2;
                     const isMe = String(API.userId) === String(entry.user_id);
                     
                     return `
-                        <div class="leaderboard-item ${isMe ? 'highlight' : ''}" style="display:flex;align-items:center;padding:12px 16px;background:${isMe ? 'rgba(99,102,241,0.15)' : 'rgba(255,255,255,0.05)'};border-radius:12px;margin-bottom:8px;border:${isMe ? '2px solid var(--brand-primary)' : 'none'};">
-                            <div style="width:50px;text-align:center;font-size:1.5rem;">${rankIcon}</div>
+                        <div class="leaderboard-item ${isMe ? 'highlight' : ''}" style="display:flex;align-items:center;padding:12px 14px;border-radius:12px;margin-bottom:8px;">
+                            <div class="leaderboard-rank">${rank}</div>
                             <div style="flex:1;margin-left:12px;">
                                 <div style="display:flex;justify-content:space-between;align-items:center;">
-                                    <span style="font-size:1rem;font-weight:600;color:${isMe ? 'var(--brand-primary)' : 'var(--text-primary)'};">${name}${isMe ? ' (我)' : ''}</span>
+                                    <span style="font-size:1rem;font-weight:600;color:${isMe ? 'var(--brand-primary)' : 'var(--text-primary)'};">${name}${isMe ? ' · 我' : ''}</span>
                                     <span style="font-size:1.2rem;font-weight:700;color:var(--text-primary);">${score.toLocaleString()}分</span>
                                 </div>
                                 <div style="font-size:0.8rem;color:var(--text-secondary);margin-top:4px;">
-                                    <span>🎮 最高${maxTile}</span>
+                                    <span>最高方块 ${maxTile}</span>
                                 </div>
                             </div>
                         </div>
@@ -8569,10 +8696,10 @@ showLeaderboardPanel() {
                 const progress = LevelSystem.getProgress();
 
                 const content = `
-                    <div class="modal-title">🏆 成就殿堂</div>
+                    <div class="modal-title">${Icon.render('trophy')} 成就里程碑</div>
                     <div class="modal-body">
                         <div class="rank-display">
-                            <div class="rank-icon">${rank.icon}</div>
+                            <div class="rank-icon">${Icon.render(rank.icon)}</div>
                             <div class="rank-name">${rank.name}</div>
                             <div class="rank-progress">
                                 累计分数: ${LevelSystem.totalScore.toLocaleString()}
@@ -8582,6 +8709,7 @@ showLeaderboardPanel() {
                                 <div class="progress-fill" style="width: ${progress}%"></div>
                             </div>
                         </div>
+                        <div class="panel-note" style="margin:12px 0;">仅展示代码能够真实检测的本机里程碑。当前成就不会伪装成云端奖励，登录后也不会自动同步。</div>
                         ${this.renderAchievements()}
                     </div>
                 `;
@@ -8591,10 +8719,10 @@ showLeaderboardPanel() {
             renderAchievements() {
                 const achievements = AchievementSystem.getAll();
                 const categories = {
-                    basic: '基础成就',
-                    challenge: '挑战成就',
-                    special: '特殊成就',
-                    hidden: '隐藏成就'
+                    starter: '新手目标',
+                    growth: '成长里程碑',
+                    challenge: '高阶挑战',
+                    special: '特殊经历'
                 };
 
                 let html = '';
@@ -8612,15 +8740,15 @@ showLeaderboardPanel() {
                             </div>
                             <div class="achievement-list" style="display:flex;flex-direction:column;gap:8px;">
                                 ${items.map(a => `
-                                    <div class="achievement-item ${a.unlocked ? '' : 'locked'}" style="display:flex;align-items:center;padding:12px;background:${a.unlocked ? 'rgba(255,215,0,0.1)' : 'rgba(255,255,255,0.03)'};border-radius:12px;transition:all 0.3s;${!a.unlocked ? 'opacity:0.6;' : ''}">
-                                        <div class="achievement-icon" style="font-size:1.5rem;margin-right:12px;${!a.unlocked ? 'filter:grayscale(1);' : ''}">${a.icon}</div>
+                                    <div class="achievement-item ${a.unlocked ? '' : 'locked'}" style="display:flex;align-items:center;padding:12px;border-radius:12px;${!a.unlocked ? 'opacity:0.6;' : ''}">
+                                        <div class="achievement-icon" style="margin-right:12px;">${Icon.render(a.icon)}</div>
                                         <div class="achievement-info" style="flex:1;">
                                             <div class="achievement-name" style="font-weight:600;color:var(--text-primary);font-size:0.95rem;">${a.name}</div>
                                             <div class="achievement-desc" style="font-size:0.8rem;color:var(--text-secondary);margin-top:2px;">${a.desc}</div>
-                                            ${a.reward && a.unlocked ? `<div style="font-size:0.75rem;color:#ffd700;margin-top:4px;">🎁 ${a.reward}</div>` : ''}
+                                            ${!a.unlocked && a.target ? `<div style="font-size:0.75rem;color:var(--text-secondary);margin-top:4px;">进度 ${Math.min(a.progress || 0, a.target)}/${a.target}</div>` : ''}
                                         </div>
-                                        <div class="achievement-status" style="font-size:1.2rem;">
-                                            ${a.unlocked ? '✅' : (a.secret ? '❓' : '🔒')}
+                                        <div class="achievement-status">
+                                            ${a.unlocked ? Icon.render('check') : Icon.render('lock')}
                                         </div>
                                     </div>
                                 `).join('')}
@@ -8634,11 +8762,12 @@ showLeaderboardPanel() {
             showTasksPanel() {
                 const tasks = TaskSystem.getTasks();
                 const content = `
-                    <div class="modal-title">📋 每日任务</div>
+                    <div class="modal-title">${Icon.render('tasks')} 今日目标</div>
                     <div class="modal-body">
+                        <div class="panel-note" style="margin-bottom:12px;">每日目标仅在本机记录并于次日重置。服务端尚无任务进度与领奖契约，因此本轮不伪造道具奖励；成长和高阶目标请在“成就”中查看。</div>
                         ${tasks.map(task => `
                             <div class="task-item">
-                                <div class="task-icon">${task.completed ? '✅' : '🎯'}</div>
+                                <div class="task-icon">${task.completed ? Icon.render('check') : Icon.render('target')}</div>
                                 <div class="task-info">
                                     <div class="task-name">${task.name}</div>
                                     <div class="task-progress">
@@ -8648,7 +8777,7 @@ showLeaderboardPanel() {
                                         </div>
                                     </div>
                                 </div>
-                                <div class="task-reward">${task.reward}</div>
+                                <div class="task-reward">${task.completed ? '已记录' : task.reward}</div>
                             </div>
                         `).join('')}
                     </div>
@@ -8665,7 +8794,7 @@ showLeaderboardPanel() {
                 );
 
                 const content = `
-                    <div class="modal-title">📤 分享成绩</div>
+                    <div class="modal-title">${Icon.render('share')}分享成绩</div>
                     <div class="modal-body">
                         <div class="share-card-preview">
                             <div style="font-size: 1rem; color: var(--text-secondary);">我的最高分</div>
@@ -8941,44 +9070,44 @@ showLeaderboardPanel() {
                 return `
                     <div class="stats-panel">
                         <div class="stats-header">
-                            <div class="stats-title">📊 游戏数据统计</div>
+                            <div class="stats-title">${Icon.render('ranking')}游戏数据</div>
                         </div>
                         
                         <div class="stats-grid">
                             <div class="stats-card highlight">
-                                <div class="stats-card-icon">🏆</div>
+                                <div class="stats-card-icon">${Icon.render('trophy')}</div>
                                 <div class="stats-card-value">${stats.bestScore.toLocaleString()}</div>
                                 <div class="stats-card-label">历史最高分</div>
                             </div>
                             <div class="stats-card">
-                                <div class="stats-card-icon">🎮</div>
+                                <div class="stats-card-icon">${Icon.render('gamepad')}</div>
                                 <div class="stats-card-value">${stats.totalGames}</div>
                                 <div class="stats-card-label">总局数</div>
                             </div>
                             <div class="stats-card">
-                                <div class="stats-card-icon">💎</div>
+                                <div class="stats-card-icon">${Icon.render('upgrade')}</div>
                                 <div class="stats-card-value">${stats.maxTile}</div>
                                 <div class="stats-card-label">最大方块</div>
                             </div>
                             <div class="stats-card">
-                                <div class="stats-card-icon">📈</div>
+                                <div class="stats-card-icon">${Icon.render('ranking')}</div>
                                 <div class="stats-card-value">${stats.avgScore.toLocaleString()}</div>
                                 <div class="stats-card-label">平均得分</div>
                             </div>
                             <div class="stats-card">
-                                <div class="stats-card-icon">⭐</div>
+                                <div class="stats-card-icon">${Icon.render('medal')}</div>
                                 <div class="stats-card-value">Lv.${stats.level}</div>
                                 <div class="stats-card-label">当前等级</div>
                             </div>
                             <div class="stats-card">
-                                <div class="stats-card-icon">🏅</div>
+                                <div class="stats-card-icon">${Icon.render('trophy')}</div>
                                 <div class="stats-card-value">${stats.achievementsUnlocked}/${stats.achievementsTotal}</div>
                                 <div class="stats-card-label">成就解锁</div>
                             </div>
                         </div>
                         
                         <div class="stats-section">
-                            <div class="stats-section-title">🎯 模式统计</div>
+                            <div class="stats-section-title">${Icon.render('target')}模式统计</div>
                             <div class="stats-row">
                                 <span class="stats-row-label">经典模式</span>
                                 <span class="stats-row-value">${stats.classicGames}局</span>
@@ -8994,35 +9123,35 @@ showLeaderboardPanel() {
                         </div>
                         
                         <div class="stats-section">
-                            <div class="stats-section-title">🎁 道具使用统计</div>
+                            <div class="stats-section-title">${Icon.render('gift')}道具使用统计</div>
                             <div class="stats-row">
-                                <span class="stats-row-label">💡 提示使用</span>
+                                <span class="stats-row-label">提示使用</span>
                                 <span class="stats-row-value">${stats.totalHints}次</span>
                             </div>
                             <div class="stats-row">
-                                <span class="stats-row-label">↩️ 撤销使用</span>
+                                <span class="stats-row-label">撤销使用</span>
                                 <span class="stats-row-value">${stats.totalUndos}次</span>
                             </div>
                             <div class="stats-row">
-                                <span class="stats-row-label">🔀 洗牌使用</span>
+                                <span class="stats-row-label">洗牌使用</span>
                                 <span class="stats-row-value">${stats.totalShuffles}次</span>
                             </div>
                             <div class="stats-row">
-                                <span class="stats-row-label">💣 炸弹使用</span>
+                                <span class="stats-row-label">炸弹使用</span>
                                 <span class="stats-row-value">${stats.totalBombs}次</span>
                             </div>
                             <div class="stats-row">
-                                <span class="stats-row-label">⬆️ 升级使用</span>
+                                <span class="stats-row-label">升级使用</span>
                                 <span class="stats-row-value">${stats.totalUpgrades}次</span>
                             </div>
                             <div class="stats-row">
-                                <span class="stats-row-label">✨ 翻倍使用</span>
+                                <span class="stats-row-label">翻倍使用</span>
                                 <span class="stats-row-value">${stats.totalDoubles}次</span>
                             </div>
                         </div>
                         
                         <div class="stats-section">
-                            <div class="stats-section-title">⏱️ 时间统计</div>
+                            <div class="stats-section-title">${Icon.render('clock')}时间统计</div>
                             <div class="stats-row">
                                 <span class="stats-row-label">总游戏时长</span>
                                 <span class="stats-row-value">${this.formatTime(stats.totalPlayTime)}</span>
@@ -9034,7 +9163,7 @@ showLeaderboardPanel() {
                         </div>
                         
                         <div class="stats-section">
-                            <div class="stats-section-title">📈 近期表现</div>
+                            <div class="stats-section-title">${Icon.render('ranking')}近期表现</div>
                             ${recentScoresChart}
                         </div>
                         
@@ -9098,7 +9227,19 @@ showLeaderboardPanel() {
 // ==================== Toast提示 ====================
         function showToast(message) {
             const toast = document.getElementById('toast');
-            toast.textContent = message;
+            const rawMessage = String(message || '');
+            const tone = /失败|错误|不足|不可用|未连接|请先|无法/.test(rawMessage)
+                ? 'warning'
+                : /成功|完成|已保存|已发放|已切换|获得/.test(rawMessage)
+                    ? 'success'
+                    : 'info';
+            const cleanMessage = rawMessage
+                .replace(/^[\s✅⚠️❌🎉🎁💡🤖📴🔄]+/u, '')
+                .replace(/\s+/g, ' ')
+                .trim();
+            const iconName = tone === 'success' ? 'check' : tone === 'warning' ? 'alert' : 'info';
+            toast.dataset.tone = tone;
+            toast.innerHTML = `${Icon.render(iconName)}<span>${escapeHTML(cleanMessage)}</span>`;
             toast.classList.add('active');
             setTimeout(() => {
                 toast.classList.remove('active');
@@ -9107,88 +9248,21 @@ showLeaderboardPanel() {
         
         // ==================== 合成特效 ====================
         function showMergeEffect(value, x, y) {
-            // 根据合成值决定特效等级
             const level = value >= 2048 ? 'legendary' : value >= 1024 ? 'epic' : value >= 512 ? 'rare' : 'common';
-            const scale = Math.min(3, 1 + Math.log2(value) / 5);
-            
-            // 创建主特效容器
             const container = document.createElement('div');
-            container.className = 'merge-effect-container';
+            container.className = `merge-effect-container ${level}`;
             container.style.cssText = 'position:fixed;left:' + x + 'px;top:' + y + 'px;transform:translate(-50%,-50%);z-index:10000;pointer-events:none;';
-            
-            // 1. 外层光环爆炸效果
-            const ring = document.createElement('div');
-            ring.className = 'merge-ring ' + level;
-            ring.style.cssText = 'position:absolute;width:300px;height:300px;left:50%;top:50%;transform:translate(-50%,-50%);border-radius:50%;animation:ringExpand 0.8s ease-out forwards;';
-            
-            // 2. 中心光球
-            const core = document.createElement('div');
-            core.className = 'merge-core ' + level;
-            core.style.cssText = 'position:absolute;width:100px;height:100px;left:50%;top:50%;transform:translate(-50%,-50%);border-radius:50%;animation:corePulse 0.5s ease-out forwards;';
-            
-            // 3. 粒子爆炸（数量根据等级）
-            const particleCount = level === 'legendary' ? 24 : level === 'epic' ? 16 : level === 'rare' ? 12 : 8;
-            const particles = document.createElement('div');
-            particles.className = 'merge-particles';
-            for (let i = 0; i < particleCount; i++) {
-                const particle = document.createElement('div');
-                const angle = (360 / particleCount) * i;
-                const color = level === 'legendary' ? '#ff0080' : level === 'epic' ? '#ffd700' : level === 'rare' ? '#00ff88' : '#4fc3f7';
-                particle.style.cssText = 'position:absolute;width:8px;height:8px;background:' + color + ';border-radius:50%;left:50%;top:50%;transform:translate(-50%,-50%);animation:particleFly 0.6s ease-out forwards;--angle:' + angle + 'deg;';
-                particles.appendChild(particle);
-            }
-            
-            // 4. 数字弹出效果
             const number = document.createElement('div');
             number.className = 'merge-number ' + level;
-            number.style.cssText = 'position:relative;font-size:' + (2.5 * scale) + 'rem;font-weight:900;color:var(--text-primary);text-shadow:0 0 30px var(--brand-primary),0 4px 8px rgba(0,0,0,0.5);animation:numberPop 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;z-index:10;';
-            number.textContent = value;
-            
-            // 5. 合成提示文字
-            const text = document.createElement('div');
-            text.className = 'merge-text';
-            text.style.cssText = 'position:relative;font-size:1.2rem;color:#ffd700;font-weight:bold;text-shadow:0 0 20px rgba(255,215,0,0.8);margin-top:10px;animation:textFade 0.8s ease-out forwards;';
-            text.textContent = level === 'legendary' ? '🏆 传奇合成！' : level === 'epic' ? '✨ 史诗合成！' : level === 'rare' ? '🌟 稀有合成！' : '🎉 合成成功！';
-            
-            // 组装特效
-            container.appendChild(ring);
-            container.appendChild(core);
-            container.appendChild(particles);
+            number.textContent = `+${value}`;
             container.appendChild(number);
-            container.appendChild(text);
-            
-            // 添加到页面
             document.body.appendChild(container);
-            
-            // 播放音效
+
             if (GameSettings.soundEnabled) {
-                if (level === 'legendary') {
-                    AudioManager.playWin && AudioManager.playWin();
-                } else {
-                    AudioManager.playMerge && AudioManager.playMerge();
-                }
+                AudioManager.playMerge && AudioManager.playMerge();
             }
-            
-            // 页面震动效果
-            document.body.classList.add('merge-shake');
-            setTimeout(() => document.body.classList.remove('merge-shake'), 300);
-            
-            // 屏幕闪光效果（传奇/史诗级别）
-            if (level === 'legendary' || level === 'epic') {
-                const flash = document.createElement('div');
-                flash.style.cssText = 'position:fixed;inset:0;background:white;opacity:0.3;pointer-events:none;z-index:9999;animation:flashOut 0.3s ease-out forwards;';
-                document.body.appendChild(flash);
-                setTimeout(() => flash.remove(), 300);
-            }
-            
-            // 自动移除特效
-            setTimeout(() => {
-                if (container.parentNode) {
-                    container.style.opacity = '0';
-                    container.style.transition = 'opacity 0.3s';
-                    setTimeout(() => container.remove(), 300);
-                }
-            }, 1200);
+
+            setTimeout(() => container.remove(), 700);
         }
 
         // ==================== 游戏模式管理 ====================
@@ -9207,26 +9281,20 @@ showLeaderboardPanel() {
             modeConfig: {
                 classic: {
                     name: '经典模式',
-                    icon: '🎯',
-                    desc: '无时间限制，轻松休闲'
+                    icon: 'gamepad',
+                    desc: '无时间限制，按自己的节奏合成'
                 },
                 challenge: {
                     name: '挑战模式',
-                    icon: '🏆',
-                    desc: '设定目标分数，突破自我',
+                    icon: 'target',
+                    desc: '达到所选分数目标即完成挑战',
                     targets: [5000, 10000, 20000, 50000]
                 },
                 timed: {
                     name: '限时模式',
-                    icon: '⏱️',
-                    desc: '分秒必争，心跳加速',
+                    icon: 'clock',
+                    desc: '在倒计时结束前取得更高分',
                     times: [60, 120, 180, 300]
-                },
-                extreme: {
-                    name: '极限模式',
-                    icon: '💀',
-                    desc: '方块加速生成，分数翻倍！',
-                    speeds: [1.5, 2, 3]
                 }
             },
 
@@ -9294,7 +9362,7 @@ showLeaderboardPanel() {
                     indicator.style.display = 'none';
                 } else {
                     indicator.style.display = 'flex';
-                    modeIcon.textContent = this.modeConfig[this.currentMode].icon;
+                    modeIcon.innerHTML = Icon.render(this.modeConfig[this.currentMode].icon);
                     modeName.textContent = this.modeConfig[this.currentMode].name;
 
                     if (this.currentMode === 'challenge') {
@@ -9319,7 +9387,7 @@ showLeaderboardPanel() {
                 // 达成目标
                 if (GameCore.score >= this.targetScore && !this.challengeWon) {
                     this.challengeWon = true;
-                    showToast('🎉 挑战成功！目标已达成！');
+                    showToast('挑战完成，已达到目标分数');
                     Effects.celebrate();
                 }
             },
@@ -9353,7 +9421,7 @@ showLeaderboardPanel() {
                     // 倒计时警告音效
                     if (this.timeRemaining === 30) {
                         AudioManager.playWarning();
-                        showToast('⚠️ 还剩30秒！');
+                        showToast('还剩 30 秒');
                     }
                     if (this.timeRemaining === 10) {
                         AudioManager.playWarning();
@@ -9419,25 +9487,25 @@ showLeaderboardPanel() {
                         <div class="mode-select-title">选择游戏模式</div>
                         <div class="mode-options">
                             <div class="mode-option ${this.currentMode === 'classic' ? 'active' : ''}" data-mode="classic">
-                                <div class="mode-option-icon">🎯</div>
+                                <div class="mode-option-icon">${Icon.render('gamepad')}</div>
                                 <div class="mode-option-info">
                                     <div class="mode-option-name">经典模式</div>
-                                    <div class="mode-option-desc">无时间限制，轻松休闲</div>
+                                    <div class="mode-option-desc">无时间限制，按自己的节奏合成</div>
                                 </div>
                                 <div class="mode-option-badge">默认</div>
                             </div>
                             <div class="mode-option ${this.currentMode === 'challenge' ? 'active' : ''}" data-mode="challenge">
-                                <div class="mode-option-icon">🏆</div>
+                                <div class="mode-option-icon">${Icon.render('target')}</div>
                                 <div class="mode-option-info">
                                     <div class="mode-option-name">挑战模式</div>
-                                    <div class="mode-option-desc">设定目标分数，突破自我</div>
+                                    <div class="mode-option-desc">达到所选分数目标即完成挑战</div>
                                 </div>
                             </div>
                             <div class="mode-option ${this.currentMode === 'timed' ? 'active' : ''}" data-mode="timed">
-                                <div class="mode-option-icon">⏱️</div>
+                                <div class="mode-option-icon">${Icon.render('clock')}</div>
                                 <div class="mode-option-info">
                                     <div class="mode-option-name">限时模式</div>
-                                    <div class="mode-option-desc">分秒必争，心跳加速</div>
+                                    <div class="mode-option-desc">在倒计时结束前取得更高分</div>
                                 </div>
                             </div>
                         </div>
@@ -9695,7 +9763,8 @@ showLeaderboardPanel() {
             AchievementSystem.init();
             Leaderboard.init();
             TaskSystem.init();
-            SeasonSystem.init();
+            // 赛季积分与奖励没有服务端契约，不能在本机伪造排名或发奖。
+            // 保留旧数据兼容代码，但不再初始化或向玩家暴露该能力。
             PowerupSystem.init();
             GameModeManager.init();
             Renderer.init();
