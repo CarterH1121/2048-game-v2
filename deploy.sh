@@ -2,10 +2,10 @@
 # 2048游戏前端部署脚本
 # 用法: ./deploy.sh
 
-SERVER="ubuntu@49.232.149.209"
-PASSWORD="112188aq!"
-REMOTE_PATH="/var/www/2048"
-LOCAL_FILE="index.html"
+# 本脚本不保存凭证。仅在已获生产操作授权并配置 SSH 密钥后使用。
+: "${DEPLOY_SERVER:?请设置 DEPLOY_SERVER，例如 user@example.com}"
+REMOTE_PATH="${DEPLOY_REMOTE_PATH:-/var/www/2048}"
+LOCAL_FILE="${DEPLOY_LOCAL_FILE:-index.html}"
 
 echo "=== 部署2048游戏前端 ==="
 echo ""
@@ -24,16 +24,16 @@ echo ""
 
 # 备份服务器文件
 echo "1. 备份服务器文件..."
-sshpass -p "$PASSWORD" ssh -o StrictHostKeyChecking=no $SERVER \
+ssh -o BatchMode=yes "$DEPLOY_SERVER" \
     "sudo cp $REMOTE_PATH/index.html $REMOTE_PATH/index.html.bak_\$(date +%Y%m%d_%H%M%S)"
 
 # 上传新版本
 echo "2. 上传新版本..."
-sshpass -p "$PASSWORD" scp -o StrictHostKeyChecking=no $LOCAL_FILE $SERVER:/tmp/
+scp "$LOCAL_FILE" "$DEPLOY_SERVER:/tmp/"
 
 # 替换文件
 echo "3. 替换文件..."
-sshpass -p "$PASSWORD" ssh -o StrictHostKeyChecking=no $SERVER \
+ssh -o BatchMode=yes "$DEPLOY_SERVER" \
     "sudo mv /tmp/index.html $REMOTE_PATH/index.html && sudo chown ubuntu:ubuntu $REMOTE_PATH/index.html"
 
 echo ""

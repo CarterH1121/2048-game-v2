@@ -1,5 +1,5 @@
 // 2048 Enhanced - Service Worker
-const CACHE_NAME = '2048-v2-cache-v1';
+const CACHE_NAME = '2048-v2-cache-20260715-1';
 const urlsToCache = [
     './',
     './index.html',
@@ -38,19 +38,37 @@ self.addEventListener('activate', (event) => {
     );
 });
 
-// 请求拦截
+// 请求拦截：页面导航使用 network-first，避免发布后长期停留在旧版。
+// 仅缓存同源静态资源，不缓存 API 请求或其他跨域响应。
 self.addEventListener('fetch', (event) => {
+    if (event.request.method !== 'GET') return;
+
+    const requestUrl = new URL(event.request.url);
+    if (requestUrl.origin !== self.location.origin || requestUrl.pathname.startsWith('/api/')) return;
+
+    if (event.request.mode === 'navigate') {
+        event.respondWith(
+            fetch(event.request)
+                .then((response) => {
+                    if (response && response.ok) {
+                        const copy = response.clone();
+                        caches.open(CACHE_NAME).then((cache) => cache.put('./index.html', copy));
+                    }
+                    return response;
+                })
+                .catch(() => caches.match('./index.html'))
+        );
+        return;
+    }
+
     event.respondWith(
         caches.match(event.request)
             .then((response) => {
-                // 缓存命中，返回缓存
                 if (response) {
                     return response;
                 }
                 
-                // 否则发起网络请求
                 return fetch(event.request).then((response) => {
-                    // 检查是否有效响应
                     if (!response || response.status !== 200 || response.type !== 'basic') {
                         return response;
                     }
@@ -66,12 +84,7 @@ self.addEventListener('fetch', (event) => {
                     return response;
                 });
             })
-            .catch(() => {
-                // 网络失败，返回离线页面
-                if (event.request.mode === 'navigate') {
-                    return caches.match('./index.html');
-                }
-            })
+            .catch(() => new Response('', { status: 503, statusText: 'Offline' }))
     );
 });
 
@@ -89,8 +102,6 @@ self.addEventListener('sync', (event) => {
 self.addEventListener('push', (event) => {
     const options = {
         body: event.data ? event.data.text() : '新游戏更新！',
-        icon: '/icon.png',
-        badge: '/badge.png',
         vibrate: [100, 50, 100],
         data: {
             dateOfArrival: Date.now(),
@@ -107,6 +118,6 @@ self.addEventListener('push', (event) => {
 self.addEventListener('notificationclick', (event) => {
     event.notification.close();
     event.waitUntil(
-        clients.openWindow('/')
+        clients.openWindow('./')
     );
 });

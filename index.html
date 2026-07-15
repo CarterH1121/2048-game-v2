@@ -2,8 +2,9 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>2048 Enhanced - Material Design 3 Edition</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' rx='14' fill='%236366F1'/><text x='32' y='43' font-size='34' text-anchor='middle' fill='white'>2</text></svg>">
     
     <!-- ==================== Google Fonts ==================== -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -461,6 +462,9 @@
         /* ========== 顶部状态区 ========== */
         .header {
             padding: 15px 20px;
+            padding-top: calc(15px + env(safe-area-inset-top));
+            padding-left: calc(20px + env(safe-area-inset-left));
+            padding-right: calc(20px + env(safe-area-inset-right));
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -1405,6 +1409,7 @@
             display: flex;
             justify-content: center;
             align-items: center;
+            width: min(100%, 520px);
             gap: 10px;
             padding: 10px 14px;
             background: var(--glass-bg);
@@ -1456,6 +1461,8 @@
         /* 道具容器 - 可横向滚动 */
         .powerup-items-container {
             display: flex;
+            flex: 1 1 auto;
+            min-width: 0;
             gap: 8px;
             align-items: center;
             transition: all 0.3s ease;
@@ -3547,12 +3554,17 @@
         @media (max-width: 480px) {
             .header {
                 padding: 8px 12px;
+                padding-top: calc(8px + env(safe-area-inset-top));
+                padding-left: calc(8px + env(safe-area-inset-left));
+                padding-right: calc(8px + env(safe-area-inset-right));
                 flex-direction: row;
-                gap: 8px;
+                flex-wrap: nowrap;
+                gap: 4px;
             }
 
             .game-title {
-                font-size: 1.5rem;
+                flex-shrink: 0;
+                font-size: 1.35rem;
             }
             
             .md3-badge {
@@ -3566,7 +3578,8 @@
             }
             
             .header-right {
-                gap: 6px;
+                gap: 4px;
+                flex-wrap: nowrap;
             }
             
             .header-btn-label {
@@ -3575,8 +3588,8 @@
             }
             
             .icon-btn {
-                width: 38px;
-                height: 38px;
+                width: 44px;
+                height: 44px;
                 font-size: 1rem;
             }
 
@@ -3604,13 +3617,13 @@
             }
 
             .grid-cell {
-                width: 65px;
-                height: 65px;
+                width: clamp(65px, calc((100vw - 100px) / 4), 80px);
+                height: clamp(65px, calc((100vw - 100px) / 4), 80px);
             }
 
             .tile {
-                width: 65px !important;
-                height: 65px !important;
+                width: clamp(65px, calc((100vw - 100px) / 4), 80px);
+                height: clamp(65px, calc((100vw - 100px) / 4), 80px);
             }
 
             .powerup-bar {
@@ -3692,19 +3705,55 @@
 
         /* ========== 横屏适配 ========== */
         @media (orientation: landscape) and (max-height: 500px) {
+            .game-wrapper {
+                max-width: none;
+                margin: 0;
+            }
+
             .header {
                 flex-direction: row;
-                padding: 8px 15px;
+                flex-wrap: nowrap;
+                padding: 4px 12px;
+                padding-top: calc(4px + env(safe-area-inset-top));
+                padding-left: calc(12px + env(safe-area-inset-left));
+                padding-right: calc(12px + env(safe-area-inset-right));
+                gap: 8px;
+            }
+
+            .game-title {
+                font-size: 1.6rem;
+            }
+
+            .header-btn-label {
+                display: none;
+            }
+
+            .header-right {
+                flex-wrap: nowrap;
+            }
+
+            .icon-btn {
+                width: 44px;
+                height: 44px;
             }
 
             .game-main {
-                padding: 10px;
+                display: grid;
+                grid-template-columns: auto minmax(0, 1fr);
+                grid-template-rows: auto auto 1fr;
+                align-content: center;
+                justify-content: center;
+                column-gap: 16px;
+                row-gap: 6px;
+                padding: 6px 20px;
             }
 
             .score-panel {
+                grid-column: 2;
+                grid-row: 1;
                 padding: 8px 10px;
                 gap: 8px;
-                margin-bottom: 8px;
+                margin: 0;
             }
 
             .score-panel .score-box {
@@ -3737,8 +3786,10 @@
             }
 
             .daily-progress {
+                grid-column: 2;
+                grid-row: 2;
                 padding: 6px 10px;
-                margin: 0 10px 8px 10px;
+                margin: 0;
                 gap: 8px;
                 font-size: 0.75rem;
             }
@@ -3767,20 +3818,37 @@
                 padding: 2px 6px;
             }
 
+            .grid-container {
+                grid-column: 1;
+                grid-row: 1 / 4;
+                padding: 8px;
+            }
+
+            .grid-background {
+                gap: 8px;
+            }
+
+            .tile-container {
+                inset: 8px;
+            }
+
             .grid-cell {
-                width: 50px;
-                height: 50px;
+                width: clamp(38px, calc((100vh - 170px) / 4), 45px);
+                height: clamp(38px, calc((100vh - 170px) / 4), 45px);
             }
 
             .powerup-bar {
-                padding: 8px;
-                margin-top: 10px;
+                grid-column: 2;
+                grid-row: 3;
+                justify-self: stretch;
+                padding: 6px 8px;
+                margin: 0;
+                min-width: 0;
             }
 
             .powerup-btn {
-                width: 45px;
-                height: 45px;
-                font-size: 1.3rem;
+                width: 44px;
+                min-height: 44px;
             }
 
             .powerup-item-newgame {
@@ -3789,7 +3857,17 @@
             }
 
             .bottom-nav {
-                padding: 5px 0;
+                padding: 3px env(safe-area-inset-right) calc(3px + env(safe-area-inset-bottom)) env(safe-area-inset-left);
+                min-height: 48px;
+            }
+
+            .nav-item {
+                gap: 2px;
+                padding: 3px 12px;
+            }
+
+            .nav-icon {
+                font-size: 1.1rem;
             }
         }
         
@@ -3953,7 +4031,7 @@
         <!-- 顶部状态区 -->
         <header class="header">
             <div class="header-left">
-                <h1 class="game-title">2048 <span class="md3-badge">内部版</span></h1>
+                <h1 class="game-title">2048 <span class="md3-badge">v2</span></h1>
             </div>
             <div class="header-right">
                 <div class="header-btn-item">
@@ -4216,24 +4294,71 @@
     <div class="confetti-container" id="confettiContainer"></div>
 
     <script>
+        const API_BASE_URL = window.GAME2048_API_BASE_URL || (() => {
+            const localHosts = new Set(['localhost', '127.0.0.1', '[::1]']);
+            if (localHosts.has(window.location.hostname)) {
+                return `${window.location.origin}/api`;
+            }
+            return `${window.location.protocol}//${window.location.hostname}:3001/api`;
+        })();
+
+        function escapeHTML(value) {
+            return String(value ?? '')
+                .replaceAll('&', '&amp;')
+                .replaceAll('<', '&lt;')
+                .replaceAll('>', '&gt;')
+                .replaceAll('"', '&quot;')
+                .replaceAll("'", '&#039;');
+        }
+
         // ==================== API 集成模块 ====================
         const API = {
-            baseUrl: 'http://49.232.149.209:3001/api',
+            baseUrl: API_BASE_URL,
             userId: null,
             username: null,
             nickname: '玩家',  // 显示名称
             isLoggedIn: false,
+            isGuest: false,
+
+            async request(path, options = {}) {
+                const controller = new AbortController();
+                const timeout = setTimeout(() => controller.abort(), 8000);
+                try {
+                    const response = await fetch(`${this.baseUrl}${path}`, {
+                        ...options,
+                        signal: controller.signal
+                    });
+                    let data = {};
+                    if (response.status !== 204) {
+                        const contentType = response.headers.get('content-type') || '';
+                        if (contentType.includes('application/json')) {
+                            data = await response.json();
+                        }
+                    }
+                    if (!response.ok) {
+                        const error = new Error(data.error || `API请求失败 (${response.status})`);
+                        error.status = response.status;
+                        error.payload = data;
+                        throw error;
+                    }
+                    return data;
+                } finally {
+                    clearTimeout(timeout);
+                }
+            },
             
             // 初始化 - 从本地恢复用户或显示注册界面
             init() {
                 const savedUserId = localStorage.getItem('api_userId');
                 const savedNickname = localStorage.getItem('user_nickname');
+                const savedMode = localStorage.getItem('api_user_mode');
                 
                 if (savedUserId && savedNickname) {
-                    this.userId = parseInt(savedUserId);
+                    this.isGuest = savedMode === 'guest';
+                    this.userId = this.isGuest ? savedUserId : parseInt(savedUserId, 10);
                     this.nickname = savedNickname;
-                    this.isLoggedIn = true;
-                    console.log('恢复用户:', this.nickname, 'ID:', this.userId);
+                    this.isLoggedIn = !this.isGuest && Number.isFinite(this.userId);
+                    console.log(this.isGuest ? '恢复离线游客' : '恢复用户:', this.nickname);
                     return true;  // 用户已就绪
                 } else {
                     // 新用户，显示命名界面
@@ -4291,12 +4416,11 @@
                 
                 // 注册到服务器
                 try {
-                    const res = await fetch(`${this.baseUrl}/user/login`, {
+                    const data = await this.request('/user/login', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ username: name })
                     });
-                    const data = await res.json();
                     
                     if (data.error && data.duplicate) {
                         // 名字重复
@@ -4308,23 +4432,34 @@
                     if (data.user && data.user.id) {
                         this.userId = data.user.id;
                         this.isLoggedIn = true;
+                        this.isGuest = false;
                         localStorage.setItem('api_userId', this.userId);
-                        localStorage.setItem('user_nickname', data.user.nickname);
+                        localStorage.setItem('user_nickname', data.user.nickname || name);
+                        localStorage.setItem('api_user_mode', 'account');
                         console.log('注册成功:', name, 'ID:', this.userId);
                     } else {
                         throw new Error('注册返回数据异常');
                     }
                 } catch (e) {
+                    if (e.payload?.duplicate) {
+                        showToast('⚠️ ' + (e.payload.error || '昵称已存在'));
+                        document.getElementById('nicknameInput').value = this.generateRandomName();
+                        return;
+                    }
                     console.log('服务器注册失败:', e.message);
-                    this.userId = Date.now();
-                    this.isLoggedIn = true;
+                    this.userId = `guest-${Date.now()}`;
+                    this.isLoggedIn = false;
+                    this.isGuest = true;
                     localStorage.setItem('api_userId', this.userId);
                     localStorage.setItem('user_nickname', name);
+                    localStorage.setItem('api_user_mode', 'guest');
                 }
                 
                 // 关闭弹窗
                 document.getElementById('modalOverlay').classList.remove('active');
-                showToast('✅ 欢迎，' + this.nickname + '！');
+                showToast(this.isGuest
+                    ? `📴 已进入离线游客模式，${this.nickname} 的进度仅保存在本机`
+                    : `✅ 欢迎，${this.nickname}！`);
                 
                 // 初始化游戏
                 if (typeof initGame === 'function') {
@@ -4336,7 +4471,7 @@
             async submitGame(score, moves, maxTile, gameMode, playTime, gameSessionId) {
                 if (!this.isLoggedIn) return;
                 try {
-                    await fetch(`${this.baseUrl}/game/record`, {
+                    await this.request('/game/record', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({
@@ -4358,8 +4493,7 @@
             // 获取全球排行榜
             async getGlobalLeaderboard(limit = 10) {
                 try {
-                    const res = await fetch(`${this.baseUrl}/leaderboard/global?limit=${limit}`);
-                    return await res.json();
+                    return await this.request(`/leaderboard/global?limit=${limit}`);
                 } catch (e) {
                     console.log('获取排行榜失败:', e.message);
                     return { leaderboard: [] };
@@ -4370,7 +4504,7 @@
             async unlockAchievement(achievementId) {
                 if (!this.isLoggedIn) return;
                 try {
-                    await fetch(`${this.baseUrl}/achievements/unlock`, {
+                    await this.request('/achievements/unlock', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({
@@ -4387,8 +4521,7 @@
             async getUserItems() {
                 if (!this.isLoggedIn) return { items: {} };
                 try {
-                    const res = await fetch(`${this.baseUrl}/items/user/${this.userId}`);
-                    return await res.json();
+                    return await this.request(`/items/user/${this.userId}`);
                 } catch (e) {
                     return { items: {} };
                 }
@@ -4398,7 +4531,7 @@
             async useItem(itemType) {
                 if (!this.isLoggedIn) return;
                 try {
-                    await fetch(`${this.baseUrl}/items/use`, {
+                    await this.request('/items/use', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({
@@ -7791,7 +7924,7 @@ useUndo() {
                     }
                     
                     try {
-                        const res = await fetch(`${API.baseUrl}/feedback`, {
+                        const data = await API.request('/feedback', {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify({
@@ -7802,7 +7935,6 @@ useUndo() {
                                 image: imageData
                             })
                         });
-                        const data = await res.json();
                         
                         if (data.success) {
                             showToast('✅ 反馈已提交，感谢您的意见！');
@@ -7821,8 +7953,7 @@ useUndo() {
                 this.closeModal();
                 
                 // 从API获取公告
-                fetch(`${API.baseUrl}/announcements`)
-                    .then(r => r.json())
+                API.request('/announcements')
                     .then(data => {
                         const announcements = data.announcements || [];
                         
@@ -7841,19 +7972,21 @@ useUndo() {
                                 <div class="announcement-title">游戏公告</div>
                             </div>
                             <div class="announcement-list">
-                                ${announcements.length > 0 ? announcements.map(a => `
-                                    <div class="announcement-item ${!readIds.includes(a.id) ? 'new' : ''} ${a.type || 'normal'}">
+                                ${announcements.length > 0 ? announcements.map(a => {
+                                    const safeType = ['important', 'update', 'event', 'normal'].includes(a.type) ? a.type : 'normal';
+                                    return `
+                                    <div class="announcement-item ${!readIds.includes(a.id) ? 'new' : ''} ${safeType}">
                                         <div class="announcement-item-header">
-                                            <span class="announcement-type-badge ${a.type || 'normal'}">
-                                                ${a.type === 'important' ? '重要' : a.type === 'update' ? '更新' : a.type === 'event' ? '活动' : '通知'}
+                                            <span class="announcement-type-badge ${safeType}">
+                                                ${safeType === 'important' ? '重要' : safeType === 'update' ? '更新' : safeType === 'event' ? '活动' : '通知'}
                                             </span>
                                             ${!readIds.includes(a.id) ? '<span class="announcement-new-badge">NEW</span>' : ''}
                                             <span class="announcement-date">${formatDate(a.created_at)}</span>
                                         </div>
-                                        <div class="announcement-item-title">${a.title}</div>
-                                        <div class="announcement-item-content">${a.content}</div>
+                                        <div class="announcement-item-title">${escapeHTML(a.title)}</div>
+                                        <div class="announcement-item-content">${escapeHTML(a.content)}</div>
                                     </div>
-                                `).join('') : '<div style="text-align:center;color:var(--text-secondary);padding:40px;">暂无公告</div>'}
+                                `}).join('') : '<div style="text-align:center;color:var(--text-secondary);padding:40px;">暂无公告</div>'}
                             </div>
                         `;
                         
@@ -7874,8 +8007,7 @@ useUndo() {
             
             updateAnnouncementBadge() {
                 // 检查是否有未读公告
-                fetch(`${API.baseUrl}/announcements`)
-                    .then(r => r.json())
+                API.request('/announcements')
                     .then(data => {
                         const announcements = data.announcements || [];
                         const readIds = JSON.parse(localStorage.getItem('read_announcements') || '[]');
@@ -7921,6 +8053,8 @@ useUndo() {
 
             showSettingsPanel() {
                 const nickname = API.nickname || '玩家';
+                const connectionLabel = API.isLoggedIn ? '✅ 已连接' : '📴 本地游客模式';
+                const connectionColor = API.isLoggedIn ? 'var(--brand-primary)' : 'var(--text-secondary)';
                 const content = `
                     <div class="modal-title">⚙️ 设置</div>
                     <div class="modal-body">
@@ -7929,10 +8063,10 @@ useUndo() {
                             <div class="settings-section-title">👤 用户信息</div>
                             <div class="settings-item">
                                 <span class="settings-label">昵称</span>
-                                <input type="text" id="nicknameInput" value="${nickname}" maxlength="12" style="width:120px;padding:5px 10px;border-radius:8px;border:1px solid var(--glass-border);background:var(--glass-bg);color:var(--text-primary);text-align:right;">
+                                <input type="text" id="nicknameInput" value="${escapeHTML(nickname)}" maxlength="12" style="width:120px;padding:5px 10px;border-radius:8px;border:1px solid var(--glass-border);background:var(--glass-bg);color:var(--text-primary);text-align:right;">
                             </div>
                             <div class="settings-item" style="padding: 4px 0; font-size: 0.7rem; color: var(--text-secondary);">
-                                <span>用户ID: ${API.userId || '未登录'}</span>
+                                <span>用户ID: ${escapeHTML(API.userId || '未登录')}</span>
                             </div>
                         </div>
                         
@@ -8005,7 +8139,7 @@ useUndo() {
                             <div class="settings-section-title">💾 数据管理</div>
                             <div class="settings-item" style="padding: 8px 0; border-bottom: 1px solid var(--glass-border);">
                                 <span class="settings-label">云端同步</span>
-                                <span style="font-size: 0.7rem; color: var(--brand-primary);">✅ 已启用</span>
+                                <span style="font-size: 0.7rem; color: ${connectionColor};">${connectionLabel}</span>
                             </div>
                             <div class="settings-actions" style="margin-top:10px;">
                                 <button class="btn btn-secondary" id="syncDataBtn" style="width:100%">
@@ -8027,15 +8161,19 @@ useUndo() {
                         // 先本地更新
                         API.nickname = newName;
                         localStorage.setItem('user_nickname', newName);
+
+                        if (!API.isLoggedIn) {
+                            showToast('✅ 昵称已保存到本机');
+                            return;
+                        }
                         
                         // 再同步到云端
                         try {
-                            const res = await fetch(`${API.baseUrl}/user/update-nickname`, {
+                            const data = await API.request('/user/update-nickname', {
                                 method: 'POST',
                                 headers: { 'Content-Type': 'application/json' },
                                 body: JSON.stringify({ userId: API.userId, nickname: newName })
                             });
-                            const data = await res.json();
                             if (data.success) {
                                 showToast('✅ 昵称已同步云端');
                                 // 刷新排行榜显示
@@ -8116,18 +8254,18 @@ useUndo() {
                         API.submitGame(GameCore.bestScore, 0, GameCore.maxTile, 'sync', 0);
                         showToast('✅ 数据已同步到云端');
                     } else {
-                        showToast('⚠️ 正在连接云端...');
-                        API.login().then(() => {
-                            if (API.isLoggedIn) {
-                                showToast('✅ 云端连接成功');
-                            }
-                        });
+                        showToast('📴 当前为本地游客模式，联网账号同步将在后续版本完善');
                     }
                 });
             },
 
             showSigninPanel() {
                 this.closeModal();
+
+                if (!API.isLoggedIn) {
+                    showToast('📴 游客模式下不可签到，请联网后重新进入');
+                    return;
+                }
                 
                 const userId = API.userId || API.nickname;
                 if (!userId) {
@@ -8136,8 +8274,7 @@ useUndo() {
                 }
                 
                 // 从API获取签到状态
-                fetch(`${API.baseUrl}/sign/status?userId=${userId}`)
-                    .then(r => r.json())
+                API.request(`/sign/status?userId=${encodeURIComponent(userId)}`)
                     .then(data => {
                         const hasSignedToday = data.signedToday;
                         const consecutiveDays = data.continuousDays || 0;
@@ -8202,6 +8339,10 @@ useUndo() {
             },
             
             doSignin() {
+                if (!API.isLoggedIn) {
+                    showToast('📴 游客模式下不可签到');
+                    return;
+                }
                 const userId = API.userId || API.nickname;
                 if (!userId) {
                     showToast('⚠️ 请先登录');
@@ -8209,12 +8350,11 @@ useUndo() {
                 }
                 
                 // 调用API签到
-                fetch(`${API.baseUrl}/sign/do`, {
+                API.request('/sign/do', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ userId })
                 })
-                    .then(r => r.json())
                     .then(data => {
                         if (data.success) {
                             // 刷新道具数量 - 从API同步最新数据
@@ -8389,8 +8529,7 @@ showLeaderboardPanel() {
                 if (tab === 'global' || tab === 'daily') {
                     // 从API获取全球排行榜（带模式参数）
                     try {
-                        const res = await fetch(`http://49.232.149.209:3001/api/leaderboard/global?mode=${mode}&limit=20`);
-                        const data = await res.json();
+                        const data = await API.request(`/leaderboard/global?mode=${encodeURIComponent(mode)}&limit=20`);
                         
                         if (data.leaderboard && data.leaderboard.length > 0) {
                             listEl.innerHTML = this.renderGlobalLeaderboard(data.leaderboard);
@@ -8411,8 +8550,10 @@ showLeaderboardPanel() {
                 return data.map((entry, index) => {
                     const rank = index + 1;
                     const rankIcon = rank === 1 ? '🥇' : rank === 2 ? '🥈' : rank === 3 ? '🥉' : rank;
-                    const name = entry.nickname || entry.username || '玩家';
-                    const isMe = API.userId === entry.user_id;
+                    const name = escapeHTML(entry.nickname || entry.username || '玩家');
+                    const score = Number(entry.score) || 0;
+                    const maxTile = Number(entry.max_tile) || 2;
+                    const isMe = String(API.userId) === String(entry.user_id);
                     
                     return `
                         <div class="leaderboard-item ${isMe ? 'highlight' : ''}" style="display:flex;align-items:center;padding:12px 16px;background:${isMe ? 'rgba(99,102,241,0.15)' : 'rgba(255,255,255,0.05)'};border-radius:12px;margin-bottom:8px;border:${isMe ? '2px solid var(--brand-primary)' : 'none'};">
@@ -8420,10 +8561,10 @@ showLeaderboardPanel() {
                             <div style="flex:1;margin-left:12px;">
                                 <div style="display:flex;justify-content:space-between;align-items:center;">
                                     <span style="font-size:1rem;font-weight:600;color:${isMe ? 'var(--brand-primary)' : 'var(--text-primary)'};">${name}${isMe ? ' (我)' : ''}</span>
-                                    <span style="font-size:1.2rem;font-weight:700;color:var(--text-primary);">${entry.score.toLocaleString()}分</span>
+                                    <span style="font-size:1.2rem;font-weight:700;color:var(--text-primary);">${score.toLocaleString()}分</span>
                                 </div>
                                 <div style="font-size:0.8rem;color:var(--text-secondary);margin-top:4px;">
-                                    <span>🎮 最高${entry.max_tile || 2}</span>
+                                    <span>🎮 最高${maxTile}</span>
                                 </div>
                             </div>
                         </div>
@@ -9420,7 +9561,7 @@ showLeaderboardPanel() {
         
         // ==================== 日志上报模块 ====================
         const Logger = {
-            apiUrl: 'http://49.232.149.209:3001/api/logs',
+            apiUrl: `${API.baseUrl}/logs`,
             enabled: true,
             queue: [],
             timer: null,
