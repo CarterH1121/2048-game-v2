@@ -415,6 +415,16 @@ async function main() {
                 const toggleRect = document.getElementById('powerupToggle').getBoundingClientRect();
                 const newGameRect = document.getElementById('newGameBtn').getBoundingClientRect();
                 const headerButtons = [...document.querySelectorAll('.icon-btn')].map((el) => el.getBoundingClientRect());
+                const cells = [...document.querySelectorAll('.grid-cell')].map((el) => el.getBoundingClientRect());
+                const tilesAligned = [...document.querySelectorAll('.tile')].every((el) => {
+                    const row = Number(el.dataset.row);
+                    const col = Number(el.dataset.col);
+                    const tile = el.getBoundingClientRect();
+                    const cell = cells[row * 4 + col];
+                    return Math.abs(tile.left - cell.left) <= 1.5
+                        && Math.abs(tile.top - cell.top) <= 1.5
+                        && Math.abs(tile.width - cell.width) <= 1.5;
+                });
                 return {
                     overflowX: document.documentElement.scrollWidth > innerWidth,
                     boardWidth: Math.round(boardRect.width),
@@ -422,13 +432,15 @@ async function main() {
                     powerBottom: Math.round(powerRect.bottom),
                     navTop: Math.round(navRect.top),
                     powerControlsVisible: toggleRect.left >= 0 && newGameRect.right <= innerWidth,
-                    minHeaderTouch: Math.min(...headerButtons.map((rect) => Math.min(rect.width, rect.height)))
+                    minHeaderTouch: Math.min(...headerButtons.map((rect) => Math.min(rect.width, rect.height))),
+                    tilesAligned
                 };
             });
             assert.equal(metrics.overflowX, false, `${width}x${height} should not overflow horizontally`);
             assert.ok(metrics.boardBottom < metrics.navTop && metrics.powerBottom <= metrics.navTop, `${width}x${height} board and powerups should not be covered by navigation`);
             assert.equal(metrics.powerControlsVisible, true, `${width}x${height} powerup toggle and new-game controls should stay in view`);
             assert.ok(metrics.minHeaderTouch >= 44, `${width}x${height} header touch targets should be at least 44px`);
+            assert.equal(metrics.tilesAligned, true, `${width}x${height} tiles should stay aligned with their cells after resize`);
             viewportResults.push({ viewport: `${width}x${height}`, ...metrics });
             await page.screenshot({ path: path.join(outputDir, `${width}x${height}.png`) });
         }
@@ -440,10 +452,21 @@ async function main() {
             const board = document.querySelector('.grid-container').getBoundingClientRect();
             const nav = document.querySelector('.bottom-nav').getBoundingClientRect();
             const power = document.querySelector('.powerup-bar').getBoundingClientRect();
-            return { board: { top: board.top, bottom: board.bottom }, power: { top: power.top, bottom: power.bottom }, navTop: nav.top };
+            const cells = [...document.querySelectorAll('.grid-cell')].map((el) => el.getBoundingClientRect());
+            const tilesAligned = [...document.querySelectorAll('.tile')].every((el) => {
+                const row = Number(el.dataset.row);
+                const col = Number(el.dataset.col);
+                const tile = el.getBoundingClientRect();
+                const cell = cells[row * 4 + col];
+                return Math.abs(tile.left - cell.left) <= 1.5
+                    && Math.abs(tile.top - cell.top) <= 1.5
+                    && Math.abs(tile.width - cell.width) <= 1.5;
+            });
+            return { board: { top: board.top, bottom: board.bottom }, power: { top: power.top, bottom: power.bottom }, navTop: nav.top, tilesAligned };
         });
         assert.ok(landscape.board.bottom <= landscape.navTop, 'landscape board should be fully visible');
         assert.ok(landscape.power.bottom <= landscape.navTop, 'landscape powerups should be fully visible');
+        assert.equal(landscape.tilesAligned, true, 'landscape tiles should stay aligned with their cells after rotation');
         await page.screenshot({ path: path.join(outputDir, '800x360-landscape.png') });
         console.log('acceptance: landscape passed');
 

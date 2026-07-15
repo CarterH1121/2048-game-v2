@@ -5254,12 +5254,25 @@ if (next && this.grid[next.row] && this.grid[next.row][next.col] && this.grid[ne
             tileContainer: null,
             cellSize: 80,
             gap: 10,
+            resizeFrame: null,
+            resizeHandler: null,
 
             init() {
                 this.gridContainer = document.getElementById('gridBackground');
                 this.tileContainer = document.getElementById('tileContainer');
                 this.createCellBackgrounds();
                 this.calculateSizes();
+                if (!this.resizeHandler) {
+                    this.resizeHandler = () => {
+                        if (this.resizeFrame) cancelAnimationFrame(this.resizeFrame);
+                        this.resizeFrame = requestAnimationFrame(() => {
+                            this.resizeFrame = null;
+                            this.render(false);
+                        });
+                    };
+                    window.addEventListener('resize', this.resizeHandler, { passive: true });
+                    window.addEventListener('orientationchange', this.resizeHandler, { passive: true });
+                }
             },
 
             calculateSizes() {
@@ -5280,7 +5293,7 @@ if (next && this.grid[next.row] && this.grid[next.row][next.col] && this.grid[ne
                 }
             },
 
-            render() {
+            render(animate = true) {
                 this.tileContainer.innerHTML = '';
                 this.calculateSizes();
                 
@@ -5288,13 +5301,13 @@ if (next && this.grid[next.row] && this.grid[next.row][next.col] && this.grid[ne
                     for (let c = 0; c < GameCore.gridSize; c++) {
                         const tile = GameCore.grid[r][c];
                         if (tile) {
-                            this.renderTile(tile);
+                            this.renderTile(tile, animate);
                         }
                     }
                 }
             },
 
-            renderTile(tile) {
+            renderTile(tile, animate = true) {
                 const el = document.createElement('div');
                 el.className = 'tile';
                 el.id = 'tile-' + tile.id;
@@ -5317,12 +5330,12 @@ if (next && this.grid[next.row] && this.grid[next.row][next.col] && this.grid[ne
                 el.style.color = color.text;
                 
                 // 新方块动画
-                if (tile.isNew) {
+                if (animate && tile.isNew) {
                     el.classList.add('tile-new');
                 }
                 
                 // 合并动画
-                if (tile.mergedFrom) {
+                if (animate && tile.mergedFrom) {
                     el.classList.add('tile-merged');
                 }
                 
