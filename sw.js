@@ -1,5 +1,6 @@
 // 2048 Enhanced - Service Worker
-const CACHE_NAME = '2048-v2-cache-20260715-2';
+const CACHE_PREFIX = '2048-v2-cache-';
+const CACHE_NAME = '2048-v2-cache-20260715-3';
 const urlsToCache = [
     './',
     './index.html',
@@ -26,7 +27,7 @@ self.addEventListener('activate', (event) => {
         caches.keys().then((cacheNames) => {
             return Promise.all(
                 cacheNames.map((cacheName) => {
-                    if (cacheName !== CACHE_NAME) {
+                    if (cacheName.startsWith(CACHE_PREFIX) && cacheName !== CACHE_NAME) {
                         console.log('Deleting old cache:', cacheName);
                         return caches.delete(cacheName);
                     }

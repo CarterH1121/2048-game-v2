@@ -34,11 +34,16 @@ assert.ok(!html.includes('http://49.232.149.209:3001'), 'runtime code must not h
 assert.ok(!/PASSWORD\s*=|sshpass\s+-p/.test(deploy), 'deploy.sh must not contain or consume a plaintext password');
 assert.match(deploy, /index\.html[\s\S]*sw\.js|sw\.js[\s\S]*index\.html/, 'deploy.sh must publish index.html and sw.js as one release unit');
 assert.match(deploy, /rollback_release/, 'deploy.sh must implement paired rollback');
+assert.match(deploy, /DEPLOY_REMOTE_PATH:\?/, 'deploy.sh must require an explicitly authorized remote path');
+assert.ok(!deploy.includes('DEPLOY_REMOTE_PATH:-/'), 'deploy.sh must not guess a production remote path');
 assert.ok(!html.includes('data-tab="daily"'), 'daily leaderboard must not be shown without a backend contract');
 assert.ok(!html.includes('class="mode-btn'), 'mode leaderboard controls must not be shown while the backend ignores mode');
 assert.ok(!/leaderboard\/global\?mode=/.test(html), 'leaderboard requests must not send an ignored mode filter');
+assert.ok(!html.includes('data-mode="extreme"'), 'unimplemented extreme mode must not be offered as a playable mode');
+assert.ok(!html.includes('option value="extreme"'), 'unimplemented extreme mode must not be offered as a default mode');
 assert.match(sw, /network-first/i, 'service worker should document its navigation update strategy');
 assert.match(sw, /2048-v2-cache-\d{8}-\d+/, 'service worker cache must have an explicit release version');
+assert.match(sw, /cacheName\.startsWith\(CACHE_PREFIX\)/, 'service worker must only delete this app cache namespace');
 
 for (const backup of [
     'index.html.md3_backup',

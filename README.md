@@ -30,3 +30,5 @@ npm test
 - `AGENTS.md`：后续维护边界与验证约定。
 
 部署和任何生产操作都不属于默认本地工作流，需另行明确授权。
+
+`deploy.sh --check` 仅执行本地发布前门禁。实际 `deploy`/`rollback` 除明确生产授权外，还必须显式提供 `DEPLOY_SERVER` 与经只读映射确认的 `DEPLOY_REMOTE_PATH`；脚本不会猜测生产目录。

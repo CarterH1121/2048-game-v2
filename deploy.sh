@@ -5,7 +5,7 @@
 set -euo pipefail
 
 MODE="${1:---check}"
-REMOTE_PATH="${DEPLOY_REMOTE_PATH:-/var/www/2048}"
+REMOTE_PATH="${DEPLOY_REMOTE_PATH:-}"
 INDEX_FILE="index.html"
 SW_FILE="sw.js"
 
@@ -28,6 +28,7 @@ preflight() {
 
 require_remote_authorization() {
     : "${DEPLOY_SERVER:?请在获得生产授权后设置 DEPLOY_SERVER，例如 user@example.com}"
+    : "${DEPLOY_REMOTE_PATH:?请按只读映射结果显式设置 DEPLOY_REMOTE_PATH}"
 }
 
 deploy_release() {

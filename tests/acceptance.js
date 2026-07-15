@@ -220,7 +220,9 @@ async function main() {
             powerups.updateDisplay();
         });
         await page.click('#bombBtn');
-        await page.click('.tile[data-row="0"][data-col="0"]');
+        await page.$eval('.tile[data-row="0"][data-col="0"]', (el) => {
+            el.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+        });
         assert.deepEqual(await page.evaluate(() => { const p = eval('PowerupSystem'); return [p.bomb, p.bombMode, eval('GameCore').grid[0][0]]; }), [0, false, null], 'bomb should delete the selected tile and consume one item');
 
         await page.evaluate(() => {
@@ -233,7 +235,9 @@ async function main() {
             powerups.updateDisplay();
         });
         await page.click('#upgradeBtn');
-        await page.click('.tile[data-row="0"][data-col="0"]');
+        await page.$eval('.tile[data-row="0"][data-col="0"]', (el) => {
+            el.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+        });
         assert.deepEqual(await page.evaluate(() => { const p = eval('PowerupSystem'); return [p.upgrade, p.upgradeMode, eval('GameCore').grid[0][0].value]; }), [0, false, 4], 'upgrade should double the selected tile and consume one item');
 
         await page.evaluate(() => { const p = eval('PowerupSystem'); p.double = 1; p.updateDisplay(); });
@@ -312,12 +316,61 @@ async function main() {
         await page.waitForFunction(() => document.getElementById('modalContent').textContent.includes('意见反馈'));
         await closeModal(page);
 
-        for (const mode of ['classic', 'challenge', 'timed', 'extreme']) {
+        for (const mode of ['classic', 'challenge', 'timed']) {
             await page.click('#modeBtn');
             await page.$eval(`.mode-option[data-mode="${mode}"]`, (el) => el.click());
             await page.$eval('#modalContent button[onclick*="applyAndStart"]', (el) => el.click());
             assert.equal(await page.evaluate(() => eval('GameModeManager').currentMode), mode, `${mode} mode should apply`);
         }
+        await page.click('#modeBtn');
+        assert.equal(await page.$('.mode-option[data-mode="extreme"]'), null, 'unimplemented extreme mode should not be offered');
+        await closeModal(page);
+
+        await page.evaluate(() => {
+            const mode = eval('GameModeManager');
+            mode.currentMode = 'challenge';
+            mode.targetScore = 4;
+            mode.updateDisplay();
+        });
+        await setGridAndMove(page, 'left', [[0, 0, 2], [0, 1, 2]]);
+        assert.equal(await page.evaluate(() => eval('GameModeManager').challengeWon), true, 'challenge mode should complete at its target score');
+        assert.equal(await page.$eval('#targetProgressFill', (el) => el.style.width), '100%', 'challenge progress should reach 100%');
+
+        await page.evaluate(() => {
+            const mode = eval('GameModeManager');
+            mode.currentMode = 'timed';
+            mode.timeLimit = 1;
+            mode.resetForNewGame();
+        });
+        await page.waitForFunction(() => eval('GameModeManager').timedEnded && document.getElementById('gameOverTitle').textContent === '时间结束！');
+        assert.equal(await page.$eval('#timerDisplay', (el) => getComputedStyle(el).display), 'flex', 'timed mode should show its countdown');
+        assert.equal(await page.evaluate(() => eval('Leaderboard').scores.alltime.some((entry) => entry.mode === 'timed')), true, 'timed mode should record its local result');
+        await page.evaluate(() => {
+            document.getElementById('gameOverOverlay').classList.remove('active');
+            const mode = eval('GameModeManager');
+            mode.currentMode = 'classic';
+            mode.resetForNewGame();
+        });
+        assert.deepEqual(await page.evaluate(() => [
+            getComputedStyle(document.getElementById('targetScoreDisplay')).display,
+            getComputedStyle(document.getElementById('timerDisplay')).display
+        ]), ['none', 'none'], 'classic mode should clear challenge and timed indicators');
+
+        assert.equal(await page.evaluate(() => {
+            const mode = eval('GameModeManager');
+            localStorage.removeItem('2048-game-mode');
+            const settings = eval('GameSettings');
+            const previousDefault = settings.defaultMode;
+            settings.defaultMode = 'challenge';
+            mode.loadSavedMode();
+            const applied = mode.currentMode;
+            settings.defaultMode = previousDefault;
+            mode.currentMode = 'classic';
+            mode.saveMode();
+            return applied;
+        }), 'challenge', 'configured default mode should apply when no explicit mode is saved');
+        assert.equal(await page.evaluate(() => eval('GameModeManager').normalizeMode('extreme')), 'classic', 'legacy extreme mode state should migrate to classic');
+
         await page.click('#modeBtn');
         await page.$eval('.mode-option[data-mode="classic"]', (el) => el.click());
         await page.$eval('#modalContent button[onclick*="applyAndStart"]', (el) => el.click());
@@ -331,6 +384,7 @@ async function main() {
 
         await page.click('#settingsBtn');
         assert.ok((await page.$eval('#modalContent', (el) => el.textContent)).includes('已连接'), 'settings should show account connection state');
+        assert.equal(await page.$('#defaultModeSelect option[value="extreme"]'), null, 'settings should not offer an unimplemented default mode');
         await closeModal(page);
         console.log('acceptance: panels and API rendering passed');
 
@@ -393,7 +447,10 @@ async function main() {
         await page.evaluate(async () => {
             const registrations = await navigator.serviceWorker.getRegistrations();
             await Promise.all(registrations.map((registration) => registration.unregister()));
-            await caches.open('2048-v2-cache-stale-contract-test');
+            await Promise.all([
+                caches.open('2048-v2-cache-stale-contract-test'),
+                caches.open('shared-cache-contract-test')
+            ]);
         });
         await page.reload({ waitUntil: 'domcontentloaded' });
         await page.waitForFunction(async () => Boolean((await navigator.serviceWorker.getRegistration())?.active));
@@ -401,6 +458,7 @@ async function main() {
         await page.waitForFunction(() => Boolean(navigator.serviceWorker.controller));
         const cacheNames = await page.evaluate(() => caches.keys());
         assert.ok(!cacheNames.includes('2048-v2-cache-stale-contract-test'), 'service worker activation should delete stale caches');
+        assert.ok(cacheNames.includes('shared-cache-contract-test'), 'service worker activation should preserve unrelated same-origin caches');
         assert.ok(cacheNames.some((name) => /^2048-v2-cache-\d{8}-\d+$/.test(name)), 'versioned app-shell cache should be installed');
         await page.setOfflineMode(true);
         await page.reload({ waitUntil: 'domcontentloaded' });

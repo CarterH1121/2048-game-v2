@@ -4640,7 +4640,7 @@
                     this.updateDisplay();
                     
                     if (state.mode) {
-                        GameModeManager.currentMode = state.mode;
+                        GameModeManager.currentMode = GameModeManager.normalizeMode(state.mode);
                     }
                     
                     showToast('✅ 已恢复游戏进度');
@@ -5706,7 +5706,9 @@ if (next && this.grid[next.row] && this.grid[next.row][next.col] && this.grid[ne
                     this.confirmExit = data.confirmExit !== false;
                     this.mergeEffects = data.mergeEffects !== false;
                     this.particleEffects = data.particleEffects !== false;
-                    this.defaultMode = data.defaultMode || 'classic';
+                    this.defaultMode = ['classic', 'challenge', 'timed'].includes(data.defaultMode)
+                        ? data.defaultMode
+                        : 'classic';
                 }
                 this.applyTheme();
             },
@@ -5788,7 +5790,7 @@ if (next && this.grid[next.row] && this.grid[next.row][next.col] && this.grid[ne
             },
             
             setDefaultMode(mode) {
-                this.defaultMode = mode;
+                this.defaultMode = ['classic', 'challenge', 'timed'].includes(mode) ? mode : 'classic';
                 this.save();
             },
             
@@ -8133,7 +8135,6 @@ useUndo() {
                                     <option value="classic" ${GameSettings.defaultMode === 'classic' ? 'selected' : ''}>🎯 经典</option>
                                     <option value="challenge" ${GameSettings.defaultMode === 'challenge' ? 'selected' : ''}>🏆 挑战</option>
                                     <option value="timed" ${GameSettings.defaultMode === 'timed' ? 'selected' : ''}>⏱️ 限时</option>
-                                    <option value="extreme" ${GameSettings.defaultMode === 'extreme' ? 'selected' : ''}>💀 极限</option>
                                 </select>
                             </div>
                         </div>
@@ -9179,7 +9180,8 @@ showLeaderboardPanel() {
 
         // ==================== 游戏模式管理 ====================
         const GameModeManager = {
-            currentMode: 'classic',  // classic, challenge, timed, extreme
+            currentMode: 'classic',  // classic, challenge, timed
+            supportedModes: ['classic', 'challenge', 'timed'],
             targetScore: 0,          // 挑战模式目标分数
             timeLimit: 180,          // 限时模式时间（秒）
             timeRemaining: 0,        // 剩余时间
@@ -9225,10 +9227,16 @@ showLeaderboardPanel() {
                 const saved = localStorage.getItem('2048-game-mode');
                 if (saved) {
                     const config = JSON.parse(saved);
-                    this.currentMode = config.mode || 'classic';
+                    this.currentMode = this.normalizeMode(config.mode);
                     this.targetScore = config.targetScore || 10000;
                     this.timeLimit = config.timeLimit || 180;
+                } else {
+                    this.currentMode = this.normalizeMode(GameSettings.defaultMode);
                 }
+            },
+
+            normalizeMode(mode) {
+                return this.supportedModes.includes(mode) ? mode : 'classic';
             },
 
             saveMode() {
@@ -9246,16 +9254,17 @@ showLeaderboardPanel() {
             },
 
             setMode(mode, options = {}) {
-                this.currentMode = mode;
-                if (mode === 'challenge') {
+                const normalizedMode = this.normalizeMode(mode);
+                this.currentMode = normalizedMode;
+                if (normalizedMode === 'challenge') {
                     this.targetScore = options.targetScore || 10000;
                 }
-                if (mode === 'timed') {
+                if (normalizedMode === 'timed') {
                     this.timeLimit = options.timeLimit || 180;
                 }
                 this.saveMode();
                 this.updateDisplay();
-                showToast(`已切换至${this.modeConfig[mode].name}`);
+                showToast(`已切换至${this.modeConfig[normalizedMode].name}`);
             },
 
             updateDisplay() {
@@ -9264,6 +9273,9 @@ showLeaderboardPanel() {
                 const modeName = document.getElementById('modeName');
                 const targetDisplay = document.getElementById('targetScoreDisplay');
                 const timerDisplay = document.getElementById('timerDisplay');
+
+                targetDisplay.style.display = 'none';
+                timerDisplay.style.display = 'none';
 
                 if (this.currentMode === 'classic') {
                     indicator.style.display = 'none';
@@ -9365,7 +9377,7 @@ showLeaderboardPanel() {
                 overlay.classList.add('active');
                 
                 // 记录限时模式成绩
-                Leaderboard.addTimedScore(GameCore.score, this.timeLimit);
+                Leaderboard.addScore(GameCore.score, 'timed', GameCore.maxTile);
             },
 
             // 重置游戏时调用
@@ -9415,14 +9427,6 @@ showLeaderboardPanel() {
                                     <div class="mode-option-desc">分秒必争，心跳加速</div>
                                 </div>
                             </div>
-                            <div class="mode-option ${this.currentMode === 'extreme' ? 'active' : ''}" data-mode="extreme">
-                                <div class="mode-option-icon">💀</div>
-                                <div class="mode-option-info">
-                                    <div class="mode-option-name">极限模式</div>
-                                    <div class="mode-option-desc">方块加速，分数翻倍！</div>
-                                </div>
-                                <div class="mode-option-badge" style="background: linear-gradient(135deg, #ef4444, #be185d);">挑战</div>
-                            </div>
                         </div>
                         
                         <!-- 挑战目标选择 -->
@@ -9439,12 +9443,6 @@ showLeaderboardPanel() {
                             ).join('')}
                         </div>
                         
-                        <!-- 极限难度选择 -->
-                        <div class="extreme-options" id="extremeOptions" style="${this.currentMode === 'extreme' ? '' : 'display:none'}">
-                            <button class="extreme-option-btn ${this.extremeSpeed === 1.5 ? 'selected' : ''}" data-speed="1.5">⚡ 1.5倍速</button>
-                            <button class="extreme-option-btn ${this.extremeSpeed === 2 ? 'selected' : ''}" data-speed="2">⚡⚡ 2倍速</button>
-                            <button class="extreme-option-btn ${this.extremeSpeed === 3 ? 'selected' : ''}" data-speed="3">⚡⚡⚡ 3倍速</button>
-                        </div>
                         
                         <div class="modal-actions" style="margin-top: 20px;">
                             <button class="btn btn-primary" onclick="GameModeManager.applyAndStart(); UI.closeModal();">开始游戏</button>
@@ -9486,16 +9484,6 @@ showLeaderboardPanel() {
                     });
                 });
                 
-                // 极限难度点击
-                document.querySelectorAll('.extreme-option-btn').forEach(btn => {
-                    btn.addEventListener('click', (e) => {
-                        const speed = parseFloat(e.currentTarget.dataset.speed);
-                        this.extremeSpeed = speed;
-                        this.extremeMultiplier = speed;
-                        document.querySelectorAll('.extreme-option-btn').forEach(b => b.classList.remove('selected'));
-                        e.currentTarget.classList.add('selected');
-                    });
-                });
             },
 
             selectModeInPanel(mode) {
@@ -9506,9 +9494,8 @@ showLeaderboardPanel() {
                 // 显示/隐藏子选项
                 document.getElementById('challengeTargets').style.display = mode === 'challenge' ? 'flex' : 'none';
                 document.getElementById('timedOptions').style.display = mode === 'timed' ? 'flex' : 'none';
-                document.getElementById('extremeOptions').style.display = mode === 'extreme' ? 'flex' : 'none';
-                
-                this.currentMode = mode;
+
+                this.currentMode = this.normalizeMode(mode);
             },
 
             applyAndStart() {
