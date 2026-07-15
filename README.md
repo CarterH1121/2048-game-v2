@@ -24,7 +24,7 @@ npm test
 ## 关键文件
 
 - `index.html`：玩家端真实主版本。
-- `sw.js`：Service Worker 与离线 app shell。
+- `sw.js`：Service Worker 与离线 app shell；仅在浏览器安全来源中启用。当前生产 HTTP 环境会跳过注册，页面和本地存档功能保持正常，不对玩家承诺离线能力。
 - `tests/acceptance.js`：隔离 API 的浏览器验收。
 - `CODEX_HANDOFF.md`：当前结构、历史版本关系、风险和接管结论。
 - `AGENTS.md`：后续维护边界与验证约定。

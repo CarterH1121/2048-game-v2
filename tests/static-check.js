@@ -30,6 +30,8 @@ for (const marker of [
 
 assert.ok(html.includes('viewport-fit=cover'), 'safe-area viewport support is required');
 assert.ok(html.includes('env(safe-area-inset-bottom)'), 'bottom safe-area support is required');
+assert.ok(html.includes("if ('serviceWorker' in navigator)"), 'service worker registration must degrade safely when unsupported');
+assert.ok(!html.includes('PWA原生应用体验'), 'player-facing metadata must not promise unavailable offline capability');
 assert.ok(!html.includes('http://49.232.149.209:3001'), 'runtime code must not hard-code the production API host');
 assert.ok(!/PASSWORD\s*=|sshpass\s+-p/.test(deploy), 'deploy.sh must not contain or consume a plaintext password');
 assert.match(deploy, /index\.html[\s\S]*sw\.js|sw\.js[\s\S]*index\.html/, 'deploy.sh must publish index.html and sw.js as one release unit');
