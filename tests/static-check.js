@@ -54,6 +54,8 @@ assert.match(html, /getComputedStyle\(document\.body\)\.getPropertyValue\(token\
 assert.ok(html.includes('/tasks/user/${this.userId}'), 'logged-in task UI must consume the persisted server contract');
 assert.ok(html.includes('任务奖励领取尚未实现'), 'task UI must disclose the remaining reward boundary');
 assert.ok(html.includes('游客目标只保存在本机'), 'guest task UI must disclose its local-only boundary');
+assert.ok(html.includes('navigator.clipboard?.writeText'), 'share copy must detect unsupported clipboard environments');
+assert.ok(html.includes('复制失败，请手动选择分享文案'), 'share copy must not claim success after a failed clipboard write');
 assert.ok(html.includes("(t/10000) + '万'"), 'challenge target labels must convert scores to ten-thousands correctly');
 assert.ok(html.includes('targetScore: 10000'), 'challenge mode must have a valid default target before the first selection');
 assert.ok(html.includes("window.addEventListener('resize', this.resizeHandler"), 'renderer must recalculate tile geometry after viewport changes');
