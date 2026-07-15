@@ -328,6 +328,13 @@ async function main() {
             }
             await page.$eval('#modalContent button[onclick*="applyAndStart"]', (el) => el.click());
             assert.equal(await page.evaluate(() => eval('GameModeManager').currentMode), mode, `${mode} mode should apply`);
+            if (mode === 'challenge') {
+                assert.deepEqual(
+                    await page.evaluate(() => [eval('GameModeManager').targetScore, document.getElementById('targetScoreValue').textContent]),
+                    [10000, '10000'],
+                    'challenge mode should start with a valid default target'
+                );
+            }
         }
         await page.click('#modeBtn');
         assert.equal(await page.$('.mode-option[data-mode="extreme"]'), null, 'unimplemented extreme mode should not be offered');
