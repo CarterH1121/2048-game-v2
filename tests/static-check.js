@@ -34,6 +34,8 @@ assert.ok(html.includes('env(safe-area-inset-bottom)'), 'bottom safe-area suppor
 assert.ok(html.includes("if ('serviceWorker' in navigator)"), 'service worker registration must degrade safely when unsupported');
 assert.ok(!html.includes('PWA原生应用体验'), 'player-facing metadata must not promise unavailable offline capability');
 assert.ok(!html.includes('http://49.232.149.209:3001'), 'runtime code must not hard-code the production API host');
+assert.match(html, /window\.GAME2048_API_BASE_URL \|\| `\$\{window\.location\.origin\}\/api`/, 'authenticated player requests must default to the same-origin API proxy');
+assert.ok(!html.includes('window.location.hostname}:3001/api'), 'the default player API must not bypass the HTTPS same-origin proxy');
 assert.ok(!/PASSWORD\s*=|sshpass\s+-p/.test(deploy), 'deploy.sh must not contain or consume a plaintext password');
 assert.match(deploy, /index\.html[\s\S]*sw\.js|sw\.js[\s\S]*index\.html/, 'deploy.sh must publish index.html and sw.js as one release unit');
 assert.match(deploy, /rollback_release/, 'deploy.sh must implement paired rollback');
