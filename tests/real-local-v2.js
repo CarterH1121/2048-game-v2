@@ -68,7 +68,7 @@ function assertChineseUi(text, label) {
   assert.equal(match, null, `${label} contains visible English UI text: ${match?.[0]}`);
 }
 
-async function runAdminBrowser(browser, baseUrl, adminPassword) {
+async function runAdminBrowser(browser, baseUrl, adminPassword, historicalUserId) {
   const page = await browser.newPage();
   const consoleErrors = [];
   const pageErrors = [];
@@ -93,6 +93,18 @@ async function runAdminBrowser(browser, baseUrl, adminPassword) {
     await page.goto(`${baseUrl}${route}`, { waitUntil: 'networkidle2' });
     assertChineseUi(await visibleUiText(page), `管理端 ${route}`);
   }
+
+  await page.setViewport({ width: 1440, height: 900, deviceScaleFactor: 1 });
+  await page.goto(`${baseUrl}/operations`, { waitUntil: 'networkidle2' });
+  await page.evaluate(() => [...document.querySelectorAll('.ant-tabs-tab')].find((element) => element.textContent.includes('历史认领'))?.click());
+  await page.waitForSelector('input[inputmode="numeric"]');
+  await page.type('input[inputmode="numeric"]', String(historicalUserId));
+  await page.evaluate(() => [...document.querySelectorAll('button')].find((element) => element.textContent.includes('生成一次性令牌'))?.click());
+  await page.waitForSelector('.one-time-token code');
+  const claimToken = await page.$eval('.one-time-token code', (element) => element.textContent.trim());
+  assert.match(claimToken, /^[A-Za-z0-9_-]{40,60}$/);
+  assertChineseUi(await visibleUiText(page), '管理端历史认领');
+  await page.screenshot({ path: path.join(outputDir, 'admin-history-claim-desktop.png'), fullPage: true });
 
   await page.goto(`${baseUrl}/users`, { waitUntil: 'networkidle2' });
   await page.click('.ant-picker');
@@ -127,11 +139,45 @@ async function runAdminBrowser(browser, baseUrl, adminPassword) {
   assert.deepEqual(pageErrors, [], `admin page errors: ${pageErrors.join(' | ')}`);
   assert.deepEqual(serverErrors, [], `admin server errors: ${serverErrors.join(' | ')}`);
   await page.close();
-  return { routes, desktopPickerText, mobilePickerText, mobilePickerLayout };
+  return { routes, desktopPickerText, mobilePickerText, mobilePickerLayout, claimToken };
+}
+
+async function runHistoricalClaimBrowser(browser, baseUrl, token, expectedUserId) {
+  const page = await browser.newPage();
+  const errors = [];
+  page.on('pageerror', (error) => errors.push(error.message));
+  await page.setViewport({ width: 390, height: 844, deviceScaleFactor: 1 });
+  await page.goto(baseUrl, { waitUntil: 'networkidle2' });
+  await page.waitForSelector('#historicalClaimBtn');
+  await page.click('#historicalClaimBtn');
+  await page.waitForSelector('#confirmHistoricalClaim');
+  const username = `claim_${crypto.randomBytes(5).toString('hex')}`;
+  const password = `Claim!9-${crypto.randomBytes(12).toString('base64url')}`;
+  await page.type('#historicalClaimToken', token);
+  await page.type('#historicalClaimUsername', username);
+  await page.type('#historicalClaimPassword', password);
+  await page.type('#historicalClaimPasswordConfirm', password);
+  await page.click('#confirmHistoricalClaim');
+  await page.waitForFunction(() => !document.getElementById('modalOverlay').classList.contains('active'));
+  assert.equal(await page.evaluate(() => String(eval('API').userId)), String(expectedUserId));
+  await page.reload({ waitUntil: 'networkidle2' });
+  await page.waitForSelector('#settingsBtn');
+  await page.waitForFunction(() => eval('API').isLoggedIn === true);
+  assert.equal(await page.$('#historicalClaimBtn'), null, 'claimed player should restore the authenticated session');
+  const tutorialVisible = await page.$eval('#tutorialOverlay', (element) => element.classList.contains('active'));
+  if (tutorialVisible) await page.click('#tutorialSkip');
+  await page.click('#settingsBtn');
+  await page.waitForSelector('#logoutPlayerBtn');
+  assertChineseUi(await visibleUiText(page), '玩家端历史账号认领');
+  await page.screenshot({ path: path.join(outputDir, 'player-history-claim-mobile.png'), fullPage: true });
+  assert.deepEqual(errors, []);
+  await page.close();
+  return { originalUserIdPreserved: true, replayTokenNotStored: true };
 }
 
 async function runPlayerBrowser(browser, baseUrl) {
-  const page = await browser.newPage();
+  const context = await browser.createBrowserContext();
+  const page = await context.newPage();
   const consoleErrors = [];
   const pageErrors = [];
   const serverErrors = [];
@@ -195,6 +241,7 @@ async function runPlayerBrowser(browser, baseUrl) {
   assert.deepEqual(pageErrors, [], `player page errors: ${pageErrors.join(' | ')}`);
   assert.deepEqual(serverErrors, [], `player server errors: ${serverErrors.join(' | ')}`);
   await page.close();
+  await context.close();
   return { restoredSession: true, scannedPanels: 5 };
 }
 
@@ -233,6 +280,8 @@ async function main() {
     })
   ];
   let browser;
+  let database;
+  let historicalUserId;
   try {
     await Promise.all([
       waitForUrl(`http://127.0.0.1:${apiPort}/api/local-v2/health`, processes[0], 'backend'),
@@ -247,13 +296,25 @@ async function main() {
     ].find((candidate) => candidate && fs.existsSync(candidate));
     assert.ok(executablePath, 'Chrome/Chromium executable is required for real local V2 browser acceptance');
     browser = await puppeteer.launch({ headless: true, executablePath, args: ['--no-sandbox', '--disable-setuid-sandbox'] });
-    const adminEvidence = await runAdminBrowser(browser, `http://127.0.0.1:${adminPort}`, adminPassword);
+    const mysql = require(path.join(backendRoot, 'node_modules', 'mysql2', 'promise'));
+    database = await mysql.createConnection({ host: commonBackendEnv.DB_HOST, port: Number(commonBackendEnv.DB_PORT), user: commonBackendEnv.DB_USER, password: commonBackendEnv.DB_PASSWORD, database: commonBackendEnv.DB_NAME });
+    const [inserted] = await database.query("INSERT INTO users (openid, nickname, avatar, status) VALUES (?, ?, '', 1)", [`browser-history-${crypto.randomUUID()}`, `历史验收${crypto.randomBytes(2).toString('hex')}`]);
+    historicalUserId = inserted.insertId;
+    const adminEvidence = await runAdminBrowser(browser, `http://127.0.0.1:${adminPort}`, adminPassword, historicalUserId);
+    const claimEvidence = await runHistoricalClaimBrowser(browser, `http://127.0.0.1:${playerPort}`, adminEvidence.claimToken, historicalUserId);
+    delete adminEvidence.claimToken;
     const playerEvidence = await runPlayerBrowser(browser, `http://127.0.0.1:${playerPort}`);
-    const evidence = { realBackend: true, isolatedMySql: commonBackendEnv.DB_NAME, adminEvidence, playerEvidence };
+    const evidence = { realBackend: true, isolatedMySql: commonBackendEnv.DB_NAME, adminEvidence, claimEvidence, playerEvidence };
     fs.writeFileSync(path.join(outputDir, 'evidence.json'), JSON.stringify(evidence, null, 2));
     console.log(JSON.stringify(evidence, null, 2));
     console.log('real-local-v2: PASS');
   } finally {
+    if (database && historicalUserId) {
+      await database.query('DELETE FROM auth_sessions WHERE actor_type = ? AND actor_id = ?', ['player', historicalUserId]);
+      await database.query('DELETE FROM identity_claim_tokens WHERE user_id = ?', [historicalUserId]);
+      await database.query('DELETE FROM users WHERE id = ?', [historicalUserId]);
+    }
+    if (database) await database.end();
     if (browser) await browser.close();
     processes.forEach((child) => child.kill());
   }

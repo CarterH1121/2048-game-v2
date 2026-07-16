@@ -4680,7 +4680,7 @@
                 try {
                     const session = await this.request('/user/session');
                     if (session.user?.id) {
-                        this.userId = Number(session.user.id);
+                        this.userId = String(session.user.id);
                         this.username = String(session.user.username || '');
                         this.nickname = String(session.user.nickname || savedNickname || '玩家');
                         this.isLoggedIn = true;
@@ -4737,6 +4737,7 @@
                         <input type="password" id="accountPassword" maxlength="72" autocomplete="current-password" placeholder="密码" class="naming-input" style="margin-top:8px;">
                         <div id="accountLoginError" class="capability-note" style="display:none;margin-top:10px;color:var(--danger-color);"></div>
                         <button class="btn btn-secondary" id="accountLoginBtn" style="width:100%;margin-top:10px;">登录账号</button>
+                        <button class="btn btn-secondary" id="historicalClaimBtn" style="width:100%;margin-top:8px;">使用一次性令牌认领历史账号</button>
                     </div>
                 `;
                 
@@ -4753,6 +4754,7 @@
                     this.confirmNickname(name);
                 });
                 document.getElementById('accountLoginBtn').addEventListener('click', () => this.loginAccount());
+                document.getElementById('historicalClaimBtn').addEventListener('click', () => UI.showHistoricalClaimDialog());
             },
             
             // 生成随机名称
@@ -4869,7 +4871,7 @@
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ username, password })
                     });
-                    this.userId = Number(data.user.id);
+                    this.userId = String(data.user.id);
                     this.username = String(data.user.username || username);
                     this.nickname = String(data.user.nickname || '玩家');
                     this.isLoggedIn = true;
@@ -4931,7 +4933,7 @@
                     })
                 });
                 localStorage.setItem('api_guest_origin_id', String(this.userId));
-                this.userId = Number(result.user.id);
+                this.userId = String(result.user.id);
                 this.username = String(result.user.username || username);
                 this.nickname = String(result.user.nickname);
                 this.isLoggedIn = true;
@@ -4955,6 +4957,24 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ oldPassword, newPassword })
                 });
+            },
+
+            async claimHistoricalIdentity({ token, username, password }) {
+                const result = await this.request('/user/claim-history', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ token, username, password })
+                });
+                this.userId = String(result.user.id);
+                this.username = String(result.user.username || username);
+                this.nickname = String(result.user.nickname || '玩家');
+                this.isLoggedIn = true;
+                this.isGuest = false;
+                localStorage.setItem('api_userId', this.userId);
+                localStorage.setItem('user_nickname', this.nickname);
+                localStorage.setItem('api_user_mode', 'account');
+                localStorage.removeItem('guest_migration_secret');
+                return result;
             },
 
             async claimTask(taskId) {
@@ -8498,6 +8518,58 @@ if (next && this.grid[next.row] && this.grid[next.row][next.col] && this.grid[ne
                 });
             },
 
+            showHistoricalClaimDialog() {
+                const content = `
+                    <div class="modal-title">${Icon.render('lock')}认领历史账号</div>
+                    <div class="modal-body">
+                        <div class="panel-note" style="margin-bottom:12px;">仅使用管理员通过安全通道提供的一次性令牌。昵称、玩家 ID、最高分和本机存储都不能作为认领凭据。</div>
+                        <label class="feedback-label" for="historicalClaimToken">一次性认领令牌</label>
+                        <input type="password" id="historicalClaimToken" autocomplete="off" spellcheck="false" class="naming-input" placeholder="粘贴完整令牌">
+                        <label class="feedback-label" for="historicalClaimUsername">账号名</label>
+                        <input type="text" id="historicalClaimUsername" maxlength="32" autocomplete="username" class="naming-input" placeholder="4-32 位小写字母、数字或下划线">
+                        <label class="feedback-label" for="historicalClaimPassword">新密码</label>
+                        <input type="password" id="historicalClaimPassword" maxlength="72" autocomplete="new-password" class="naming-input" placeholder="至少 12 个字节">
+                        <label class="feedback-label" for="historicalClaimPasswordConfirm">确认新密码</label>
+                        <input type="password" id="historicalClaimPasswordConfirm" maxlength="72" autocomplete="new-password" class="naming-input">
+                        <div id="historicalClaimError" class="capability-note" style="display:none;margin-top:10px;color:var(--danger-color);"></div>
+                        <button class="btn btn-primary" id="confirmHistoricalClaim" style="width:100%;margin-top:14px;">确认认领原账号</button>
+                    </div>`;
+                this.showModal(content);
+                document.getElementById('confirmHistoricalClaim').addEventListener('click', async (event) => {
+                    const tokenInput = document.getElementById('historicalClaimToken');
+                    const username = document.getElementById('historicalClaimUsername').value.trim().toLowerCase();
+                    const password = document.getElementById('historicalClaimPassword').value;
+                    const passwordConfirm = document.getElementById('historicalClaimPasswordConfirm').value;
+                    const errorEl = document.getElementById('historicalClaimError');
+                    if (!/^[A-Za-z0-9_-]{40,60}$/.test(tokenInput.value.trim()) || !/^[a-z][a-z0-9_]{3,31}$/.test(username)) {
+                        errorEl.textContent = '请检查一次性令牌和账号名格式';
+                        errorEl.style.display = 'block';
+                        return;
+                    }
+                    if (new TextEncoder().encode(password).length < 12 || password !== passwordConfirm) {
+                        errorEl.textContent = password !== passwordConfirm ? '两次输入的密码不一致' : '密码至少需要 12 个字节';
+                        errorEl.style.display = 'block';
+                        return;
+                    }
+                    event.currentTarget.disabled = true;
+                    event.currentTarget.textContent = '认领中…';
+                    try {
+                        const token = tokenInput.value.trim();
+                        tokenInput.value = '';
+                        const result = await API.claimHistoricalIdentity({ token, username, password });
+                        this.closeModal();
+                        showToast(`已安全认领原账号 ${result.user.id}`);
+                        if (typeof initGame === 'function') initGame();
+                    } catch (error) {
+                        tokenInput.value = '';
+                        errorEl.textContent = error.payload?.error || '认领失败；令牌输入已清空，请重新获取或粘贴';
+                        errorEl.style.display = 'block';
+                        event.currentTarget.disabled = false;
+                        event.currentTarget.textContent = '重新输入令牌';
+                    }
+                });
+            },
+
             showPlayerPasswordDialog() {
                 const content = `
                     <div class="modal-title">${Icon.render('lock')}修改账号密码</div>
@@ -8631,7 +8703,7 @@ if (next && this.grid[next.row] && this.grid[next.row][next.col] && this.grid[ne
                                     ? '完成一局后会提交成绩；服务端任务与库存可重登恢复。棋盘、设置、成就与主题仍保存在本机浏览器中。'
                                     : '游客棋盘、记录和目标保存在本机。可升级为安全账号并迁移已完成记录与对应任务指标。'}
                             </div>
-                            ${API.isGuest ? '<button class="btn btn-primary" id="upgradeGuestBtn" style="width:100%;margin-top:10px;">升级为安全账号</button>' : ''}
+                            ${API.isGuest ? '<button class="btn btn-primary" id="upgradeGuestBtn" style="width:100%;margin-top:10px;">升级为安全账号</button><button class="btn btn-secondary" id="claimHistoricalBtn" style="width:100%;margin-top:8px;">认领历史账号</button>' : ''}
                             ${API.isLoggedIn ? '<button class="btn btn-secondary" id="changePlayerPasswordBtn" style="width:100%;margin-top:10px;">修改密码</button><button class="btn btn-secondary" id="logoutPlayerBtn" style="width:100%;margin-top:8px;">退出账号</button>' : ''}
                         </div>
                     </div>
@@ -8643,6 +8715,8 @@ if (next && this.grid[next.row] && this.grid[next.row][next.col] && this.grid[ne
 
                 const upgradeButton = document.getElementById('upgradeGuestBtn');
                 if (upgradeButton) upgradeButton.addEventListener('click', () => this.showGuestUpgradeDialog());
+                const claimButton = document.getElementById('claimHistoricalBtn');
+                if (claimButton) claimButton.addEventListener('click', () => this.showHistoricalClaimDialog());
                 const passwordButton = document.getElementById('changePlayerPasswordBtn');
                 if (passwordButton) passwordButton.addEventListener('click', () => this.showPlayerPasswordDialog());
                 const logoutButton = document.getElementById('logoutPlayerBtn');

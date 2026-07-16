@@ -61,6 +61,9 @@ assert.ok(html.includes('游客目标只保存在本机'), 'guest task UI must d
 assert.ok(html.includes('timedDeadlineAt'), 'timed mode must persist an absolute deadline');
 assert.ok(html.includes('visibilitychange'), 'timed mode must reconcile the deadline after backgrounding');
 assert.ok(html.includes('/user/upgrade-guest'), 'guest upgrade must use the local V2 migration endpoint');
+assert.ok(html.includes('/user/claim-history'), 'historical identity claims must use the one-time server token endpoint');
+assert.ok(html.includes('昵称、玩家 ID、最高分和本机存储都不能作为认领凭据'), 'claim UI must reject unsafe ownership signals');
+assert.ok(!html.includes("setItem('historicalClaimToken'"), 'claim tokens must never be persisted to localStorage');
 assert.ok(html.includes('/user/session'), 'accounts must restore through a server-validated session');
 assert.ok(html.includes("this.readCookie('v2_player_csrf')"), 'state-changing player requests must carry the server CSRF token');
 assert.ok(!html.includes("setItem('local_v2_account_key'"), 'player authentication secrets must not be stored in localStorage');
