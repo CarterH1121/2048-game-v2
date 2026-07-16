@@ -8466,7 +8466,7 @@ if (next && this.grid[next.row] && this.grid[next.row][next.col] && this.grid[ne
                     <div class="modal-title">${Icon.render('user')}升级为安全账号</div>
                     <div class="modal-body">
                         <div class="panel-note" style="margin-bottom:12px;">
-                            将 ${snapshot.games.length} 条本机完成记录及其任务指标写入隔离数据库。密码只发送给后端进行安全哈希；当前棋盘、设置和成就仍保留在本浏览器。
+                            将 ${snapshot.games.length} 条本机完成记录及其任务指标写入你的安全账号。密码只发送给后端进行安全哈希；当前棋盘、设置和成就仍保留在本浏览器。
                         </div>
                         <label class="feedback-label" for="upgradeUsername">账号名</label>
                         <input type="text" id="upgradeUsername" maxlength="32" autocomplete="username" placeholder="4-32 位小写字母、数字或下划线" class="naming-input">
@@ -9165,7 +9165,7 @@ showLeaderboardPanel() {
                 if (API.isLoggedIn) await TaskSystem.refreshServerTasks();
                 const tasks = TaskSystem.getTasks();
                 const taskNote = TaskSystem.serverAvailable
-                    ? '任务、今日进度、领取状态和道具奖励均来自本地 V2 测试数据库。重复点击不会重复发奖。'
+                    ? '任务、今日进度、领取状态和道具奖励均来自账号服务。重复点击不会重复发奖。'
                     : API.isGuest
                         ? '游客目标只保存在本机并于次日重置；登录后可使用服务端持久化任务。'
                         : `服务端任务暂不可用，当前显示本机目标。${TaskSystem.serverError ? `原因：${escapeHTML(TaskSystem.serverError)}` : ''}`;

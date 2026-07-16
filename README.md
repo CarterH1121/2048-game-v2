@@ -17,7 +17,7 @@ python -m http.server 8080 --bind 127.0.0.1
 npm test
 ```
 
-- `npm run test:static`：语法、核心模块、安全基线、缓存版本与历史备份存在性。
+- `npm run test:static`：语法、核心模块、安全基线、缓存版本与已跟踪历史备份存在性。
 - `npm run test:browser`：真实 Chrome 中验证登录/游客、四方向移动合并、胜负、道具、主要面板、刷新恢复、离线缓存、横竖屏和指定移动端尺寸。
 - 浏览器截图写入 `output/playwright/acceptance/`，该目录不纳入 Git。
 
@@ -34,7 +34,7 @@ npm run local:v2
 ## 关键文件
 
 - `index.html`：玩家端真实主版本。
-- `sw.js`：Service Worker 与离线 app shell；仅在浏览器安全来源中启用。当前生产 HTTP 环境会跳过注册，页面和本地存档功能保持正常，不对玩家承诺离线能力。
+- `sw.js`：Service Worker 与离线 app shell；仅在浏览器安全来源中启用。正式 HTTPS 发布可启用，普通 HTTP 会跳过注册；导航采用 network-first，因此本轮文案调整无需单独提高缓存版本。
 - `tests/acceptance.js`：隔离 API 的浏览器验收。
 - `CODEX_HANDOFF.md`：当前结构、历史版本关系、风险和接管结论。
 - `AGENTS.md`：后续维护边界与验证约定。

@@ -9,7 +9,7 @@
 
 ## Historical HTML files
 
-- The four tracked `index*backup*`/`index*.bak*` files were imported together in the initial Git commit. Their filenames, sizes, and content diffs suggest a chronological progression, but Git does not prove that lineage.
+- The two tracked historical HTML files (`index.html.md3_backup` and `index_backup.html`) were imported with the initial Git history. Date-stamped `index*.bak*` files may exist in individual worktrees but are ignored local artifacts, not release inputs or clean-clone requirements.
 - Do not delete, rename, or bulk-edit historical HTML files without a separate provenance review and explicit approval.
 - Never copy a historical file over `index.html` merely because a document calls it a newer version; verify features and Git history first.
 
@@ -23,7 +23,7 @@
 
 ## API and production safety
 
-- Localhost uses same-origin `/api`; deployed hosts default to port `3001` on the current hostname. A host page may set `window.GAME2048_API_BASE_URL` before the main script to override this.
+- Local and deployed builds default to same-origin `/api`; the production reverse proxy keeps port `3001` on loopback only. A host page may set `window.GAME2048_API_BASE_URL` before the main script only for an explicitly reviewed environment.
 - Never place passwords, tokens, cookies, private keys, or server credentials in this repository. `deploy.sh` accepts an authorized SSH target via environment variables and assumes key-based SSH.
 - Do not run `deploy.sh`, SSH, production HTTP write tests, database operations, or release actions unless the current task explicitly authorizes them.
 - Browser tests must mock or intercept the API. A local acceptance run must not create users, submit scores, sign in, or write logs on production.

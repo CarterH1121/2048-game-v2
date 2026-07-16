@@ -84,11 +84,9 @@ assert.match(sw, /cacheName\.startsWith\(CACHE_PREFIX\)/, 'service worker must o
 
 for (const backup of [
     'index.html.md3_backup',
-    'index_backup.html',
-    'index.html.bak_20260429_051212',
-    'index.html.bak_local_20260501_112117'
+    'index_backup.html'
 ]) {
-    assert.ok(fs.existsSync(path.join(root, backup)), `historical backup is missing: ${backup}`);
+    assert.ok(fs.existsSync(path.join(root, backup)), `tracked historical backup is missing: ${backup}`);
 }
 
 console.log('static-check: PASS');
