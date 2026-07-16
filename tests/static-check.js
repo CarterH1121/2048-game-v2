@@ -8,6 +8,7 @@ const read = (name) => fs.readFileSync(path.join(root, name), 'utf8');
 const html = read('index.html');
 const sw = read('sw.js');
 const deploy = read('deploy.sh');
+const localServer = read('tools/local-v2-server.js');
 
 const scripts = [...html.matchAll(/<script(?:\s[^>]*)?>([\s\S]*?)<\/script>/gi)].map((match) => match[1]);
 assert.ok(scripts.length >= 2, 'index.html should contain its inline scripts');
@@ -58,7 +59,15 @@ assert.ok(html.includes('游客目标只保存在本机'), 'guest task UI must d
 assert.ok(html.includes('timedDeadlineAt'), 'timed mode must persist an absolute deadline');
 assert.ok(html.includes('visibilitychange'), 'timed mode must reconcile the deadline after backgrounding');
 assert.ok(html.includes('/user/upgrade-guest'), 'guest upgrade must use the local V2 migration endpoint');
-assert.ok(html.includes('/user/local-session'), 'upgraded local accounts must restore through a server session check');
+assert.ok(html.includes('/user/session'), 'accounts must restore through a server-validated session');
+assert.ok(html.includes("this.readCookie('v2_player_csrf')"), 'state-changing player requests must carry the server CSRF token');
+assert.ok(!html.includes("setItem('local_v2_account_key'"), 'player authentication secrets must not be stored in localStorage');
+assert.ok(!html.includes("setItem('guest_upgrade_account_key'"), 'guest upgrades must not retain the legacy account key');
+assert.ok(!html.includes('>Play<') && !html.includes('>NEW<') && !html.includes('Lv.'), 'visible player chrome must not retain default English labels');
+assert.ok(!/\sonclick\s*=/.test(html), 'inline click handlers must stay removed so script CSP can be enforced');
+assert.match(localServer, /Content-Security-Policy/, 'the local candidate server must emit a content security policy');
+assert.match(localServer, /sha256-/, 'inline application scripts must be authorized by exact CSP hashes');
+assert.ok(!localServer.includes("script-src 'self' 'unsafe-inline'"), 'script CSP must not permit arbitrary inline JavaScript');
 assert.ok(html.includes('navigator.clipboard?.writeText'), 'share copy must detect unsupported clipboard environments');
 assert.ok(html.includes('复制失败，请手动选择分享文案'), 'share copy must not claim success after a failed clipboard write');
 assert.ok(html.includes("(t/10000) + '万'"), 'challenge target labels must convert scores to ten-thousands correctly');

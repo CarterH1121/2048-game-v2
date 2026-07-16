@@ -15,13 +15,20 @@ const mimeTypes = {
     '.svg': 'image/svg+xml'
 };
 
-function json(res, body, status = 200) {
-    res.writeHead(status, { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store' });
+function json(res, body, status = 200, headers = {}) {
+    res.writeHead(status, { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store', ...headers });
     res.end(JSON.stringify(body));
 }
 
 function handleApi(req, res, pathname) {
-    if (pathname === '/api/user/login') return json(res, { user: { id: 2048, nickname: '测试玩家' } });
+    if (pathname === '/api/user/session') {
+        return String(req.headers.cookie || '').includes('test-player=1')
+            ? json(res, { success: true, user: { id: 2048, username: 'test_player', nickname: '测试玩家' } })
+            : json(res, { error: '玩家会话已失效', code: 'SESSION_INVALID' }, 401);
+    }
+    if (pathname === '/api/user/login') return json(res, { success: true, user: { id: 2048, username: 'test_player', nickname: '测试玩家' } }, 200, {
+        'Set-Cookie': ['test-player=1; Path=/; HttpOnly; SameSite=Strict', 'v2_player_csrf=test-csrf; Path=/; SameSite=Strict']
+    });
     if (pathname.startsWith('/api/items/user/')) {
         return json(res, { items: { undo: 1, hint: 3, shuffle: 2, bomb: 1, upgrade: 1, double: 1 } });
     }
@@ -150,8 +157,9 @@ async function main() {
         console.log('acceptance: initial page loaded');
 
         assert.equal(await page.$eval('#modalOverlay', (el) => el.classList.contains('active')), true, 'first load should ask for a nickname');
-        await page.$eval('#nicknameInput', (input) => { input.value = '测试玩家'; });
-        await page.click('#confirmNameBtn');
+        await page.$eval('#accountUsername', (input) => { input.value = 'test_player'; });
+        await page.$eval('#accountPassword', (input) => { input.value = '本地浏览器测试密码'; });
+        await page.click('#accountLoginBtn');
         await page.waitForFunction(() => (
             document.querySelectorAll('.grid-cell').length === 16
             && document.querySelectorAll('.tile').length === 2
@@ -161,8 +169,8 @@ async function main() {
 
         assert.equal(await page.$$eval('.grid-cell', (els) => els.length), 16, 'board should contain 16 cells');
         assert.equal(await page.$$eval('.tile', (els) => els.length), 2, 'new game should start with two tiles');
-        assert.equal(await page.evaluate(() => localStorage.getItem('api_user_mode')), 'account', 'successful login should persist account mode');
-        console.log('acceptance: login and initial game passed');
+        assert.equal(await page.evaluate(() => localStorage.getItem('api_user_mode')), 'account', 'successful account login should persist account mode');
+        console.log('acceptance: account login and initial game passed');
 
         const moveCases = [
             ['left', [[0, 0, 2], [0, 1, 2]], [0, 0]],
@@ -182,7 +190,7 @@ async function main() {
         await page.evaluate(() => { const game = eval('GameCore'); game.score = 4; game.updateDisplay(); });
         await page.click('#newGameBtn');
         await page.waitForFunction(() => document.getElementById('modalContent').textContent.includes('重新开始'));
-        await page.click('#modalContent button[onclick="UI.confirmAction()"]');
+        await page.click('#modalContent button[data-ui-action="confirm"]');
         await page.waitForFunction((sessionId) => eval('GameCore').gameSessionId !== sessionId && document.querySelectorAll('.tile').length === 2, {}, previousSession);
         assert.equal(await page.$eval('#currentScore', (el) => el.textContent), '0', 'new-game control should reset score');
 
@@ -330,7 +338,7 @@ async function main() {
             ['button[data-panel="leaderboard"]', '排行榜'],
             ['button[data-panel="achievements"]', '成就里程碑'],
             ['button[data-panel="tasks"]', '今日目标'],
-            ['button[onclick*="showSkinPanel"]', '主题与棋盘'],
+            ['button[data-panel="skins"]', '主题与棋盘'],
             ['button[data-panel="share"]', '分享成绩'],
             ['button[data-panel="profile"]', '游戏数据']
         ];
@@ -366,7 +374,7 @@ async function main() {
                     'challenge target labels should match their numeric values'
                 );
             }
-            await page.$eval('#modalContent button[onclick*="applyAndStart"]', (el) => el.click());
+            await page.$eval('#modalContent button[data-ui-action="apply-mode"]', (el) => el.click());
             assert.equal(await page.evaluate(() => eval('GameModeManager').currentMode), mode, `${mode} mode should apply`);
             if (mode === 'challenge') {
                 assert.deepEqual(
@@ -449,11 +457,11 @@ async function main() {
 
         await page.click('#modeBtn');
         await page.$eval('.mode-option[data-mode="classic"]', (el) => el.click());
-        await page.$eval('#modalContent button[onclick*="applyAndStart"]', (el) => el.click());
+        await page.$eval('#modalContent button[data-ui-action="apply-mode"]', (el) => el.click());
 
         await page.click('#signinBtn');
         await page.waitForFunction(() => document.getElementById('modalContent').textContent.includes('每日签到'));
-        await page.click('#modalContent button[onclick="UI.doSignin()"]');
+        await page.click('#modalContent button[data-ui-action="signin"]');
         await page.waitForFunction(() => !document.getElementById('modalOverlay').classList.contains('active'));
         await new Promise((resolve) => setTimeout(resolve, 700));
         if (await page.$eval('#modalOverlay', (el) => el.classList.contains('active'))) await closeModal(page);

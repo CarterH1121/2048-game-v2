@@ -4341,7 +4341,7 @@
         <!-- 顶部状态区 -->
         <header class="header">
             <div class="header-left">
-                <h1 class="game-title">2048 <span class="md3-badge">Play</span></h1>
+                <h1 class="game-title">2048 <span class="md3-badge">畅玩</span></h1>
             </div>
             <div class="header-right">
                 <div class="header-btn-item">
@@ -4377,7 +4377,7 @@
                     <div class="score-value" id="currentScore">0</div>
                 </div>
                 <div class="level-badge" id="levelBadge">
-                    <div class="level-number">Lv.1</div>
+                    <div class="level-number">等级 1</div>
                     <div class="level-rank"><span class="level-rank-icon"><svg class="ui-icon"><use href="#icon-medal"></use></svg></span>新手</div>
                 </div>
                 <div class="score-box">
@@ -4507,7 +4507,7 @@
                 <span class="nav-icon"><svg class="ui-icon"><use href="#icon-tasks"></use></svg></span>
                 <span>任务</span>
             </button>
-            <button class="nav-item" onclick="UI.showSkinPanel()">
+            <button class="nav-item" data-panel="skins">
                 <span class="nav-icon"><svg class="ui-icon"><use href="#icon-palette"></use></svg></span>
                 <span>皮肤</span>
             </button>
@@ -4635,14 +4635,26 @@
             nickname: '玩家',  // 显示名称
             isLoggedIn: false,
             isGuest: false,
-            localAccountKey: '',
+
+            readCookie(name) {
+                const prefix = `${name}=`;
+                const value = document.cookie.split(';').map(item => item.trim()).find(item => item.startsWith(prefix));
+                return value ? decodeURIComponent(value.slice(prefix.length)) : '';
+            },
 
             async request(path, options = {}) {
                 const controller = new AbortController();
                 const timeout = setTimeout(() => controller.abort(), 8000);
                 try {
+                    const headers = new Headers(options.headers || {});
+                    if (['POST', 'PUT', 'PATCH', 'DELETE'].includes(String(options.method || 'GET').toUpperCase())) {
+                        const csrfToken = this.readCookie('v2_player_csrf');
+                        if (csrfToken) headers.set('X-CSRF-Token', csrfToken);
+                    }
                     const response = await fetch(`${this.baseUrl}${path}`, {
                         ...options,
+                        headers,
+                        credentials: 'same-origin',
                         signal: controller.signal
                     });
                     let data = {};
@@ -4656,6 +4668,9 @@
                         const error = new Error(data.error || `API请求失败 (${response.status})`);
                         error.status = response.status;
                         error.payload = data;
+                        if (response.status === 401 && this.isLoggedIn && !['/user/login', '/user/register'].includes(path)) {
+                            this.handleSessionExpired();
+                        }
                         throw error;
                     }
                     return data;
@@ -4668,42 +4683,45 @@
             async init() {
                 const savedUserId = localStorage.getItem('api_userId');
                 const savedNickname = localStorage.getItem('user_nickname');
-                const savedMode = localStorage.getItem('api_user_mode');
-                const savedAccountKey = localStorage.getItem('local_v2_account_key') || '';
-                
-                if (savedUserId && savedNickname) {
-                    this.isGuest = savedMode === 'guest';
-                    this.userId = this.isGuest ? savedUserId : parseInt(savedUserId, 10);
-                    this.nickname = savedNickname;
-                    this.isLoggedIn = !this.isGuest && Number.isFinite(this.userId);
-                    this.localAccountKey = savedAccountKey;
-                    if (savedMode === 'account' && savedAccountKey) {
-                        try {
-                            const session = await this.request('/user/local-session', {
-                                method: 'POST',
-                                headers: { 'Content-Type': 'application/json' },
-                                body: JSON.stringify({ accountKey: savedAccountKey })
-                            });
-                            this.userId = Number(session.user.id);
-                            this.nickname = String(session.user.nickname);
-                            this.isLoggedIn = true;
-                            this.isGuest = false;
-                            localStorage.setItem('api_userId', String(this.userId));
-                            localStorage.setItem('user_nickname', this.nickname);
-                        } catch (error) {
-                            this.userId = localStorage.getItem('api_guest_origin_id') || `guest-recovery-${Date.now()}`;
-                            this.isLoggedIn = false;
-                            this.isGuest = true;
-                            console.log('本地测试账号会话恢复失败，保留本机游客数据:', error.message);
-                        }
+                try {
+                    const session = await this.request('/user/session');
+                    if (session.user?.id) {
+                        this.userId = Number(session.user.id);
+                        this.username = String(session.user.username || '');
+                        this.nickname = String(session.user.nickname || savedNickname || '玩家');
+                        this.isLoggedIn = true;
+                        this.isGuest = false;
+                        localStorage.setItem('api_userId', String(this.userId));
+                        localStorage.setItem('user_nickname', this.nickname);
+                        localStorage.setItem('api_user_mode', 'account');
+                        localStorage.removeItem('local_v2_account_key');
+                        return true;
                     }
-                    console.log(this.isGuest ? '恢复离线游客' : '恢复用户:', this.nickname);
-                    return true;  // 用户已就绪
-                } else {
-                    // 新用户，显示命名界面
-                    this.showNamingDialog();
-                    return false;  // 等待用户注册
+                } catch (_error) {}
+
+                if (savedUserId && savedNickname) {
+                    this.userId = localStorage.getItem('api_guest_origin_id') || (String(savedUserId).startsWith('guest-') ? savedUserId : `guest-recovery-${Date.now()}`);
+                    this.nickname = savedNickname;
+                    this.isLoggedIn = false;
+                    this.isGuest = true;
+                    localStorage.setItem('api_user_mode', 'guest');
+                    localStorage.setItem('api_guest_origin_id', String(this.userId));
+                    return true;
                 }
+                this.showNamingDialog();
+                return false;
+            },
+
+            handleSessionExpired(message = '账号会话已失效，当前进度已保留在本机，请重新登录') {
+                const guestId = localStorage.getItem('api_guest_origin_id') || `guest-recovery-${Date.now()}`;
+                this.userId = guestId;
+                this.username = null;
+                this.isLoggedIn = false;
+                this.isGuest = true;
+                localStorage.setItem('api_userId', guestId);
+                localStorage.setItem('api_user_mode', 'guest');
+                localStorage.setItem('api_guest_origin_id', guestId);
+                showToast(message);
             },
             
             // 显示命名界面
@@ -4714,12 +4732,17 @@
                     <div class="naming-dialog">
                         <div class="naming-icon">${Icon.render('gamepad')}</div>
                         <div class="naming-title">欢迎来到 2048</div>
-                        <div class="naming-subtitle">请输入你的昵称</div>
+                        <div class="naming-subtitle">可先以游客身份体验，或登录已有账号</div>
                         <input type="text" id="nicknameInput" value="${randomName}" maxlength="12" placeholder="输入昵称" class="naming-input">
                         <div class="naming-buttons">
                             <button class="btn btn-secondary" id="randomNameBtn">换一个昵称</button>
-                            <button class="btn btn-primary" id="confirmNameBtn">开始游戏</button>
+                            <button class="btn btn-primary" id="confirmNameBtn">游客开始</button>
                         </div>
+                        <div class="panel-note" style="margin:16px 0 10px;">已有账号</div>
+                        <input type="text" id="accountUsername" maxlength="32" autocomplete="username" placeholder="账号名" class="naming-input">
+                        <input type="password" id="accountPassword" maxlength="72" autocomplete="current-password" placeholder="密码" class="naming-input" style="margin-top:8px;">
+                        <div id="accountLoginError" class="capability-note" style="display:none;margin-top:10px;color:var(--danger-color);"></div>
+                        <button class="btn btn-secondary" id="accountLoginBtn" style="width:100%;margin-top:10px;">登录账号</button>
                     </div>
                 `;
                 
@@ -4735,6 +4758,7 @@
                     const name = document.getElementById('nicknameInput').value.trim();
                     this.confirmNickname(name);
                 });
+                document.getElementById('accountLoginBtn').addEventListener('click', () => this.loginAccount());
             },
             
             // 生成随机名称
@@ -4744,7 +4768,7 @@
                 return prefixes[Math.floor(Math.random() * prefixes.length)] + nums;
             },
             
-            // 确认昵称并注册
+            // 确认昵称并进入本地游客模式
             async confirmNickname(name) {
                 if (!name || name.length < 1 || name.length > 12) {
                     showToast('昵称需要1-12个字符');
@@ -4753,53 +4777,17 @@
                 
                 this.nickname = name;
                 
-                // 注册到服务器
-                try {
-                    const data = await this.request('/user/login', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ username: name })
-                    });
-                    
-                    if (data.error && data.duplicate) {
-                        // 名字重复
-                        showToast('⚠️ ' + data.error);
-                        document.getElementById('nicknameInput').value = this.generateRandomName();
-                        return;
-                    }
-                    
-                    if (data.user && data.user.id) {
-                        this.userId = data.user.id;
-                        this.isLoggedIn = true;
-                        this.isGuest = false;
-                        localStorage.setItem('api_userId', this.userId);
-                        localStorage.setItem('user_nickname', data.user.nickname || name);
-                        localStorage.setItem('api_user_mode', 'account');
-                        console.log('注册成功:', name, 'ID:', this.userId);
-                    } else {
-                        throw new Error('注册返回数据异常');
-                    }
-                } catch (e) {
-                    if (e.payload?.duplicate) {
-                        showToast('⚠️ ' + (e.payload.error || '昵称已存在'));
-                        document.getElementById('nicknameInput').value = this.generateRandomName();
-                        return;
-                    }
-                    console.log('服务器注册失败:', e.message);
-                    this.userId = `guest-${Date.now()}`;
-                    this.isLoggedIn = false;
-                    this.isGuest = true;
-                    localStorage.setItem('api_userId', this.userId);
-                    localStorage.setItem('user_nickname', name);
-                    localStorage.setItem('api_user_mode', 'guest');
-                    localStorage.setItem('api_guest_origin_id', this.userId);
-                }
+                this.userId = `guest-${Date.now()}`;
+                this.isLoggedIn = false;
+                this.isGuest = true;
+                localStorage.setItem('api_userId', this.userId);
+                localStorage.setItem('user_nickname', name);
+                localStorage.setItem('api_user_mode', 'guest');
+                localStorage.setItem('api_guest_origin_id', this.userId);
                 
                 // 关闭弹窗
                 document.getElementById('modalOverlay').classList.remove('active');
-                showToast(this.isGuest
-                    ? `已进入离线游客模式，${this.nickname} 的进度仅保存在本机`
-                    : `欢迎，${this.nickname}`);
+                showToast(`已进入游客模式，${this.nickname} 的进度仅保存在本机`);
                 
                 // 初始化游戏
                 if (typeof initGame === 'function') {
@@ -4868,6 +4856,44 @@
                 }
             },
 
+            async loginAccount() {
+                const username = document.getElementById('accountUsername').value.trim().toLowerCase();
+                const password = document.getElementById('accountPassword').value;
+                const errorEl = document.getElementById('accountLoginError');
+                const button = document.getElementById('accountLoginBtn');
+                if (!username || !password) {
+                    errorEl.textContent = '请输入账号名和密码';
+                    errorEl.style.display = 'block';
+                    return;
+                }
+                button.disabled = true;
+                button.textContent = '登录中…';
+                errorEl.style.display = 'none';
+                try {
+                    const data = await this.request('/user/login', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ username, password })
+                    });
+                    this.userId = Number(data.user.id);
+                    this.username = String(data.user.username || username);
+                    this.nickname = String(data.user.nickname || '玩家');
+                    this.isLoggedIn = true;
+                    this.isGuest = false;
+                    localStorage.setItem('api_userId', String(this.userId));
+                    localStorage.setItem('user_nickname', this.nickname);
+                    localStorage.setItem('api_user_mode', 'account');
+                    document.getElementById('modalOverlay').classList.remove('active');
+                    showToast(`欢迎回来，${this.nickname}`);
+                    if (typeof initGame === 'function') initGame();
+                } catch (error) {
+                    errorEl.textContent = error.payload?.error || '登录失败，请稍后重试';
+                    errorEl.style.display = 'block';
+                    button.disabled = false;
+                    button.textContent = '登录账号';
+                }
+            },
+
             async getUserTasks() {
                 if (!this.isLoggedIn) return { tasks: [], persistence: 'local' };
                 return this.request(`/tasks/user/${this.userId}`);
@@ -4891,36 +4917,50 @@
                 };
             },
 
-            async upgradeGuest(nickname) {
+            async upgradeGuest({ username, password, nickname }) {
                 if (!this.isGuest) throw new Error('当前不是游客模式');
                 const migrationId = localStorage.getItem('guest_migration_id') || `migration-${crypto.randomUUID()}`;
-                const accountKey = localStorage.getItem('guest_upgrade_account_key') || crypto.randomUUID().replaceAll('-', '') + crypto.randomUUID().replaceAll('-', '');
+                const migrationSecret = localStorage.getItem('guest_migration_secret') || crypto.randomUUID().replaceAll('-', '') + crypto.randomUUID().replaceAll('-', '');
                 localStorage.setItem('guest_migration_id', migrationId);
-                localStorage.setItem('guest_upgrade_account_key', accountKey);
+                localStorage.setItem('guest_migration_secret', migrationSecret);
                 const result = await this.request('/user/upgrade-guest', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         migrationId,
+                        migrationSecret,
                         guestId: this.userId,
+                        username,
+                        password,
                         nickname,
-                        accountKey,
                         snapshot: this.buildGuestSnapshot()
                     })
                 });
                 localStorage.setItem('api_guest_origin_id', String(this.userId));
                 this.userId = Number(result.user.id);
+                this.username = String(result.user.username || username);
                 this.nickname = String(result.user.nickname);
                 this.isLoggedIn = true;
                 this.isGuest = false;
-                this.localAccountKey = accountKey;
                 localStorage.setItem('api_userId', String(this.userId));
                 localStorage.setItem('user_nickname', this.nickname);
                 localStorage.setItem('api_user_mode', 'account');
-                localStorage.setItem('local_v2_account_key', accountKey);
-                localStorage.removeItem('guest_upgrade_account_key');
+                localStorage.removeItem('guest_migration_secret');
                 await Promise.all([PowerupSystem.syncFromAPI(), TaskSystem.refreshServerTasks()]);
                 return result;
+            },
+
+            async logoutAccount() {
+                if (this.isLoggedIn) await this.request('/user/logout', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{}' });
+                this.handleSessionExpired('已退出账号，当前进度将继续保存在本机');
+            },
+
+            async changePassword(oldPassword, newPassword) {
+                return this.request('/user/change-password', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ oldPassword, newPassword })
+                });
             },
 
             async claimTask(taskId) {
@@ -6399,7 +6439,7 @@ if (next && this.grid[next.row] && this.grid[next.row][next.col] && this.grid[ne
                 const rank = this.ranks[this.level - 1];
                 const badge = document.getElementById('levelBadge');
                 badge.innerHTML = `
-                    <div class="level-number">Lv.${this.level}</div>
+                        <div class="level-number">等级 ${this.level}</div>
                     <div class="level-rank"><span class="level-rank-icon">${Icon.render(rank.icon)}</span>${rank.name}</div>
                 `;
             },
@@ -6590,7 +6630,7 @@ if (next && this.grid[next.row] && this.grid[next.row][next.col] && this.grid[ne
                     time: now,
                     mode: mode,
                     maxTile: maxTile,
-                    date: new Date().toLocaleDateString()
+                    date: new Date().toLocaleDateString('zh-CN')
                 };
                 
                 this.scores.daily.push(entry);
@@ -6674,7 +6714,7 @@ if (next && this.grid[next.row] && this.grid[next.row][next.col] && this.grid[ne
                 if (diff < 3600000) return Math.floor(diff / 60000) + '分钟前';
                 if (diff < 86400000) return Math.floor(diff / 3600000) + '小时前';
                 if (diff < 604800000) return Math.floor(diff / 86400000) + '天前';
-                return new Date(timestamp).toLocaleDateString();
+                return new Date(timestamp).toLocaleDateString('zh-CN');
             },
 
             checkWeeklyReset() {
@@ -6817,7 +6857,7 @@ if (next && this.grid[next.row] && this.grid[next.row][next.col] && this.grid[ne
                     score,
                     mode,
                     time: now,
-                    date: new Date().toLocaleDateString()
+                    date: new Date().toLocaleDateString('zh-CN')
                 };
                 
                 this.seasonScores.push(entry);
@@ -7953,8 +7993,8 @@ if (next && this.grid[next.row] && this.grid[next.row][next.col] && this.grid[ne
                         <div class="gameover-title">好友挑战</div>
                         <div class="tutorial-desc">对方分数：${score}<br>开始一局并尝试超过它</div>
                         <div class="modal-actions">
-                            <button class="btn btn-primary" onclick="UI.closeModal(); GameCore.init();">接受挑战</button>
-                            <button class="btn btn-secondary" onclick="UI.closeModal();">稍后</button>
+                            <button class="btn btn-primary" data-ui-action="accept-challenge">接受挑战</button>
+                            <button class="btn btn-secondary" data-ui-action="close">稍后</button>
                         </div>
                     </div>
                 `;
@@ -8109,6 +8149,37 @@ if (next && this.grid[next.row] && this.grid[next.row][next.col] && this.grid[ne
                 document.getElementById('modalOverlay').addEventListener('click', (e) => {
                     if (e.target.id === 'modalOverlay') {
                         this.closeModal();
+                    }
+                });
+
+                document.getElementById('modalContent').addEventListener('click', (event) => {
+                    const action = event.target.closest('[data-ui-action]');
+                    if (!action) return;
+
+                    switch (action.dataset.uiAction) {
+                        case 'close':
+                            this.closeModal();
+                            break;
+                        case 'confirm':
+                            this.confirmAction();
+                            break;
+                        case 'accept-challenge':
+                            this.closeModal();
+                            GameCore.init();
+                            break;
+                        case 'signin':
+                            this.doSignin();
+                            break;
+                        case 'apply-skin':
+                            this.applySkin(action.dataset.theme);
+                            break;
+                        case 'share':
+                            SocialShare.share(action.dataset.platform);
+                            break;
+                        case 'apply-mode':
+                            GameModeManager.applyAndStart();
+                            this.closeModal();
+                            break;
                     }
                 });
 
@@ -8287,7 +8358,7 @@ if (next && this.grid[next.row] && this.grid[next.row][next.col] && this.grid[ne
                         const formatDate = (dateStr) => {
                             if (!dateStr) return '';
                             const d = new Date(dateStr);
-                            return `${d.getMonth()+1}/${d.getDate()}`;
+                            return d.toLocaleDateString('zh-CN', { month: 'long', day: 'numeric' });
                         };
                         
                         const content = `
@@ -8304,7 +8375,7 @@ if (next && this.grid[next.row] && this.grid[next.row][next.col] && this.grid[ne
                                             <span class="announcement-type-badge ${safeType}">
                                                 ${safeType === 'important' ? '重要' : safeType === 'update' ? '更新' : safeType === 'event' ? '活动' : '通知'}
                                             </span>
-                                            ${!readIds.includes(a.id) ? '<span class="announcement-new-badge">NEW</span>' : ''}
+                                            ${!readIds.includes(a.id) ? '<span class="announcement-new-badge">新</span>' : ''}
                                             <span class="announcement-date">${formatDate(a.created_at)}</span>
                                         </div>
                                         <div class="announcement-item-title">${escapeHTML(a.title)}</div>
@@ -8357,8 +8428,8 @@ if (next && this.grid[next.row] && this.grid[next.row][next.col] && this.grid[ne
                         <div style="font-size:18px;font-weight:700;color:var(--text-primary);margin-bottom:8px;">${escapeHTML(title)}</div>
                         <div style="font-size:14px;color:var(--text-secondary);margin-bottom:20px;">${escapeHTML(message)}</div>
                         <div style="display:flex;gap:12px;justify-content:center;">
-                            <button class="btn btn-secondary" onclick="UI.closeModal()" style="flex:1;max-width:120px;">取消</button>
-                            <button class="btn btn-danger" onclick="UI.confirmAction()" style="flex:1;max-width:120px;">确定</button>
+                            <button class="btn btn-secondary" data-ui-action="close" style="flex:1;max-width:120px;">取消</button>
+                            <button class="btn btn-danger" data-ui-action="confirm" style="flex:1;max-width:120px;">确定</button>
                         </div>
                     </div>
                 `;
@@ -8378,23 +8449,42 @@ if (next && this.grid[next.row] && this.grid[next.row][next.col] && this.grid[ne
             showGuestUpgradeDialog() {
                 const snapshot = API.buildGuestSnapshot();
                 const content = `
-                    <div class="modal-title">${Icon.render('user')}升级为本地测试账号</div>
+                    <div class="modal-title">${Icon.render('user')}升级为安全账号</div>
                     <div class="modal-body">
                         <div class="panel-note" style="margin-bottom:12px;">
-                            将 ${snapshot.games.length} 条本机完成记录及其任务指标写入隔离 MySQL。当前棋盘、设置和成就仍保留在本浏览器；账号道具采用服务端标准初始库存，不接受客户端自报数量。
+                            将 ${snapshot.games.length} 条本机完成记录及其任务指标写入隔离数据库。密码只发送给后端进行安全哈希；当前棋盘、设置和成就仍保留在本浏览器。
                         </div>
+                        <label class="feedback-label" for="upgradeUsername">账号名</label>
+                        <input type="text" id="upgradeUsername" maxlength="32" autocomplete="username" placeholder="4-32 位小写字母、数字或下划线" class="naming-input">
                         <label class="feedback-label" for="upgradeNickname">账号昵称</label>
                         <input type="text" id="upgradeNickname" value="${escapeHTML(API.nickname)}" maxlength="12" class="naming-input">
+                        <label class="feedback-label" for="upgradePassword">密码</label>
+                        <input type="password" id="upgradePassword" maxlength="72" autocomplete="new-password" placeholder="至少 12 个字节" class="naming-input">
+                        <label class="feedback-label" for="upgradePasswordConfirm">确认密码</label>
+                        <input type="password" id="upgradePasswordConfirm" maxlength="72" autocomplete="new-password" placeholder="再次输入密码" class="naming-input">
                         <div id="upgradeError" class="capability-note" style="display:none;margin-top:10px;color:var(--danger-color);"></div>
                         <button class="btn btn-primary" id="confirmGuestUpgrade" style="width:100%;margin-top:14px;">迁移并升级</button>
                     </div>`;
                 this.showModal(content);
                 document.getElementById('confirmGuestUpgrade').addEventListener('click', async (event) => {
                     const button = event.currentTarget;
+                    const username = document.getElementById('upgradeUsername').value.trim().toLowerCase();
                     const nickname = document.getElementById('upgradeNickname').value.trim();
+                    const password = document.getElementById('upgradePassword').value;
+                    const passwordConfirm = document.getElementById('upgradePasswordConfirm').value;
                     const errorEl = document.getElementById('upgradeError');
-                    if (!nickname || nickname.length > 12) {
+                    if (!/^[a-z][a-z0-9_]{3,31}$/.test(username)) {
+                        errorEl.textContent = '账号名需为 4-32 位小写字母、数字或下划线，且以字母开头';
+                        errorEl.style.display = 'block';
+                        return;
+                    }
+                    if (!nickname || [...nickname].length > 12) {
                         errorEl.textContent = '昵称需要 1-12 个字符';
+                        errorEl.style.display = 'block';
+                        return;
+                    }
+                    if (new TextEncoder().encode(password).length < 12 || password !== passwordConfirm) {
+                        errorEl.textContent = password !== passwordConfirm ? '两次输入的密码不一致' : '密码至少需要 12 个字节';
                         errorEl.style.display = 'block';
                         return;
                     }
@@ -8402,14 +8492,53 @@ if (next && this.grid[next.row] && this.grid[next.row][next.col] && this.grid[ne
                     button.textContent = '迁移中…';
                     errorEl.style.display = 'none';
                     try {
-                        const result = await API.upgradeGuest(nickname);
+                        const result = await API.upgradeGuest({ username, password, nickname });
                         this.closeModal();
-                        showToast(`已升级为本地测试账号，迁移 ${result.migration.games} 条记录`);
+                        showToast(`账号创建成功，已迁移 ${result.migration.games} 条记录`);
                     } catch (error) {
                         errorEl.textContent = error.payload?.error || '升级失败，数据库未写入，请重试';
                         errorEl.style.display = 'block';
                         button.disabled = false;
                         button.textContent = '重试迁移';
+                    }
+                });
+            },
+
+            showPlayerPasswordDialog() {
+                const content = `
+                    <div class="modal-title">${Icon.render('lock')}修改账号密码</div>
+                    <div class="modal-body">
+                        <label class="feedback-label" for="currentPlayerPassword">当前密码</label>
+                        <input type="password" id="currentPlayerPassword" maxlength="72" autocomplete="current-password" class="naming-input">
+                        <label class="feedback-label" for="newPlayerPassword">新密码</label>
+                        <input type="password" id="newPlayerPassword" maxlength="72" autocomplete="new-password" placeholder="至少 12 个字节，且不得包含账号名" class="naming-input">
+                        <label class="feedback-label" for="confirmPlayerPassword">确认新密码</label>
+                        <input type="password" id="confirmPlayerPassword" maxlength="72" autocomplete="new-password" class="naming-input">
+                        <div id="playerPasswordError" class="capability-note" style="display:none;margin-top:10px;color:var(--danger-color);"></div>
+                        <button class="btn btn-primary" id="confirmPlayerPasswordChange" style="width:100%;margin-top:14px;">修改密码</button>
+                    </div>`;
+                this.showModal(content);
+                document.getElementById('confirmPlayerPasswordChange').addEventListener('click', async (event) => {
+                    const oldPassword = document.getElementById('currentPlayerPassword').value;
+                    const newPassword = document.getElementById('newPlayerPassword').value;
+                    const confirmPassword = document.getElementById('confirmPlayerPassword').value;
+                    const errorEl = document.getElementById('playerPasswordError');
+                    if (!oldPassword || new TextEncoder().encode(newPassword).length < 12 || newPassword !== confirmPassword) {
+                        errorEl.textContent = newPassword !== confirmPassword ? '两次输入的新密码不一致' : '请填写当前密码，且新密码至少需要 12 个字节';
+                        errorEl.style.display = 'block';
+                        return;
+                    }
+                    event.currentTarget.disabled = true;
+                    event.currentTarget.textContent = '修改中…';
+                    try {
+                        await API.changePassword(oldPassword, newPassword);
+                        API.handleSessionExpired('密码已修改，所有账号会话均已失效，请重新登录');
+                        this.closeModal();
+                    } catch (error) {
+                        errorEl.textContent = error.payload?.error || '密码修改失败，请重试';
+                        errorEl.style.display = 'block';
+                        event.currentTarget.disabled = false;
+                        event.currentTarget.textContent = '修改密码';
                     }
                 });
             },
@@ -8429,7 +8558,7 @@ if (next && this.grid[next.row] && this.grid[next.row][next.col] && this.grid[ne
                                 <input type="text" id="nicknameInput" value="${escapeHTML(nickname)}" maxlength="12" style="width:120px;padding:5px 10px;border-radius:8px;border:1px solid var(--glass-border);background:var(--glass-bg);color:var(--text-primary);text-align:right;">
                             </div>
                             <div class="settings-item" style="padding: 4px 0; font-size: 0.7rem; color: var(--text-secondary);">
-                                <span>用户ID: ${escapeHTML(API.userId || '未登录')}</span>
+                                <span>用户编号：${escapeHTML(API.userId || '未登录')}</span>
                             </div>
                         </div>
                         
@@ -8506,9 +8635,10 @@ if (next && this.grid[next.row] && this.grid[next.row][next.col] && this.grid[ne
                             <div class="capability-note" style="margin-top:10px;">
                                 ${API.isLoggedIn
                                     ? '完成一局后会提交成绩；服务端任务与库存可重登恢复。棋盘、设置、成就与主题仍保存在本机浏览器中。'
-                                    : '游客棋盘、记录和目标保存在本机。可升级为本地测试账号并迁移已完成记录与对应任务指标。'}
+                                    : '游客棋盘、记录和目标保存在本机。可升级为安全账号并迁移已完成记录与对应任务指标。'}
                             </div>
-                            ${API.isGuest ? '<button class="btn btn-primary" id="upgradeGuestBtn" style="width:100%;margin-top:10px;">升级为本地测试账号</button>' : ''}
+                            ${API.isGuest ? '<button class="btn btn-primary" id="upgradeGuestBtn" style="width:100%;margin-top:10px;">升级为安全账号</button>' : ''}
+                            ${API.isLoggedIn ? '<button class="btn btn-secondary" id="changePlayerPasswordBtn" style="width:100%;margin-top:10px;">修改密码</button><button class="btn btn-secondary" id="logoutPlayerBtn" style="width:100%;margin-top:8px;">退出账号</button>' : ''}
                         </div>
                     </div>
                     <div style="text-align:center;margin-top:10px;font-size:0.75rem;color:var(--text-secondary);">
@@ -8519,6 +8649,13 @@ if (next && this.grid[next.row] && this.grid[next.row][next.col] && this.grid[ne
 
                 const upgradeButton = document.getElementById('upgradeGuestBtn');
                 if (upgradeButton) upgradeButton.addEventListener('click', () => this.showGuestUpgradeDialog());
+                const passwordButton = document.getElementById('changePlayerPasswordBtn');
+                if (passwordButton) passwordButton.addEventListener('click', () => this.showPlayerPasswordDialog());
+                const logoutButton = document.getElementById('logoutPlayerBtn');
+                if (logoutButton) logoutButton.addEventListener('click', async () => {
+                    await API.logoutAccount();
+                    this.closeModal();
+                });
                 
                 // 绑定昵称修改 - 同步到云端
                 document.getElementById('nicknameInput').addEventListener('change', async (e) => {
@@ -8660,7 +8797,7 @@ if (next && this.grid[next.row] && this.grid[next.row][next.col] && this.grid[ne
                                         今日记录已保存，明日再来
                                     </div>
                                 ` : `
-                                    <button class="btn btn-primary" onclick="UI.doSignin()" style="width:100%;">
+                                    <button class="btn btn-primary" data-ui-action="signin" style="width:100%;">
                                         立即签到
                                     </button>
                                 `}
@@ -8739,7 +8876,7 @@ if (next && this.grid[next.row] && this.grid[next.row][next.col] && this.grid[ne
                         <div class="panel-note">六套主题会同步页面、棋盘、按钮、弹窗和状态色，并保存在本机。服务端皮肤资产尚未接入当前玩家端。</div>
                         <div class="skin-grid" style="margin-top:12px;">
                             ${skins.map(t => `
-                                <button type="button" class="skin-card ${GameSettings.theme === t.id ? 'active' : ''}" onclick="UI.applySkin('${t.id}')">
+                                <button type="button" class="skin-card ${GameSettings.theme === t.id ? 'active' : ''}" data-ui-action="apply-skin" data-theme="${escapeHTML(t.id)}">
                                     <span class="skin-swatch">${t.colors.map(color => `<span style="background:${color}"></span>`).join('')}</span>
                                     <span class="skin-name">${t.name}</span>
                                     <span class="skin-desc">${t.desc}</span>
@@ -8774,6 +8911,9 @@ if (next && this.grid[next.row] && this.grid[next.row][next.col] && this.grid[ne
                         break;
                     case 'profile':
                         this.showProfilePanel();
+                        break;
+                    case 'skins':
+                        this.showSkinPanel();
                         break;
                 }
             },
@@ -9027,10 +9167,10 @@ showLeaderboardPanel() {
                         </div>
                         <div class="share-message">${message}</div>
                         <div class="share-buttons">
-                            <button class="btn btn-primary" onclick="SocialShare.share('wechat')">微信</button>
-                            <button class="btn btn-secondary" onclick="SocialShare.share('weibo')">微博</button>
-                            <button class="btn btn-secondary" onclick="SocialShare.share('qq')">QQ</button>
-                            <button class="btn btn-secondary" onclick="SocialShare.share('copy')">复制</button>
+                            <button class="btn btn-primary" data-ui-action="share" data-platform="wechat">微信</button>
+                            <button class="btn btn-secondary" data-ui-action="share" data-platform="weibo">微博</button>
+                            <button class="btn btn-secondary" data-ui-action="share" data-platform="qq">QQ</button>
+                            <button class="btn btn-secondary" data-ui-action="share" data-platform="copy">复制</button>
                         </div>
                     </div>
                 `;
@@ -9318,7 +9458,7 @@ showLeaderboardPanel() {
                             </div>
                             <div class="stats-card">
                                 <div class="stats-card-icon">${Icon.render('medal')}</div>
-                                <div class="stats-card-value">Lv.${stats.level}</div>
+                        <div class="stats-card-value">等级 ${stats.level}</div>
                                 <div class="stats-card-label">当前等级</div>
                             </div>
                             <div class="stats-card">
@@ -9390,7 +9530,7 @@ showLeaderboardPanel() {
                         </div>
                         
                         <div class="modal-actions">
-                            <button class="btn btn-primary" onclick="UI.closeModal();">关闭</button>
+                            <button class="btn btn-primary" data-ui-action="close">关闭</button>
                         </div>
                     </div>
                 `;
@@ -9773,8 +9913,8 @@ showLeaderboardPanel() {
                         
                         
                         <div class="modal-actions" style="margin-top: 20px;">
-                            <button class="btn btn-primary" onclick="GameModeManager.applyAndStart(); UI.closeModal();">开始游戏</button>
-                            <button class="btn btn-secondary" onclick="UI.closeModal();">取消</button>
+                            <button class="btn btn-primary" data-ui-action="apply-mode">开始游戏</button>
+                            <button class="btn btn-secondary" data-ui-action="close">取消</button>
                         </div>
                     </div>
                 `;
